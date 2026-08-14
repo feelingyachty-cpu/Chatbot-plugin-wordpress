@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feeling Yachty — Social Command Center</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Feeling Yachty · Pac-Man desk</p>
+        <h1>Social command center</h1>
+        <p class="lede">Daily AI briefing with original links, the publications we read, the 10 training homes, Meta and Google study notes, and the next moves for Miami and Panama charters.</p>
+      </div>
+      <div class="stamp">
+        <strong id="briefing-date">2026-08-14</strong>
+        Briefing date · open any card to read the source
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Dashboard sections">
+      <button data-tab="briefing" class="active">Daily briefing</button>
+      <button data-tab="sources">What we read</button>
+      <button data-tab="training">10 training homes</button>
+      <button data-tab="meta">Meta Ads agent</button>
+      <button data-tab="google">Google stack</button>
+      <button data-tab="ideas">Do better</button>
+      <button data-tab="database">Keep the brain current</button>
+    </nav>
+
+    <section id="panel-briefing" class="panel active">
+      <div class="grid">
+        <div class="card span-8">
+          <div class="kicker">Today’s take</div>
+          <h2 id="briefing-headline"></h2>
+          <p class="muted">You do not need to read the full articles. Each card is the briefing. The link is there if you want the primary source. Full write-up: <a href="../knowledge/daily-briefings/2026-08-14.md">knowledge/daily-briefings/2026-08-14.md</a></p>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Owned channel alert</div>
+          <p class="kpi warn">29</p>
+          <p class="muted small">LinkedIn impressions in the last 30 days. 85 followers, 0 comments, 3 unanswered inbox threads. Close the inbox before we buy more awareness.</p>
+        </div>
+        <div id="briefing-list" class="contents span-12 grid"></div>
+      </div>
+    </section>
+
+    <section id="panel-sources" class="panel">
+      <div class="grid">
+        <div class="card span-12">
+          <div class="kicker">Daily + weekly stack</div>
+          <h2>Where the newest information lives</h2>
+          <p class="muted">Pac-Man reads the top five every weekday, then the specialist and travel sources. Full notes in <a href="../knowledge/daily-sources.md">knowledge/daily-sources.md</a>.</p>
+          <table>
+            <thead><tr><th>Source</th><th>Why it is on the desk</th></tr></thead>
+            <tbody id="source-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-training" class="panel">
+      <div class="grid">
+        <div class="card span-8">
+          <div class="kicker">Become dangerous</div>
+          <h2>10 places to learn social media marketing</h2>
+          <p class="muted">Official first, then operations, then extras. Study order: Blueprint → Skillshop Search + Measurement + GA4 → HubSpot → TikTok → LinkedIn Learning. Details: <a href="../knowledge/training.md">knowledge/training.md</a>.</p>
+          <ol class="train" id="training-list"></ol>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Upload path</div>
+          <h3>Drop certificates here</h3>
+          <p class="muted">When you finish a module, put the PDF and a 10-line note in <code>knowledge/training-uploads/</code>. The next briefing will index it. Official Blueprint courses stay login-gated at Facebook; this repo holds the operating manual so the agent can still work.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-meta" class="panel">
+      <div class="grid">
+        <div class="card span-12 callout">
+          <strong>Skill loaded:</strong> <code>.cursor/skills/meta-ads-agent/SKILL.md</code> · Interior repo: <a href="../knowledge/meta-blueprint/README.md">knowledge/meta-blueprint/</a>
+        </div>
+        <div class="card span-6">
+          <div class="kicker">Official</div>
+          <h3>Blueprint and Help</h3>
+          <ul class="clean">
+            <li><a href="https://www.facebook.com/business/learn" target="_blank" rel="noopener">Meta Blueprint / Learn</a></li>
+            <li><a href="https://www.facebook.com/business/learn/courses" target="_blank" rel="noopener">Course catalog</a></li>
+            <li><a href="https://trainingworkshops.facebookblueprint.com/student/catalog" target="_blank" rel="noopener">Live workshops</a></li>
+            <li><a href="https://www.facebook.com/business/help" target="_blank" rel="noopener">Business Help Center</a></li>
+            <li><a href="https://adsmanager.facebook.com/" target="_blank" rel="noopener">Ads Manager</a></li>
+            <li><a href="https://developers.facebook.com/documentation/ads-commerce/marketing-api/advantage-campaigns" target="_blank" rel="noopener">Advantage+ campaign experience (2026)</a></li>
+          </ul>
+        </div>
+        <div class="card span-6">
+          <div class="kicker">2026 physics</div>
+          <h3>What the agent will not get wrong</h3>
+          <ul class="clean">
+            <li>Advantage+ is a <em>state</em> (budget + audience + placements), not a leftover Shopping campaign type.</li>
+            <li>Pixel + Conversions API with the same event_id. Aim Event Match Quality 6+.</li>
+            <li>ODAX objectives: Awareness, Traffic, Engagement, Leads, App, Sales. Bookings ≠ followers.</li>
+            <li>Miami and Panama never share a campaign.</li>
+            <li>Do not optimize a charter campaign to link clicks.</li>
+            <li>Holiday learning starts mid-October. Black Friday 2026 is 27 November.</li>
+          </ul>
+        </div>
+        <div class="card span-12">
+          <div class="kicker">Feeling Yachty playbook</div>
+          <h3>Campaigns we should run once tracking is live</h3>
+          <table>
+            <thead><tr><th>Campaign</th><th>Optimize</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Miami Leads Advantage+</td><td>Lead / Schedule</td><td>Sunset, birthday, bachelor, corporate, wedding creatives</td></tr>
+              <tr><td>Miami Sales Advantage+</td><td>Purchase / deposit</td><td>Only after value fires</td></tr>
+              <tr><td>Miami warm retarget</td><td>Lead or Purchase</td><td>30–90 day viewers and abandoners</td></tr>
+              <tr><td>Panama Awareness + Leads</td><td>Reach then Lead</td><td>San Blas / Panama City only</td></tr>
+              <tr><td>Event-week intercept</td><td>Lead</td><td>Art Basel, F1, Ultra, NYE — start 4–6 weeks out</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-google" class="panel">
+      <div class="grid">
+        <div class="card span-12 callout">
+          <strong>Skill loaded:</strong> <code>.cursor/skills/google-ads-agent/SKILL.md</code> · Interior repo: <a href="../knowledge/google/README.md">knowledge/google/</a>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Ads</div>
+          <h3>Skillshop + Help</h3>
+          <ul class="clean">
+            <li><a href="https://skillshop.withgoogle.com/" target="_blank" rel="noopener">Google Skillshop</a></li>
+            <li><a href="https://support.google.com/google-ads/answer/9702955" target="_blank" rel="noopener">About Ads certifications</a></li>
+            <li><a href="https://support.google.com/google-ads" target="_blank" rel="noopener">Google Ads Help</a></li>
+            <li><a href="https://blog.google/products/ads-commerce/" target="_blank" rel="noopener">Ads &amp; Commerce blog</a></li>
+          </ul>
+          <p class="muted small">Earn Search, then Measurement, then Video. 80% / 75 minutes / 12 months. Brand Search stays on even if organic ranks.</p>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Analytics 4</div>
+          <h3>Events, not sessions</h3>
+          <ul class="clean">
+            <li><a href="https://support.google.com/analytics/answer/10089681" target="_blank" rel="noopener">GA4 intro + cert path</a></li>
+            <li><a href="https://support.google.com/analytics/answer/9322688" target="_blank" rel="noopener">About events</a></li>
+            <li><a href="https://support.google.com/analytics/answer/13128484" target="_blank" rel="noopener">Key events</a></li>
+            <li><a href="https://support.google.com/analytics/answer/14183469" target="_blank" rel="noopener">Set up a property</a></li>
+          </ul>
+          <p class="muted small">Key events for us: <code>generate_lead</code>, <code>purchase</code>. Never mark page_view as a conversion.</p>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Search Console</div>
+          <h3>No exam — operate it</h3>
+          <ul class="clean">
+            <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">Open Search Console</a></li>
+            <li><a href="https://support.google.com/webmasters/answer/9128668" target="_blank" rel="noopener">About Search Console</a></li>
+            <li><a href="https://developers.google.com/search/docs" target="_blank" rel="noopener">Search Central docs</a></li>
+          </ul>
+          <p class="muted small">Queries become RSA headlines, ad negatives, and Reel hooks. Inspect a URL before blaming the algorithm.</p>
+        </div>
+        <div class="card span-12">
+          <h3>Build order</h3>
+          <p class="muted">Tracking → brand Search → Miami non-brand ad groups → Panama Search → remarketing → Demand Gen / YouTube with real Reels → Performance Max last. Full playbook: <a href="../knowledge/google/feeling-yachty-google-playbook.md">feeling-yachty-google-playbook.md</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-ideas" class="panel">
+      <div class="grid">
+        <div class="card span-6">
+          <div class="kicker">This week</div>
+          <h3>Do these before more content theory</h3>
+          <ol class="train">
+            <li>Clear the three LinkedIn inbox threads (Upwork, jet-ski referral, job applicant).</li>
+            <li>Audit Pixel + CAPI + GA4 key events on feelingyachty.com.</li>
+            <li>Cut 12 vertical variants from footage you already have.</li>
+            <li>Turn on a Google brand Search campaign.</li>
+            <li>Post 3 LinkedIn operator notes (corporate checklist, what is included, event-week marina reality).</li>
+          </ol>
+        </div>
+        <div class="card span-6">
+          <div class="kicker">Channel jobs</div>
+          <h3>Stop asking every app to do everything</h3>
+          <ul class="clean">
+            <li><strong>Instagram / TikTok / Shorts</strong> — demand. Real boats, 5–7 Reels a week.</li>
+            <li><strong>Facebook</strong> — older destination buyers + inbox.</li>
+            <li><strong>LinkedIn</strong> — corporate and weddings-as-business. 3 posts / week + personal shares.</li>
+            <li><strong>WhatsApp</strong> — the closer. Minutes, not hours.</li>
+            <li><strong>X</strong> — listen on event weeks. Do not advertise there yet.</li>
+          </ul>
+        </div>
+        <div class="card span-12">
+          <p class="muted">Full list, 30-day sprint, and KPIs: <a href="../knowledge/social-strategy/improvement-ideas.md">knowledge/social-strategy/improvement-ideas.md</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-database" class="panel">
+      <div class="grid">
+        <div class="card span-12">
+          <div class="kicker">How Pac-Man stays an expert</div>
+          <h2>Improve the database, do not hoard PDFs</h2>
+          <ol class="train">
+            <li><strong>Daily file contract.</strong> Every article on this dash has title, URL, summary, and a Feeling Yachty action. See <a href="../scripts/refresh-briefing.md">scripts/refresh-briefing.md</a>.</li>
+            <li><strong>Skills load first.</strong> New chats read <code>.cursor/skills/</code> plus the latest briefing before they give advice.</li>
+            <li><strong>Training drop-box.</strong> Certificates and notes go in <code>knowledge/training-uploads/</code>.</li>
+            <li><strong>Next: RSS automation.</strong> A scheduled job should draft the briefing from Social Media Today, Search Engine Land, Meta news, and Google’s ads blog, then Slack <code>#social-media-post-communications</code>.</li>
+            <li><strong>Performance snapshots.</strong> Nightly Meta, Google Ads, GA4, GSC, and CRM booked flags — without raw PII — so the ads agents optimize from our numbers, not vibes.</li>
+            <li><strong>Inventory table.</strong> Yacht, guest cap, market, rate, hero clip, live URL, bookable yes/no. Stops hallucinated boats.</li>
+            <li><strong>Decision log.</strong> Dated “we turned this off because…” so future Pac-Man does not undo a hard-won choice.</li>
+            <li><strong>Recert calendar.</strong> Skillshop 12 months, Blueprint Associate 2 years, Professional 1 year.</li>
+          </ol>
+          <p class="muted">Full write-up: <a href="../knowledge/social-strategy/database-improvements.md">knowledge/social-strategy/database-improvements.md</a></p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Interior repository for Feeling Yachty social, Meta Blueprint, Google Ads, GA4, and Search Console. Open this file locally or serve the <code>dash/</code> folder. Articles stay at their publishers — we store summaries and actions, not scraped full text.
+    </footer>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{
+  "date": "2026-08-14",
+  "generated_at": "2026-08-14T15:50:00Z",
+  "headline": "Instagram’s first wordmark refresh in a decade, Meta’s holiday clock is already running, and LinkedIn is still our weakest owned channel.",
+  "items": [
+    {
+      "id": "ig-wordmark",
+      "title": "Instagram introduces a redesigned wordmark",
+      "url": "https://techcrunch.com/2026/08/13/instagram-introduces-a-redesigned-wordmark/",
+      "source": "TechCrunch",
+      "published": "2026-08-13",
+      "summary": "Adam Mosseri launched a new Instagram wordmark on 13 Aug 2026 — the first script change in ten years. The rainbow camera app icon is unchanged. Designers kept cursive so the brand still feels handmade; some users read the r as a z. New fonts shipped with it. Meta would not confirm an icon redesign.",
+      "fy_action": "Swap any template that hard-codes the 2016 Instagram script. Do not rebuild the brand around a logo meme.",
+      "tags": ["instagram", "brand"]
+    },
+    {
+      "id": "meta-holiday",
+      "title": "Meta publishes holiday marketing guides",
+      "url": "https://www.socialmediatoday.com/news/meta-publishes-holiday-marketing-guides/827856/",
+      "source": "Social Media Today",
+      "published": "2026-08-11",
+      "summary": "Meta’s 2026 holiday playbook says waiting until November is already late. Use Reels for discovery, Partnership ads for trust, and Advantage+ for conversion. Black Friday is 27 Nov 2026 with a short run to Christmas. SMBs were told to have ads learning by mid-October. Meta also cites heavy in-app messaging and creator-led shopping.",
+      "fy_action": "Put NYE, Art Basel, and holiday corporate packages into Advantage+ tests in September–October. Pair with WhatsApp/message CTAs.",
+      "tags": ["meta", "ads", "seasonal"]
+    },
+    {
+      "id": "meta-holiday-smb",
+      "title": "Meta shares holiday 2026 tips for small businesses",
+      "url": "https://www.socialmediatoday.com/news/meta-shares-holiday-2026-tips-for-small-businesses/826785/",
+      "source": "Social Media Today",
+      "published": "2026-08-02",
+      "summary": "Holiday Insights Center plus a 15,000-shopper survey: 85% bought in-store after seeing something on Meta apps, 59% messaged a business, 94% look to creators, and AI-assisted shopping is rising. Start ads mid-October so the model is not cold on BFCM.",
+      "fy_action": "Treat messaging as a conversion path, not a leftover inbox. Creators on real water beat another studio still.",
+      "tags": ["meta", "smb", "seasonal"]
+    },
+    {
+      "id": "pr-daily-week",
+      "title": "Social media updates and new features to know this week",
+      "url": "https://www.prdaily.com/social-media-updates-and-new-features-to-know-this-week-53/",
+      "source": "PR Daily",
+      "published": "2026-08-13",
+      "summary": "X is replacing creator revenue share with an Original Content Rewards program. LinkedIn now ranks comments by professional relevance. Meta Edits is adding beta tools. Meta One gets a larger Reels follow button, more AI Messenger replies, extra profile links, and up to three business locations. YouTube launched Live Practice Mode for private livestream rehearsal.",
+      "fy_action": "Add Miami + Panama as locations if on Meta One. Use Live Practice Mode before a yacht walkthrough live. Seed a useful first comment on every LinkedIn post.",
+      "tags": ["linkedin", "youtube", "meta"]
+    },
+    {
+      "id": "drizzle-trends",
+      "title": "Social Media Trends Report: August 3, 2026",
+      "url": "https://drizzledigital.com/social-media-trends-august-2026/",
+      "source": "Drizzle Digital",
+      "published": "2026-08-03",
+      "summary": "Weekly formats: Do Not Disturb, guess-the-brand-color, home-is-anywhere, how-to-summon-me, stress cutaways. LinkedIn published more native-content guidance. YouTube published a Shorts growth guide. Instagram now allows replacing audio on already-published feed posts and carousels.",
+      "fy_action": "Optional: a “how to summon the captain” Reel and a Biscayne “home is anywhere” still. Skip color-swatch trends unless it is a signature hull.",
+      "tags": ["trends", "organic"]
+    },
+    {
+      "id": "smt-desk",
+      "title": "Social Media Today — daily desk",
+      "url": "https://www.socialmediatoday.com/",
+      "source": "Social Media Today",
+      "published": "2026-08-14",
+      "summary": "Desk cluster: Meta still has the widest social reach; Instagram will charge for some AI access; Muse Spark 1.1; YouTube Studio refresh; dedicated Meta ad exclusion audiences; Google Ads and Analytics adding more AI tools; X adding Grok insights in Ads Manager. People are posting less under pressure — paid and strong creative gain share.",
+      "fy_action": "When the booker list is ready, use the new exclusion audiences on prospecting. Do not open X ads this month.",
+      "tags": ["meta", "google", "industry"]
+    },
+    {
+      "id": "itsnicethat-ig",
+      "title": "Behind Instagram’s first major refresh in over ten years",
+      "url": "https://www.itsnicethat.com/features/behind-instagrams-first-major-refresh-in-10-years-partnership-130826",
+      "source": "It's Nice That",
+      "published": "2026-08-13",
+      "summary": "Instagram’s design leads kept script after testing sans-serif because the wordmark is inseparable from the product. The refresh is framed as handmade expression against corporate “blanding,” with a tighter type system and subtler gradient use.",
+      "fy_action": "If we ever redo FY wordmarks, keep a human script or script-adjacent mark. Do not flatten into generic luxury sans.",
+      "tags": ["instagram", "creative"]
+    },
+    {
+      "id": "google-certs",
+      "title": "About Google Ads certifications",
+      "url": "https://support.google.com/google-ads/answer/9702955",
+      "source": "Google Ads Help",
+      "published": "2026-08-14",
+      "summary": "Official Skillshop rules: 80% pass, 75 minutes, no pause, 1-day retake, 12-month validity. Search, Display, Video, Shopping, and Apps count toward the company Partner badge. Individual certs are personal.",
+      "fy_action": "Sit Search + Measurement first. Put expiry dates on this dash when someone passes.",
+      "tags": ["google", "training"]
+    }
+  ]
+}

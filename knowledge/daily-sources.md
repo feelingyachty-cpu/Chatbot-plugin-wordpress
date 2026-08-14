@@ -1,6 +1,6 @@
 # Daily reading list
 
-These are the publications Pac-Man reads every day. They are the current best mix of breaking platform news, paid-social research, and creator-culture signal. Each item is on the dashboard with a live link.
+These are the publications Nala reads every day. They are the current best mix of breaking platform news, paid-social research, and creator-culture signal. Each item is on the dashboard with a live link.
 
 ## Must-read every weekday
 
@@ -51,7 +51,7 @@ These are the publications Pac-Man reads every day. They are the current best mi
 | PhocusWire | Online travel booking behavior | [phocuswire.com](https://www.phocuswire.com/) |
 | Miami Herald / Miami New Times events | Local event weeks that fill charters (Art Basel, F1, Ultra, NYE) | [miamiherald.com](https://www.miamiherald.com/) |
 
-## How Pac-Man uses this list
+## How Nala uses this list
 
 1. Scan the must-read set first. If a headline changes Meta, Google, Instagram, TikTok, YouTube, or LinkedIn behavior, it goes in the briefing.
 2. Pull 6–12 articles. Write a 4–8 sentence AI summary and one Feeling Yachty action.

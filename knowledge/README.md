@@ -2,15 +2,15 @@
 
 This is the social media, Meta Ads, and Google marketing brain for Feeling Yachty.
 
-Open the live command center at [`dash/index.html`](../dash/index.html). Every article, course, and playbook here is also summarized on that dashboard with a source link.
+Nala’s briefing module is [`dash/index.html`](../dash/index.html). Pac-Man owns the command dashboard. Nala upgrades it with cards in [`dash/data/pacman-cards.json`](../dash/data/pacman-cards.json). Chain of command: [`org.md`](org.md).
 
 ## How this is used
 
 | Who | What they do |
 | --- | --- |
-| You | Skim the dashboard daily. Open a source link only when you want the full article. |
-| Pac-Man (this agent) | Reads the daily sources, updates the briefing, and uses the Meta / Google skills before making ads or content recommendations. |
-| Future agents | Load `.cursor/skills/` before any social, Meta Ads, or Google Ads work. |
+| Pac-Man (supervisor) | Owns the command dashboard. Approves cards. Routes work. |
+| Nala (this agent) | Reads daily sources, writes briefings, submits Pac-Man cards, uses Meta / Google skills. Reports to Pac-Man. |
+| You | Skim Pac-Man’s dash (or Nala’s module). Open a source link only when you want the full article. |
 
 ## Map
 
@@ -42,5 +42,6 @@ Meta Blueprint course videos and exam vouchers sit behind a Facebook login. This
 
 1. Read [`daily-sources.md`](daily-sources.md).
 2. Write a new file in `daily-briefings/YYYY-MM-DD.md`.
-3. Mirror the same items into `dash/data/briefing.json`.
+3. Mirror the same items into `dash/data/briefing.json` and Pac-Man cards into `dash/data/pacman-cards.json`.
 4. Surface only decisions, platform changes, and Feeling Yachty actions. Do not dump raw article text.
+5. Do not publish site or ads changes. Submit a card to Pac-Man.

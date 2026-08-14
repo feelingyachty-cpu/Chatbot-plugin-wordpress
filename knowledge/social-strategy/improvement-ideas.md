@@ -1,6 +1,6 @@
 # Ideas to do better on social (Feeling Yachty)
 
-These are recommendations from the social media manager, using today’s briefing, the LinkedIn baseline (85 followers, 29 impressions / 30 days, 0 comments), and the brand’s real inventory.
+These are recommendations from **Nala** (reports to Pac-Man), using today’s briefing, the LinkedIn baseline (85 followers, 29 impressions / 30 days, 0 comments), and the brand’s real inventory. Site or spend moves go to Pac-Man as cards. Do not publish from this list.
 
 ## Fix the operating system first
 

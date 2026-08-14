@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Feeling Yachty — Social Command Center</title>
+  <title>Nala briefing module — reports to Pac-Man</title>
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
   <div class="wrap">
     <header class="hero">
       <div>
-        <p class="eyebrow">Feeling Yachty · Pac-Man desk</p>
-        <h1>Social command center</h1>
-        <p class="lede">Daily AI briefing with original links, the publications we read, the 10 training homes, Meta and Google study notes, and the next moves for Miami and Panama charters.</p>
+        <p class="eyebrow">Nala · reports to Pac-Man</p>
+        <h1>Social briefing module</h1>
+        <p class="lede">Nala’s daily AI briefing for Pac-Man’s dashboard. Every article has a summary and the original link. Cards use Pac-Man’s SEO-queue schema so he can drop them on the command dash he is building.</p>
       </div>
       <div class="stamp">
         <strong id="briefing-date">2026-08-14</strong>
@@ -21,7 +21,8 @@
     </header>
 
     <nav class="tabs" aria-label="Dashboard sections">
-      <button data-tab="briefing" class="active">Daily briefing</button>
+      <button data-tab="pacman" class="active">Pac-Man feed</button>
+      <button data-tab="briefing">Daily briefing</button>
       <button data-tab="sources">What we read</button>
       <button data-tab="training">10 training homes</button>
       <button data-tab="meta">Meta Ads agent</button>
@@ -30,7 +31,24 @@
       <button data-tab="database">Keep the brain current</button>
     </nav>
 
-    <section id="panel-briefing" class="panel active">
+    <section id="panel-pacman" class="panel active">
+      <div class="grid">
+        <div class="card span-8">
+          <div class="kicker">Supervisor intake</div>
+          <h2>Cards for Pac-Man’s dashboard</h2>
+          <p class="muted">Same fields as the SEO queue Pac-Man already runs (<code>task_id</code>, priority, approval, proposal, evidence, status). Nala submits. Pac-Man approves. Nothing publishes from this module.</p>
+          <p class="muted small">Drive sheet: <a href="https://docs.google.com/spreadsheets/d/1--PYs3_k3cVZ9TQGDx6RCAjouHW7oZOE_Bd-30iKpTw/edit" target="_blank" rel="noopener">Social Briefing (Nala to PACMAN)</a> · JSON: <a href="data/pacman-cards.json">dash/data/pacman-cards.json</a> · Command Hub: <a href="https://docs.google.com/spreadsheets/d/1SpeS7QeBl27yLCGcCJ1QY4OPBdA8kct4Ru7lKsRGqeI/edit" target="_blank" rel="noopener">open hub</a></p>
+        </div>
+        <div class="card span-4">
+          <div class="kicker">Chain of command</div>
+          <p class="kpi">Nala</p>
+          <p class="muted small">Social / ads specialist. Reports to Pac-Man. Human owner Nala Yemail is a different person. See <a href="../knowledge/org.md">knowledge/org.md</a>.</p>
+        </div>
+        <div id="pacman-card-list" class="span-12 grid"></div>
+      </div>
+    </section>
+
+    <section id="panel-briefing" class="panel">
       <div class="grid">
         <div class="card span-8">
           <div class="kicker">Today’s take</div>
@@ -51,7 +69,7 @@
         <div class="card span-12">
           <div class="kicker">Daily + weekly stack</div>
           <h2>Where the newest information lives</h2>
-          <p class="muted">Pac-Man reads the top five every weekday, then the specialist and travel sources. Full notes in <a href="../knowledge/daily-sources.md">knowledge/daily-sources.md</a>.</p>
+          <p class="muted">Nala reads the top five every weekday, then the specialist and travel sources, and files cards to Pac-Man. Full notes in <a href="../knowledge/daily-sources.md">knowledge/daily-sources.md</a>.</p>
           <table>
             <thead><tr><th>Source</th><th>Why it is on the desk</th></tr></thead>
             <tbody id="source-table"></tbody>
@@ -199,7 +217,7 @@
     <section id="panel-database" class="panel">
       <div class="grid">
         <div class="card span-12">
-          <div class="kicker">How Pac-Man stays an expert</div>
+          <div class="kicker">How Nala stays current for Pac-Man</div>
           <h2>Improve the database, do not hoard PDFs</h2>
           <ol class="train">
             <li><strong>Daily file contract.</strong> Every article on this dash has title, URL, summary, and a Feeling Yachty action. See <a href="../scripts/refresh-briefing.md">scripts/refresh-briefing.md</a>.</li>
@@ -208,7 +226,7 @@
             <li><strong>Next: RSS automation.</strong> A scheduled job should draft the briefing from Social Media Today, Search Engine Land, Meta news, and Google’s ads blog, then Slack <code>#social-media-post-communications</code>.</li>
             <li><strong>Performance snapshots.</strong> Nightly Meta, Google Ads, GA4, GSC, and CRM booked flags — without raw PII — so the ads agents optimize from our numbers, not vibes.</li>
             <li><strong>Inventory table.</strong> Yacht, guest cap, market, rate, hero clip, live URL, bookable yes/no. Stops hallucinated boats.</li>
-            <li><strong>Decision log.</strong> Dated “we turned this off because…” so future Pac-Man does not undo a hard-won choice.</li>
+            <li><strong>Decision log.</strong> Dated “we turned this off because…” so future Nala does not undo a hard-won choice. Pac-Man approves reversals that change live spend or the site.</li>
             <li><strong>Recert calendar.</strong> Skillshop 12 months, Blueprint Associate 2 years, Professional 1 year.</li>
           </ol>
           <p class="muted">Full write-up: <a href="../knowledge/social-strategy/database-improvements.md">knowledge/social-strategy/database-improvements.md</a></p>
@@ -217,7 +235,7 @@
     </section>
 
     <footer>
-      Interior repository for Feeling Yachty social, Meta Blueprint, Google Ads, GA4, and Search Console. Open this file locally or serve the <code>dash/</code> folder. Articles stay at their publishers — we store summaries and actions, not scraped full text.
+      Nala’s briefing module for Pac-Man. Articles stay at their publishers — we store summaries, actions, and supervisor cards, not scraped full text.
     </footer>
   </div>
   <script src="assets/app.js"></script>

@@ -1,3 +1,66 @@
+const PACMAN_CARDS = [
+  {
+    task_id: "FY-SOC-INBOX-20260814-001",
+    market: "LINKEDIN",
+    priority: "P0",
+    action: "REPLY",
+    proposal: "Close or answer the three aging LinkedIn threads (Upwork, jet-ski referral, job applicant).",
+    why: "85 followers, 29 impressions / 30 days, 0 comments. Dead inbox is a trust leak.",
+    status: "SUBMITTED",
+    approval: "YES"
+  },
+  {
+    task_id: "FY-SOC-TRACK-20260814-001",
+    market: "SITEWIDE",
+    priority: "P0",
+    action: "AUDIT",
+    proposal: "Audit Meta Pixel + CAPI and GA4 key events before any Advantage+ or Smart Bidding.",
+    why: "Without signal, spend cannot learn.",
+    status: "SUBMITTED",
+    approval: "YES"
+  },
+  {
+    task_id: "FY-SOC-ADS-20260814-001",
+    market: "GOOGLE",
+    priority: "P1",
+    action: "CREATE",
+    proposal: "Small brand Search campaign. RSA + call asset. No PMax yet.",
+    why: "Competitors can bid the name.",
+    status: "SUBMITTED",
+    approval: "YES"
+  },
+  {
+    task_id: "FY-SOC-HOLIDAY-20260814-001",
+    market: "META",
+    priority: "P1",
+    action: "PLAN",
+    proposal: "NYE / Art Basel / holiday corporate into Advantage+ learning Sep–Oct. Separate Miami and Panama.",
+    why: "Meta 2026 holiday guide: November launches miss the learning window.",
+    status: "SUBMITTED",
+    approval: "YES"
+  },
+  {
+    task_id: "FY-SOC-BRIEF-20260814-001",
+    market: "SOCIAL",
+    priority: "P2",
+    action: "PUBLISH-TO-DASH",
+    proposal: "Add today’s social briefing module to Pac-Man’s dashboard (IG wordmark, LinkedIn comment rank, YouTube Live Practice, exclusion audiences).",
+    why: "Supervisor should see the social brief without a second command center.",
+    status: "SUBMITTED",
+    approval: "NO"
+  },
+  {
+    task_id: "FY-SOC-TRAIN-20260814-001",
+    market: "OPS",
+    priority: "P2",
+    action: "LINK",
+    proposal: "Pin Nala’s 10 training homes and Meta/Google notes as a Library card.",
+    why: "One place to see what Nala studied.",
+    status: "SUBMITTED",
+    approval: "NO"
+  }
+];
+
 const BRIEFING = {
   date: "2026-08-14",
   generated_at: "2026-08-14T15:50:00Z",
@@ -105,6 +168,23 @@ const TRAINING = [
 
 function $(sel) { return document.querySelector(sel); }
 
+function renderPacmanCards() {
+  const host = $("#pacman-card-list");
+  if (!host) return;
+  host.innerHTML = PACMAN_CARDS.map((card) => `
+    <article class="card span-6">
+      <div class="kicker">${card.priority} · ${card.market} · ${card.action}</div>
+      <h3>${card.task_id}</h3>
+      <p class="muted">${card.proposal}</p>
+      <div class="action"><strong>Why:</strong> ${card.why}</div>
+      <div class="tags">
+        <span class="tag">${card.status}</span>
+        <span class="tag">approval ${card.approval}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
 function renderBriefing() {
   $("#briefing-date").textContent = BRIEFING.date;
   $("#briefing-headline").textContent = BRIEFING.headline;
@@ -146,7 +226,8 @@ document.querySelectorAll("nav.tabs button").forEach((btn) => {
   btn.addEventListener("click", () => activate(btn.dataset.tab));
 });
 
+renderPacmanCards();
 renderBriefing();
 renderSources();
 renderTraining();
-activate((location.hash || "#briefing").slice(1) || "briefing");
+activate((location.hash || "#pacman").slice(1) || "pacman");

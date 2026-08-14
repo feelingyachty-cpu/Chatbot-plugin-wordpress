@@ -1,6 +1,6 @@
 # 10 best places to learn social media marketing
 
-These are the locations Pac-Man studies from, and the ones you can enroll in. Ranked for a luxury charter operator who needs organic social, Meta Ads, Google Ads, and analytics — not generic “influencer lifestyle” courses.
+These are the locations Nala studies from, and the ones you can enroll in. Ranked for a luxury charter operator who needs organic social, Meta Ads, Google Ads, and analytics — not generic “influencer lifestyle” courses.
 
 ## 1. Meta Blueprint (official Meta training)
 
@@ -80,7 +80,7 @@ These are the locations Pac-Man studies from, and the ones you can enroll in. Ra
 - **Start:** [digitalmarketinginstitute.com](https://digitalmarketinginstitute.com/)
 - **Why it is here:** Highest-rigor generalist social credential. Optional. Do Blueprint + Skillshop + HubSpot first.
 
-## Study order for Feeling Yachty / Pac-Man
+## Study order for Feeling Yachty / Nala
 
 1. Meta Blueprint Associate path + this repo’s `knowledge/meta-blueprint/`
 2. Google Skillshop Search + Measurement + GA4 101–301
@@ -89,4 +89,4 @@ These are the locations Pac-Man studies from, and the ones you can enroll in. Ra
 5. LinkedIn Learning modules for the company page
 6. Everything else as needed
 
-When you finish a course, save the certificate PDF and your notes into `knowledge/training-uploads/` (create it when the first file arrives). Pac-Man will index it on the next briefing.
+When you finish a course, save the certificate PDF and your notes into `knowledge/training-uploads/` (create it when the first file arrives). Nala will index it on the next briefing and file a Library card for Pac-Man.

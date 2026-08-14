@@ -33,7 +33,7 @@ Fees and names can change. Confirm on the Certification hub before buying a vouc
 - Fail wait: commonly 5 days, then full fee again
 - You may not sit the exam as “the company.” A named person passes it.
 
-## Associate curriculum Pac-Man has internalized
+## Associate curriculum Nala has internalized
 
 Mapped from Blueprint Associate prep and Meta Help:
 

@@ -8,4 +8,4 @@ Drop certificate PDFs and short notes here, in a subfolder:
 - `tiktok/`
 - `other/`
 
-Name files `YYYY-MM-DD-short-title.pdf` (or `.md`). Pac-Man will index new files on the next briefing.
+Name files `YYYY-MM-DD-short-title.pdf` (or `.md`). Nala will index new files on the next briefing and submit a card to Pac-Man.

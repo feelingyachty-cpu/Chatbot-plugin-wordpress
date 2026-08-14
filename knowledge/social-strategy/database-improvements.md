@@ -1,6 +1,6 @@
-# How to keep Pac-Man’s database current
+# How to keep Nala’s database current (for Pac-Man)
 
-The user asked for ideas so this agent stays a social media expert without rereading the internet from scratch every time. These are the upgrades, in priority order.
+Nala reports to Pac-Man. These upgrades keep Nala current and keep Pac-Man’s dashboard fed. Do not stand up a second command center.
 
 ## 1. Daily briefing as a file contract (do this now)
 
@@ -43,7 +43,7 @@ A scheduled job (GitHub Action or Cursor automation) should:
 3. Draft summaries into `dash/data/briefing.json`
 4. Open a PR or Slack a digest to `#social-media-post-communications`
 
-Until that exists, Pac-Man does it at the start of each working day.
+Until that exists, Nala does it at the start of each working day and files cards to Pac-Man.
 
 Suggested feeds:
 
@@ -83,7 +83,7 @@ Without this, the agent will hallucinate inventory. The Drive listing copy and `
 
 ## 7. Decision log
 
-`knowledge/social-strategy/decisions.md` — dated notes: “Turned off Display,” “Excluded Audience Network,” “Killed bachelor creative.” Future Pac-Man must read this before reversing a choice.
+`knowledge/social-strategy/decisions.md` — dated notes: “Turned off Display,” “Excluded Audience Network,” “Killed bachelor creative.” Future Nala must read this before reversing a choice. Pac-Man is the only one who can approve a reversal that changes live spend or the site.
 
 ## 8. Evaluation set
 

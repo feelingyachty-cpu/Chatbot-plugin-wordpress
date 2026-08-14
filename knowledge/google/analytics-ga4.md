@@ -48,7 +48,7 @@ Do not mark `page_view` or `scroll` as key events.
 - `lead_type` — wedding, corporate, birthday, sunset
 - `guest_count` if collected
 
-## Reports Pac-Man actually uses
+## Reports Nala actually uses
 
 - **Realtime / DebugView** — did it fire?
 - **Acquisition → User / Traffic acquisition** — channel grouping vs session source

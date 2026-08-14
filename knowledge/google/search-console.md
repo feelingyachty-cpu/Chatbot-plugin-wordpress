@@ -23,7 +23,7 @@ You do not need GSC to *be* in Search. You need it to *operate* Search.
 - **Fernando / marketing:** queries, CTR, which yacht pages deserve ads + social support
 - **SEO / content:** the Miami and Panama blog clusters already planned in Drive
 - **Dev / WordPress:** coverage errors, canonicals, sitemap, robots, CWV
-- **Pac-Man:** turn query data into ad negatives, RSA headlines, and social captions
+- **Nala:** turn query data into ad negatives, RSA headlines, and social captions. File the resulting keyword/creative cards to Pac-Man.
 
 ## Setup
 

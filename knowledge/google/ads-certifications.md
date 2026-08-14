@@ -39,7 +39,7 @@ Separate Skillshop path ([intro](https://support.google.com/analytics/answer/100
 
 There is **no** Skillshop “Search Console Certification” equivalent to Ads. Expertise is demonstrated by using the product and the [Search Console Help](https://support.google.com/webmasters/answer/9128668) + [Google Search Central](https://developers.google.com/search/docs) documentation. This repo is the study guide.
 
-## Study method for Pac-Man
+## Study method for Nala
 
 1. Read the matching file in this folder.
 2. Open the official Help article linked in that file.

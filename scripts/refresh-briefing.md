@@ -1,18 +1,18 @@
-# Daily briefing refresh
+# Daily briefing refresh (Nala → Pac-Man)
 
-Run this at the start of a social workday (or whenever the user says “update the dash”).
+Nala runs this at the start of a social workday. Pac-Man owns the command dashboard.
 
 ## Steps
 
 1. Open `knowledge/daily-sources.md` and read the weekday must-read set.
 2. Collect 6–12 articles that change how we post or buy ads.
 3. Write `knowledge/daily-briefings/YYYY-MM-DD.md` using yesterday’s file as the template.
-4. Update `dash/data/briefing.json`:
-   - `generated_at` ISO timestamp
-   - `date`
-   - `items[]` with `title`, `url`, `source`, `published`, `summary`, `fy_action`, `tags`
-5. If `dash/assets/app.js` embeds a copy of the briefing, update that copy too so `index.html` works from disk.
-6. Commit: `Social briefing YYYY-MM-DD`.
+4. Update `dash/data/briefing.json`.
+5. Update `dash/data/pacman-cards.json` and `dash/data/pacman-cards.csv` with any new supervisor cards (same schema as the SEO queue).
+6. If `dash/assets/app.js` embeds copies, update those too.
+7. Refresh the Drive sheet *Feeling Yachty Social Briefing (Nala to PACMAN)* when cards change.
+8. Commit: `Nala briefing YYYY-MM-DD for Pac-Man`.
+9. Do not publish site or ads changes. Cards stay SUBMITTED until Pac-Man approves.
 
 ## Quality bar
 

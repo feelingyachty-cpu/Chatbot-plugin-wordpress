@@ -2,6 +2,10 @@
 
 WordPress plugin that chats with guests and recommends **live** boats from the fleet plugin.
 
+## How the fleet plugin works
+
+Read and **keep updating** [docs/feeling-yachty-suite.md](docs/feeling-yachty-suite.md). That file is the living manual for **feeling-yachty-suite 3.65.0** (yachts, Woo shortcodes, `fy-*` UI, REST, webhooks). Update it in the same PR as any Suite upgrade.
+
 ## The fleet plugin
 
 **`feeling-yachty-suite` 3.65.0** is the fleet plugin. It is already running on [feelingyachty.com](https://feelingyachty.com/) and exposes:

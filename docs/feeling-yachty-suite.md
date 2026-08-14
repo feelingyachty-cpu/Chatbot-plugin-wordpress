@@ -15,10 +15,10 @@ Feeling Yachty Suite is the **fleet + storefront plugin** for FeelingYachty.com.
 - Adds yachts and syncs each one to a WooCommerce product
 - Renders catalog / listing / product UI (the `fy-*` design system)
 - Stores hourly charter pricing, pink-fleet flags, free-hour deals, badges, marinas, reviews
-- Exposes a public REST API (`fy/v1`) for n8n, price push, and the site chatbot
+- Exposes a public REST API (`fy/v1`) for n8n and price push
 - Sends signed webhooks for bookings and support tickets into GoHighLevel
 
-It is **not** the chatbot. The chatbot in this repo (`feeling-yachty-chatbot`) *reads* Suite. Do not merge the two plugins.
+This repo does **not** include a website chatbot. Chat was removed; the owner uses another solution.
 
 ---
 
@@ -35,7 +35,7 @@ Admin adds/edits fy_yacht
         │     Suite injects the real product-page UI at render time
         │
         └─ public JSON: GET /wp-json/fy/v1/yachts
-              used by n8n price push, Mom Bot listings, this chatbot
+              used by n8n price push and other automations
 ```
 
 **Two Miami fleets currently coexist** (do not collapse them without an owner decision):
@@ -119,7 +119,7 @@ Base: `https://feelingyachty.com/wp-json/fy/v1`
 
 n8n credential `Wordpress account` (`KGm37ZnRNDgXh023`) is how price push authenticates.
 
-Related namespace (separate plugin or Suite module): `fy-support-bot/v1` — `POST /chat`, `/test-connection`, `/coach`.
+`fy-support-bot/v1` still exists on production WordPress (`/chat`, `/test-connection`, `/coach`). It is **not** maintained in this repo. Do not add chatbot settings here.
 
 ---
 
@@ -181,7 +181,7 @@ Maps (`fy-map`, `fy-gps`), FAQ accordion (`fy-qa`, `fy-q`, `fy-ans`, `fy-acc`), 
 
 Organization, Service, ItemList of boats, Offer prices, FAQPage, Boat, Place/marina, CommunicateAction (WhatsApp). Pink hub also emits Offer blocks per pink yacht.
 
-If an upgrade changes class names, data attributes, or schema `@id`s, list the diff in the changelog below — front-end CSS and the chatbot cards depend on this.
+If an upgrade changes class names, data attributes, or schema `@id`s, list the diff in the changelog below — front-end CSS depends on this.
 
 ---
 
@@ -227,8 +227,6 @@ n8n **My Database - WordPress Price Push** can PATCH `price` weekly from the Goo
 | BookMyBoat | `sku` `BMB-*`, `source_listing_id`, weekly sync workflows |
 | n8n price push | `GET/POST /fy/v1/yachts` |
 | n8n → GHL | signed webhooks `booking.paid`, `ticket.*` |
-| Mom Bot / Support Receptionist | yacht lookup tool (sheet today; should use `fy/v1`) |
-| Feeling Yachty Fleet Chatbot (this repo) | `FY_Chatbot_Fleet_Client` → `fy/v1` |
 | Rank Math | sitemap includes `/fleet/miami/`; Suite SEO object on the yacht |
 
 ---
@@ -254,6 +252,11 @@ Add paths here once `feeling-yachty-suite/` is in git.
 
 ## Changelog (docs + product)
 
+### 2026-08-14 — chatbot removed
+
+- Deleted `feeling-yachty-chatbot/` (widget, REST `fy-chatbot/v1`, Settings → FY Fleet Chatbot, shortcode `[fy_fleet_chat]`, n8n webhook setting).
+- This repo is Suite documentation only. Do not reintroduce chatbot settings.
+
 ### 3.65.0 — 2026-08-14 (docs created)
 
 - Documented live `fy/v1` contract, fleets, marina list, pricing row types, badges.
@@ -267,5 +270,4 @@ Add paths here once `feeling-yachty-suite/` is in git.
 
 1. Bump **Last reviewed** and add a `### x.y.z` heading here.
 2. Diff REST fields, shortcodes, `fy-*` classes, webhooks, and Woo hooks.
-3. Update the chatbot (`feeling-yachty-chatbot`) if the yacht JSON contract changed.
-4. Keep this file in the same PR as the Suite code change.
+3. Keep this file in the same PR as the Suite code change.

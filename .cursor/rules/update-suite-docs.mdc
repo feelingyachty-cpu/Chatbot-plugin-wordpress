@@ -7,7 +7,7 @@ alwaysApply: true
 
 `docs/feeling-yachty-suite.md` is the living how-it-works file for **feeling-yachty-suite** (the fleet plugin on FeelingYachty.com).
 
-Whenever you change Suite behavior — or the chatbot that reads it — you must update that file in the same PR:
+Whenever you change Suite behavior you must update that file in the same PR:
 
 - Version / last-reviewed date
 - REST `fy/v1` fields
@@ -19,4 +19,4 @@ Whenever you change Suite behavior — or the chatbot that reads it — you must
 
 Do not invent yacht names or prices. Quote Suite `pricing[]` rows.
 
-The chatbot plugin (`feeling-yachty-chatbot`) is a consumer of Suite, not a replacement. Keep them separate.
+Do not add a website chatbot, chat widget, or chatbot settings back into this repo unless the owner explicitly asks.

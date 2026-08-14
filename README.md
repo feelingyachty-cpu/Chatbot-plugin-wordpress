@@ -8,6 +8,8 @@ This repo does **not** ship a website chatbot. That work was removed; chat is ha
 
 Read and **keep updating** [docs/feeling-yachty-suite.md](docs/feeling-yachty-suite.md) on every Suite upgrade.
 
+Client-ease audit (bugs and fixes): [docs/suite-audit-2026-08-14.md](docs/suite-audit-2026-08-14.md).
+
 The Suite source zip is not in git yet. Production already exposes:
 
 | Endpoint | Role |

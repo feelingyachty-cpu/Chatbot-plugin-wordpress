@@ -3,6 +3,8 @@
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
 Last reviewed: **2026-08-14** against production **feeling-yachty-suite 3.65.0** on feelingyachty.com.
 
+Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
+
 The PHP zip for 3.65.0 is not yet in this git repo. This file is the source of truth for *behavior we can see live*. When the plugin source is added, fill in the “Source map” and “Shortcodes (PHP names)” sections from the actual files.
 
 ---
@@ -251,6 +253,10 @@ Add paths here once `feeling-yachty-suite/` is in git.
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-14 — client UX audit
+
+- Added [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md): dual URLs, `/fleet/miami/` → homepage, 200-yacht API cap (27 boats dropped), hourly vs total price confusion, old 49-boat fleet, Panama missing from Suite.
 
 ### 2026-08-14 — chatbot removed
 

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Feeling Yachty — Add a Yacht Staff Guide</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.48in 0.55in 0.52in 0.55in;
+    }
+    @page :first {
+      margin: 0;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Avenir Next", "Segoe UI", Calibri, "Trebuchet MS", sans-serif;
+      color: #12263a;
+      background: #fff;
+      font-size: 12.4px;
+      line-height: 1.42;
+    }
+    .page { break-after: page; page-break-after: always; }
+    .page:last-child { break-after: auto; page-break-after: auto; }
+
+    .cover {
+      width: 8.5in;
+      height: 11in;
+      background: linear-gradient(160deg, #061018 0%, #12263a 46%, #1c3b58 100%);
+      color: #fff;
+      padding: 0.72in 0.7in;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -70px;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(225,29,116,0.58), transparent 70%);
+    }
+    .cover::after {
+      content: "";
+      position: absolute;
+      left: -70px;
+      bottom: 90px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,0.3), transparent 70%);
+    }
+    .cover-inner { position: relative; z-index: 1; }
+    .eyebrow {
+      display: inline-block;
+      background: #e11d74;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 11px;
+      padding: 7px 13px;
+      border-radius: 999px;
+    }
+    .cover h1 {
+      font-size: 48px;
+      line-height: 1.04;
+      margin: 26px 0 14px;
+      max-width: 7.1in;
+    }
+    .cover h1 span { color: #ff7ab3; }
+    .cover .lead {
+      font-size: 17.5px;
+      max-width: 6.5in;
+      color: #d7e6f5;
+      margin: 0 0 28px;
+    }
+    .cover-card {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 18px;
+      padding: 16px 20px;
+      max-width: 6.7in;
+    }
+    .cover-card p { margin: 0 0 8px; }
+    .cover-card p:last-child { margin: 0; }
+    .cover-card strong { color: #ffd6e8; }
+    .cover-pills {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .cover-pill {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 12px;
+      padding: 10px 12px;
+      flex: 1;
+      font-size: 12px;
+      color: #d7e6f5;
+    }
+    .cover-pill b {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+    .cover-foot {
+      position: absolute;
+      left: 0.7in;
+      right: 0.7in;
+      bottom: 0.55in;
+      display: flex;
+      justify-content: space-between;
+      color: #9fb4c9;
+      font-size: 12px;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #e11d74;
+    }
+    .brand {
+      font-weight: 800;
+      color: #12263a;
+      letter-spacing: 0.02em;
+    }
+    .brand span { color: #e11d74; }
+    .chapter {
+      background: #12263a;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 999px;
+    }
+
+    h2 {
+      font-size: 25px;
+      margin: 0 0 6px;
+      color: #0b1b2b;
+    }
+    h2 .num {
+      display: inline-block;
+      background: #e11d74;
+      color: #fff;
+      border-radius: 10px;
+      padding: 2px 10px;
+      font-size: 16px;
+      margin-right: 8px;
+      vertical-align: 3px;
+    }
+    h3 {
+      font-size: 15.5px;
+      margin: 14px 0 6px;
+      color: #e11d74;
+    }
+    p { margin: 0 0 9px; }
+    .sub {
+      color: #4b6580;
+      margin-bottom: 14px;
+      font-size: 13.2px;
+    }
+    .kicker {
+      color: #e11d74;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin: 0 0 5px;
+    }
+
+    .banner {
+      background: #fff1f6;
+      border-left: 6px solid #e11d74;
+      padding: 9px 13px;
+      border-radius: 0 12px 12px 0;
+      margin: 10px 0 12px;
+    }
+    .banner.blue { background: #eef7ff; border-left-color: #1d7ae1; }
+    .banner.gold { background: #fff7e6; border-left-color: #e1a01d; }
+    .banner.green { background: #eefbf3; border-left-color: #1db36a; }
+
+    .steps { counter-reset: step; }
+    .step {
+      counter-increment: step;
+      display: flex;
+      gap: 12px;
+      margin: 0 0 10px;
+      break-inside: avoid;
+    }
+    .step::before {
+      content: counter(step);
+      flex: 0 0 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #12263a;
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .step.pink::before { background: #e11d74; }
+    .step h4 { margin: 0 0 2px; font-size: 14.5px; color: #0b1b2b; }
+    .step p { margin: 0; color: #334e68; }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .grid3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .card {
+      border: 1px solid #d7e3ee;
+      border-radius: 14px;
+      padding: 11px 13px;
+      background: #f7fbff;
+      break-inside: avoid;
+    }
+    .card h4 { margin: 0 0 5px; color: #12263a; font-size: 13.5px; }
+    .card.pink { background: #fff5f9; border-color: #f5c0d6; }
+    .card.navy { background: #12263a; color: #fff; border: 0; }
+    .card.navy h4 { color: #ffb3d2; }
+    .card.navy p { color: #d7e6f5; }
+    .card.gold { background: #fff8ea; border-color: #f0d49a; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 12px;
+      font-size: 11.6px;
+    }
+    th {
+      background: #12263a;
+      color: #fff;
+      text-align: left;
+      padding: 7px 9px;
+    }
+    td {
+      padding: 6px 9px;
+      border-bottom: 1px solid #e3edf5;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f6fafd; }
+
+    .check { list-style: none; padding: 0; margin: 6px 0 0; }
+    .check li {
+      padding: 5px 0 5px 28px;
+      position: relative;
+    }
+    .check li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 19px;
+      height: 19px;
+      border-radius: 6px;
+      background: #1db36a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 19px;
+    }
+
+    .toc-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px dashed #d5e2ee;
+    }
+    .toc-num {
+      flex: 0 0 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #e11d74;
+      color: #fff;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toc-num.navy { background: #12263a; }
+    .toc-num.gold { background: #c98412; }
+    .toc-row h4 { margin: 0 0 2px; font-size: 14.5px; }
+    .toc-row p { margin: 0; color: #4b6580; font-size: 12px; }
+
+    .pill {
+      display: inline-block;
+      background: #e11d74;
+      color: #fff;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .footer {
+      margin-top: 14px;
+      color: #7a93a8;
+      font-size: 10.5px;
+    }
+    code {
+      background: #eef3f8;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="cover page">
+    <div class="cover-inner">
+      <div class="eyebrow">Staff training guide · Suite 3.65.0</div>
+      <h1>How to add a yacht<br><span>and where it shows up</span></h1>
+      <p class="lead">A simple guide for the Feeling Yachty team. Follow the steps. Fill every box. Then check the guest pages so clients see the new boat right away.</p>
+      <div class="cover-card">
+        <p><strong>Who this is for:</strong> anyone who adds or edits boats on FeelingYachty.com</p>
+        <p><strong>What you will learn first:</strong> how to add a yacht, step by step</p>
+        <p><strong>What comes last:</strong> settings (managers only — do not change these unless asked)</p>
+      </div>
+      <div class="cover-pills">
+        <div class="cover-pill"><b>1–2</b>Add the yacht</div>
+        <div class="cover-pill"><b>3</b>Check every page</div>
+        <div class="cover-pill"><b>4</b>Edit later</div>
+        <div class="cover-pill"><b>Last</b>Settings</div>
+      </div>
+    </div>
+    <div class="cover-foot">
+      <span>Feeling Yachty · Miami &amp; Panama</span>
+      <span>Keep this PDF next to your login</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Contents</div>
+    </div>
+    <div class="kicker">How to use this guide</div>
+    <h2>Read in this order</h2>
+    <p class="sub">Train on adding a yacht first. Settings are at the back on purpose. If you only add boats, you can stop before the pink “Managers only” pages.</p>
+
+    <div class="toc-row">
+      <div class="toc-num">1</div>
+      <div>
+        <h4>Gather the facts</h4>
+        <p>Name, photos, guests, marina, and trip totals — before you open WordPress.</p>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div class="toc-num">2</div>
+      <div>
+        <h4>Add the yacht</h4>
+        <p>Create one record, pick the current Miami (or Panama) list, type prices as totals, then Publish.</p>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div class="toc-num">3</div>
+      <div>
+        <h4>Where it must appear</h4>
+        <p>Admin list, yacht page, Miami or Panama catalog, pink page if pink, Book button, filters.</p>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div class="toc-num navy">4</div>
+      <div>
+        <h4>Change a boat later</h4>
+        <p>Edit the same record. Never make a second yacht to “update” the first one.</p>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div class="toc-num gold">!</div>
+      <div>
+        <h4>Common mistakes</h4>
+        <p>Wrong fleet, hourly prices, blank marina, fake guest counts, missing photos.</p>
+      </div>
+    </div>
+    <div class="toc-row">
+      <div class="toc-num navy">⚙</div>
+      <div>
+        <h4>Settings (last)</h4>
+        <p>Every box on the yacht screen, plus fleets, marinas, badges, shop products, and office sync.</p>
+      </div>
+    </div>
+
+    <h3>What this plugin does</h3>
+    <div class="grid2">
+      <div class="card navy">
+        <h4>Think of it like this</h4>
+        <p>You are not writing a blog post. You are adding one boat to the shop. The plugin copies that boat onto the public site so guests can see it, compare prices, and book.</p>
+      </div>
+      <div class="card pink">
+        <h4>One yacht = one record</h4>
+        <p>Add the boat <strong>once</strong>. Do not make a second copy “just in case.” Extra copies confuse guests and split the booking links.</p>
+      </div>
+    </div>
+    <div class="banner gold">
+      <strong>Miami list to use:</strong> <strong>miami-yacht-rental</strong> (no extra “s”). The older list named <strong>miami-yacht-rentals</strong> is leftover. Do not add new boats there.
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Step 1 · Prepare</div>
+    </div>
+    <div class="kicker">Do this first</div>
+    <h2><span class="num">1</span> Gather this before you click Add</h2>
+    <p class="sub">Do not open WordPress until you have these answers. Missing pieces make a half-page that guests cannot book.</p>
+
+    <table>
+      <tr><th>You need</th><th>Example</th><th>Why</th></tr>
+      <tr><td>City</td><td>Miami or Panama</td><td>Puts the boat on the right catalog</td></tr>
+      <tr><td>Guest name for the boat</td><td>50ft Pink Maxum “Barbie”</td><td>What guests see on the card</td></tr>
+      <tr><td>Length and max guests</td><td>50 ft · 13 guests</td><td>Filters and safety</td></tr>
+      <tr><td>Brand + year + model</td><td>Maxum · 2008</td><td>Helps guests recognize the boat</td></tr>
+      <tr><td>Marina / pickup</td><td>Miami Beach Marina</td><td>Guests always ask “where do we go?”</td></tr>
+      <tr><td>Captain included?</td><td>Yes (almost always)</td><td>Leave Yes unless it is a true bareboat</td></tr>
+      <tr><td>Pink boat?</td><td>Yes / No</td><td>Shows in the pink yacht list</td></tr>
+      <tr><td>Free extra hour?</td><td>Pay 4, get 5</td><td>Shows the +1 Free Hour badge</td></tr>
+      <tr><td>Prices as totals</td><td>3h $1,100 · 4h $1,350 · 6h $1,850</td><td>What the card prints</td></tr>
+      <tr><td>5+ clear photos</td><td>Outside, deck, salon, sunset</td><td>First photo = the card picture</td></tr>
+      <tr><td>Owner / source note</td><td>Owner name or BookMyBoat id</td><td>For the office, not the guest</td></tr>
+    </table>
+
+    <div class="banner green">
+      <strong>Name formula that always works:</strong> size + brand + nickname in quotes.<br>
+      Good: <em>45ft Sea Ray “NO ETA”</em> &nbsp;·&nbsp; Bad: <em>Azimut</em> (too many boats share that name) or titles with emojis and “from $1000”.
+    </div>
+    <div class="banner">
+      <strong>Golden rule:</strong> Write prices as the <em>total for that many hours</em> (example: 4 hours = $800). Do not type an hourly rate next to “3 Hours.” Guests will think the whole trip costs the hourly number.
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Step 2 · WordPress</div>
+    </div>
+    <div class="kicker">The main lesson</div>
+    <h2><span class="num">2</span> Add the yacht in WordPress</h2>
+    <p class="sub">Log in to FeelingYachty.com WordPress. You need permission to edit Yachts. If you do not see <strong>Yachts</strong> in the left menu, ask a manager.</p>
+
+    <div class="steps">
+      <div class="step pink">
+        <div>
+          <h4>Open Yachts → Add New</h4>
+          <p>Left menu: <strong>Yachts</strong> (sometimes under Feeling Yachty / Fleet). Click <strong>Add New</strong>. You are now making one boat record.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h4>Type the public name</h4>
+          <p>Use the formula: <strong>50ft Pink Maxum “Barbie”</strong>. This name shows on the card, the page title, and texts to guests. No HTML codes. No emoji. No “cheap yacht rental Miami” in the title.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h4>Set the featured photo, then the gallery</h4>
+          <p>The featured photo is the catalog card. Use a bright, wide shot of the whole boat. Then add more photos to the gallery so the guest page has a slideshow.</p>
+        </div>
+      </div>
+      <div class="step pink">
+        <div>
+          <h4>Pick the fleet / city</h4>
+          <p>Miami new boats → <strong>miami-yacht-rental</strong>.<br>
+          Panama boats → <strong>panama-yacht-rentals</strong> (if that box is empty, stop and tell a manager — Panama may still live on older pages).<br>
+          Do <strong>not</strong> tick both Miami lists. Do <strong>not</strong> use the old <em>miami-yacht-rentals</em> list for new boats.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h4>Fill the spec boxes</h4>
+          <p><strong>Length (ft)</strong>, <strong>Max guests</strong>, <strong>Year</strong>, <strong>Brand</strong>, <strong>Model</strong>. Turn <strong>Captain included</strong> on. Turn <strong>Pink</strong> on only if the boat is truly pink. Turn <strong>Free hour</strong> on only if the price table has a “pay 4 get 5” style deal.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner">
+      <strong>Guests on a 26–32 ft boat:</strong> do not type 13 unless the boat is really licensed for 13. A small boat with “13 guests” looks wrong and can cause a fight at the dock.
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Step 2 · Prices &amp; publish</div>
+    </div>
+    <div class="kicker">Still adding the yacht</div>
+    <h2><span class="num">2</span> Prices, marina, then Publish</h2>
+
+    <div class="steps">
+      <div class="step pink">
+        <div>
+          <h4>Enter the price table as totals</h4>
+          <p>Each row is one trip length and the <strong>full charter price</strong> guests pay for that length. Use a heading row for weekday vs weekend if prices change.</p>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>Duration</th><th>Price you type</th><th>Guest reads</th></tr>
+      <tr><td>3 Hours</td><td>1100</td><td>3 hours · $1,100</td></tr>
+      <tr><td>4 Hours</td><td>1350</td><td>4 hours · $1,350</td></tr>
+      <tr><td>6 Hours</td><td>1850</td><td>6 hours · $1,850</td></tr>
+      <tr><td>Pay for 4 Hours Get 5 Hours Total</td><td>1350</td><td>Pay 4, get 5 · $1,350</td></tr>
+    </table>
+
+    <div class="banner gold">
+      <strong>Weekday vs weekend:</strong> add a heading row like “Monday–Thursday” then the prices, then a heading “Friday–Sunday” then those prices. A weekend extra can be a note: <em>Weekend surcharge — $150</em>.
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Pick the marina</h4>
+        <p>Choose from the marina list (Dinner Key, Miami Beach Marina, Bill Bird / Haulover, and so on). Add a pickup note if guests need a gate or “meet at the white tent.” If you skip this, guests will call you.</p>
+      </div>
+      <div class="card">
+        <h4>Write a short guest blurb</h4>
+        <p>3–5 sentences. Who it is for, what is on board, where it leaves. Do not paste a novel. Do not invent a price in the blurb that does not match the table.</p>
+      </div>
+      <div class="card pink">
+        <h4>Badges (optional)</h4>
+        <p>Use only if they are true: Pink Yacht, +1 Free Hour, Bachelorette Favorite, Slide Available, New Yacht. Too many badges look like spam.</p>
+      </div>
+      <div class="card navy">
+        <h4>Click Publish — not Save Draft</h4>
+        <p>Draft is invisible to guests. Publish makes the catalog card and the shop product. Then copy the public link and send it to yourself.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Step 3 · Check the site</div>
+    </div>
+    <div class="kicker">This is the part people forget</div>
+    <h2><span class="num">3</span> Where the yacht should appear</h2>
+    <p class="sub">After Publish, open a private / incognito window (or log out) and check every place below. If one is missing, the boat is not finished.</p>
+
+    <table>
+      <tr><th>Place</th><th>What you should see</th><th>If it is missing</th></tr>
+      <tr>
+        <td><strong>Yacht list in WP Admin</strong></td>
+        <td>Your new boat in <em>Yachts</em>, status Published</td>
+        <td>You saved a draft. Publish it.</td>
+      </tr>
+      <tr>
+        <td><strong>The yacht’s own page</strong></td>
+        <td>Name, photos, price table, marina, Book button</td>
+        <td>Wait 1 minute, refresh hard. Still empty? Tell a manager — the product page may not have attached.</td>
+      </tr>
+      <tr>
+        <td><strong>Miami catalog</strong><br><code>/miami-yacht-rental/</code></td>
+        <td>A card with photo, starting total, and your name</td>
+        <td>Wrong fleet box. Edit the yacht and tick <em>miami-yacht-rental</em> only.</td>
+      </tr>
+      <tr>
+        <td><strong>Pink catalog</strong><br><code>/miami-pink-yacht-rentals/</code></td>
+        <td>The card, only if Pink is on</td>
+        <td>Turn Pink on. Add the Pink Yacht badge.</td>
+      </tr>
+      <tr>
+        <td><strong>Fleet link</strong><br><code>/fleet/miami/your-boat-name/</code></td>
+        <td>Same boat, same prices</td>
+        <td>This is the link we prefer to text guests. If you also see a second link under <code>/miami-yacht-rentals/…-4/</code>, tell a manager — do not keep both.</td>
+      </tr>
+      <tr>
+        <td><strong>Panama catalog</strong><br><code>/panama-yacht-rentals/</code></td>
+        <td>Panama boats only</td>
+        <td>Miami boats must never show here. If a Panama boat does not show, it may still live on older Panama pages — ask before making a second copy.</td>
+      </tr>
+      <tr>
+        <td><strong>Shop / Book button</strong></td>
+        <td>Deposit checkout with the same name and photo</td>
+        <td>The plugin creates a WooCommerce product automatically. If Book is dead, the product is draft or unlinked.</td>
+      </tr>
+      <tr>
+        <td><strong>Search / filters on the hub</strong></td>
+        <td>Shows up when guests pick the right size, pink, or price chip</td>
+        <td>Length, pink flag, or starting price is blank. Fill those boxes.</td>
+      </tr>
+    </table>
+
+    <div class="banner blue">
+      <strong>Text this to the group chat after you add a boat:</strong> name, public link, 4-hour total, marina, max guests. If you cannot fill that text, the listing is not ready for clients.
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Step 4 · Later edits</div>
+    </div>
+    <div class="kicker">After it is live</div>
+    <h2><span class="num">4</span> How to change a yacht later</h2>
+    <p class="sub">Always edit the <strong>same</strong> yacht record. Do not add a new yacht to “update” an old one.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Change a price</h4>
+        <p>Yachts → find the boat → edit the price row → Update. Then open the guest card and confirm the new total. If a weekly sheet also pushes prices, tell the person who owns that sheet so you do not overwrite each other.</p>
+      </div>
+      <div class="card">
+        <h4>Change photos</h4>
+        <p>Replace the featured image if the card should change. Add or remove gallery photos for the page. Guests judge the boat in 2 seconds — blurry first photos lose the booking.</p>
+      </div>
+      <div class="card">
+        <h4>Hide a boat for a while</h4>
+        <p>Set status to <strong>Draft</strong> or unpublish. Do not delete unless a manager says so. Deleting can break old links guests already saved.</p>
+      </div>
+      <div class="card">
+        <h4>Sold, renamed, or moved marina</h4>
+        <p>Edit the same record. Keep the same public link if you can. Changing the name a little is fine. Making a brand-new page loses reviews and old ads.</p>
+      </div>
+    </div>
+
+    <h3>Quick “is it good?” checklist</h3>
+    <ul class="check">
+      <li>Name is size + brand + nickname. No duplicate “Azimut” with no nickname.</li>
+      <li>First photo is clear. At least 4 more photos on the page.</li>
+      <li>City/fleet is the <em>current</em> Miami list or Panama — not both Miami lists.</li>
+      <li>Guest count is honest for that size boat.</li>
+      <li>Captain is on, unless it is truly bareboat.</li>
+      <li>Every price is a <strong>trip total</strong>, not an hourly rate sitting next to “3 Hours.”</li>
+      <li>Marina is filled. You could tell a guest where to stand.</li>
+      <li>You opened the guest page while logged out and the Book button works.</li>
+      <li>You sent the link + 4-hour price + marina in the team chat.</li>
+    </ul>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Watch-outs</div>
+    </div>
+    <div class="kicker">Please do not do these</div>
+    <h2>Common mistakes</h2>
+    <table>
+      <tr><th>Mistake</th><th>What happens</th><th>Do this instead</th></tr>
+      <tr>
+        <td>Adding the boat twice</td>
+        <td>Two cards, two prices, angry guests</td>
+        <td>Search Yachts for the name first</td>
+      </tr>
+      <tr>
+        <td>Putting it on the old Miami list</td>
+        <td>Boat never shows on the main catalog</td>
+        <td>Use <strong>miami-yacht-rental</strong> only</td>
+      </tr>
+      <tr>
+        <td>Typing hourly in the 3-hour box</td>
+        <td>Card can show $3,583 when the trip is $10,750</td>
+        <td>Type the full trip price</td>
+      </tr>
+      <tr>
+        <td>Leaving marina blank</td>
+        <td>Inbox fills with “where do we meet?”</td>
+        <td>Pick a marina every time</td>
+      </tr>
+      <tr>
+        <td>13 guests on a 26 ft boat</td>
+        <td>Looks fake and can be unsafe</td>
+        <td>Use the real licensed number</td>
+      </tr>
+      <tr>
+        <td>Title with emoji and “from $1000”</td>
+        <td>Looks like an ad, not a boat</td>
+        <td>Clean name. Prices live in the table</td>
+      </tr>
+      <tr>
+        <td>Pink flag off on a pink boat</td>
+        <td>Missing from the pink page guests love</td>
+        <td>Turn Pink on + Pink Yacht badge</td>
+      </tr>
+      <tr>
+        <td>Publishing with no photo</td>
+        <td>Empty gray card. Guests skip it</td>
+        <td>Featured image before Publish</td>
+      </tr>
+    </table>
+
+    <div class="banner">
+      <strong>Need help?</strong> Do not guess. Ask the person who owns the website before changing fleets, deleting boats, or editing settings on the last pages of this guide.
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Managers only · settings</div>
+    </div>
+    <div class="kicker">Leave this for last</div>
+    <h2>Every box on the yacht screen</h2>
+    <p class="sub">Staff who only add boats can stop before these pink “Managers only” pages. This table is the full yacht record. Fill what you know. Leave office-only boxes for a manager if you are unsure.</p>
+
+    <table>
+      <tr><th>Box you will see</th><th>What to put</th><th>Where guests see it</th></tr>
+      <tr><td>Title</td><td>Size + brand + nickname</td><td>Card, page, texts, shop</td></tr>
+      <tr><td>Featured image</td><td>Best wide photo of the whole boat</td><td>Catalog card</td></tr>
+      <tr><td>Gallery</td><td>5+ extra photos</td><td>Yacht page slideshow</td></tr>
+      <tr><td>Fleet / category</td><td>miami-yacht-rental or panama-yacht-rentals</td><td>Which catalog the card sits on</td></tr>
+      <tr><td>Tags</td><td>Optional search words (party, sunset)</td><td>Can help filters / search</td></tr>
+      <tr><td>Length (ft)</td><td>Real length</td><td>Card, filters, “50ft” in the name</td></tr>
+      <tr><td>Max guests</td><td>Licensed number, not a default 13</td><td>Card and filters</td></tr>
+      <tr><td>Year / brand / model</td><td>As on the boat papers</td><td>Specs on the yacht page</td></tr>
+      <tr><td>Captain included</td><td>On, unless bareboat</td><td>Guest page and sales notes</td></tr>
+      <tr><td>Pink yacht</td><td>On only if the hull is pink</td><td>Pink catalog + pink badge</td></tr>
+      <tr><td>Free extra hour</td><td>On only if the deal is real</td><td>+1 Free Hour badge</td></tr>
+      <tr><td>Price table rows</td><td>Trip totals, headings, notes</td><td>Price panel on the yacht page</td></tr>
+      <tr><td>Starting / hourly price</td><td>Do not pair an hourly number with “3 Hours”</td><td>Can leak onto cards — keep it honest</td></tr>
+      <tr><td>Price note</td><td>“4-hour weekday charter”</td><td>Small print under the price</td></tr>
+      <tr><td>Weekend / crew / fuel / service</td><td>Extra fees if they are charged</td><td>Notes near the price</td></tr>
+      <tr><td>Marina</td><td>Pick from the shared list</td><td>Map / meetup line</td></tr>
+      <tr><td>Guest blurb</td><td>3–5 honest sentences</td><td>Yacht page story</td></tr>
+      <tr><td>Badges</td><td>Only true tags</td><td>Pills on the card</td></tr>
+      <tr><td>Add-ons</td><td>Jet ski, decor, chef — with prices</td><td>Extras on the yacht page</td></tr>
+      <tr><td>Blackout dates</td><td>Days the boat cannot sail</td><td>Stops a bad booking date</td></tr>
+      <tr><td>Reviews</td><td>Real guest quotes only</td><td>Review block on the page</td></tr>
+      <tr><td>Search terms</td><td>Nicknames people type</td><td>Helps the hub search box</td></tr>
+      <tr><td>Owner / SKU / source id</td><td>Office tracking</td><td>Not shown to guests</td></tr>
+      <tr><td>SEO title / description</td><td>Leave to a manager if empty</td><td>Google snippet</td></tr>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Managers only · settings</div>
+    </div>
+    <div class="kicker">Whole-site controls</div>
+    <h2>Fleets, marinas, badges, shop</h2>
+    <p class="sub">These controls change the whole website. Wrong clicks can hide the fleet or break booking messages.</p>
+
+    <h3>Fleets (cities / lists)</h3>
+    <table>
+      <tr><th>Fleet name you will see</th><th>Use it for</th></tr>
+      <tr><td><strong>miami-yacht-rental</strong></td><td>All new Miami boats. This is the public catalog.</td></tr>
+      <tr><td>miami-yacht-rentals (older)</td><td>Leftover list. Do not add new boats. A manager should merge or hide it.</td></tr>
+      <tr><td>panama-yacht-rentals</td><td>Panama boats inside the plugin. If the count is zero, Panama may still be on older pages — do not duplicate them.</td></tr>
+    </table>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Marinas</h4>
+        <p>The plugin keeps a shared marina list (Dinner Key, Miamarina, Bill Bird, Crandon, and many more — about 58). Add a marina here once. Then every yacht can pick it. Do not type a one-off address on each boat if the marina already exists.</p>
+      </div>
+      <div class="card pink">
+        <h4>Badges</h4>
+        <p>Styles guests see: <span class="pill">hot</span> party/value tags, <span class="pill">pink</span> Pink Yacht, <span class="pill" style="background:#1db36a">free</span> +1 Free Hour. Keep the list short. Inventing new badge names every week makes the site look messy.</p>
+      </div>
+      <div class="card gold">
+        <h4>WooCommerce / Book button</h4>
+        <p>Each published yacht is tied to one shop product. The product page is filled by the plugin (you may see a tiny <code>fy-auto</code> note). Do not empty that product. Do not create a second product by hand for the same boat.</p>
+      </div>
+      <div class="card navy">
+        <h4>Do not rename fleet slugs</h4>
+        <p>Guest links and filters use those names. Renaming <em>miami-yacht-rental</em> can hide the whole Miami catalog overnight.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Feeling <span>Yachty</span></div>
+      <div class="chapter">Managers only · settings</div>
+    </div>
+    <div class="kicker">Office tools &amp; if it breaks</div>
+    <h2>Sync, bookings, and what not to click</h2>
+
+    <h3>Prices that update from a sheet</h3>
+    <p>A weekly automation can push prices from the office Google Sheet into the plugin. If you edit a price in WordPress and it “jumps back,” the sheet won. Change the sheet <em>or</em> WordPress, then tell the team which one is the source of truth.</p>
+
+    <h3>Bookings and tickets</h3>
+    <p>When a guest pays, the plugin can send a signed message to the office tools (GoHighLevel). That is why paid bookings show up for sales without anyone copying and pasting. Do not rotate secret keys or webhook URLs unless you are the person who set them up.</p>
+
+    <h3>What you should not click</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>Do not delete</h4>
+        <p>Fleets, marinas, yachts with old guest links, or the Suite plugin itself.</p>
+      </div>
+      <div class="card">
+        <h4>Do not “test off”</h4>
+        <p>Turning off WooCommerce or Suite kills every Book button on the site.</p>
+      </div>
+      <div class="card">
+        <h4>Do not add another chat</h4>
+        <p>Chat is handled somewhere else on purpose. Do not add a second chat widget here.</p>
+      </div>
+      <div class="card">
+        <h4>Do not invent a second boat</h4>
+        <p>If a listing looks broken, fix the original. A duplicate makes the problem worse.</p>
+      </div>
+    </div>
+
+    <div class="card navy" style="margin-top:12px">
+      <h4>If something looks broken</h4>
+      <p>1. Confirm the yacht is Published and on the current Miami (or Panama) fleet.<br>
+      2. Confirm featured photo + at least one price row + marina.<br>
+      3. Open the guest link logged out.<br>
+      4. If the page is blank, the shop product may have lost its automatic content — a manager must re-attach it.<br>
+      5. Still stuck? Send the yacht name, the admin link, and the guest link to the website owner. Do not create a duplicate boat while you wait.</p>
+    </div>
+
+    <p class="footer">Feeling Yachty Suite 3.65.0 · Staff guide · Add yachts first, settings last · Update this PDF when the plugin changes · feelingyachty.com</p>
+  </section>
+
+</body>
+</html>

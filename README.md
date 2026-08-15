@@ -8,6 +8,8 @@ This repo does **not** ship a website chatbot. That work was removed; chat is ha
 
 Read and **keep updating** [docs/feeling-yachty-suite.md](docs/feeling-yachty-suite.md) on every Suite upgrade.
 
+**Staff training PDF** (add a yacht first, then where it appears, settings last): [docs/Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](docs/Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf). Editable source: [docs/guides/add-a-yacht-staff-guide.html](docs/guides/add-a-yacht-staff-guide.html).
+
 Client-ease audit (bugs and fixes): [docs/suite-audit-2026-08-14.md](docs/suite-audit-2026-08-14.md).
 
 The Suite source zip is not in git yet. Production already exposes:

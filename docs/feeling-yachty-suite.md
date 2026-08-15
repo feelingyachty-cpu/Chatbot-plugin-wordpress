@@ -3,6 +3,7 @@
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
 Last reviewed: **2026-08-14** against production **feeling-yachty-suite 3.65.0** on feelingyachty.com.
 
+Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
 
 The PHP zip for 3.65.0 is not yet in this git repo. This file is the source of truth for *behavior we can see live*. When the plugin source is added, fill in the “Source map” and “Shortcodes (PHP names)” sections from the actual files.
@@ -253,6 +254,11 @@ Add paths here once `feeling-yachty-suite/` is in git.
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-15 — staff add-a-yacht PDF
+
+- Added [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf) for training: add a yacht first, then every guest page a change should hit, settings last.
+- HTML source: [guides/add-a-yacht-staff-guide.html](guides/add-a-yacht-staff-guide.html). Rebuild the PDF with Chrome `--print-to-pdf` after Suite upgrades.
 
 ### 2026-08-14 — client UX audit
 

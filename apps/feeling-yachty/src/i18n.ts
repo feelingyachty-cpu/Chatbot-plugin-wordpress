@@ -95,6 +95,20 @@ const EN: Record<string, string> = {
   passwordRequired: 'Password must be at least 8 characters.',
   authRequired: 'Email and password are required.',
   photoLarge: 'Photo is too large. Choose a closer crop or a smaller picture.',
+  upToGuests: 'up to {n} guests',
+  guestsShort: 'guests',
+  hoursHint: 'Tap a duration — totals are trip prices, not hourly rates.',
+  hoursLabel: 'View hours & pricing',
+  hideHoursLabel: 'Hide hours & pricing',
+  trustLine: '2,500+ reviews · 24/7 live · {n} yachts in {city}',
+  featuredKicker: 'SNAP TO COMPARE',
+  featuredTitle: 'Biggest boats first',
+  pinkReelKicker: 'PINK FLEET',
+  pinkReelTitle: 'Photo-ready specials',
+  continueBrowsing: 'Keep browsing',
+  seeAllPromos: 'See all pink promos',
+  liveHelp: 'Need a match? Talk live — 24/7',
+  valueNote: 'Each card shows the lowest trip total. Open hours for every duration.',
 };
 
 const ES: Record<string, string> = {
@@ -194,6 +208,20 @@ const ES: Record<string, string> = {
   passwordRequired: 'La contraseña debe tener al menos 8 caracteres.',
   authRequired: 'Email y contraseña son obligatorios.',
   photoLarge: 'La foto es muy grande. Elige un recorte más cercano o una foto más pequeña.',
+  upToGuests: 'hasta {n} invitados',
+  guestsShort: 'invitados',
+  hoursHint: 'Toca una duración — son totales del viaje, no tarifas por hora.',
+  hoursLabel: 'Ver horas y precios',
+  hideHoursLabel: 'Ocultar horas y precios',
+  trustLine: '2,500+ reseñas · 24/7 en vivo · {n} yates en {city}',
+  featuredKicker: 'DESLIZA Y COMPARA',
+  featuredTitle: 'Los más grandes primero',
+  pinkReelKicker: 'FLOTA ROSA',
+  pinkReelTitle: 'Especiales para fotos',
+  continueBrowsing: 'Sigue mirando',
+  seeAllPromos: 'Ver todas las promos rosa',
+  liveHelp: '¿Necesitas un match? Habla en vivo — 24/7',
+  valueNote: 'Cada tarjeta muestra el total más bajo. Abre horas para cada duración.',
 };
 
 export function t(lang: string | undefined, key: string, vars?: Record<string, string | number>): string {

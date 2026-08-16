@@ -1,13 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
   Pressable,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -16,15 +16,24 @@ import {
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { checkoutUrl, fetchFleet, fetchYacht, money, sendTalkMessage, startingTotal } from './src/api';
+import { checkoutUrl, fetchFleet, fetchYacht, sendTalkMessage } from './src/api';
 import { fetchMe, loadCachedUser, loadSettings, loadToken } from './src/auth';
+import { featuredYachts, filterAndSort, yachtsByIds, type SizeBand, type SortKey, type StyleFilter } from './src/browse';
 import { CITIES, GHL_FORM, type City } from './src/config';
 import { t } from './src/i18n';
 import { ProfileTab } from './src/ProfileTab';
-import { browseYachts, promoYachts } from './src/promo';
+import { promoYachts } from './src/promo';
+import { loadRecentIds, loadSavedIds, pushRecentId, saveSavedIds } from './src/saved';
 import { ThemeProvider, useTheme } from './src/ThemeContext';
 import type { Colors } from './src/theme';
 import type { AppSettings, AppUser, Booking, Yacht } from './src/types';
+import { FeaturedReel } from './src/ui/FeaturedReel';
+import { FilterBar } from './src/ui/FilterBar';
+import { PressScale } from './src/ui/PressScale';
+import { FeedSkeleton } from './src/ui/Shimmer';
+import { TabBar } from './src/ui/TabBar';
+import { MiniCard, YachtCard } from './src/ui/YachtCard';
+import { YachtDetail } from './src/ui/YachtDetail';
 
 type Tab = 'yachts' | 'promos' | 'talk' | 'profile';
 type Overlay = null | 'yacht' | 'checkout' | 'ghl-form';
@@ -37,7 +46,7 @@ export default function App() {
   if (!boot) {
     return (
       <View style={{ flex: 1, backgroundColor: '#081018', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color="#e11d74" />
+        <Text style={{ color: '#FDF2D0', fontWeight: '800', letterSpacing: 2 }}>FEELING YACHTY</Text>
       </View>
     );
   }
@@ -58,8 +67,15 @@ function AppShell() {
   const [city, setCity] = useState<City>(defaultCity);
   const [yachts, setYachts] = useState<Yacht[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
+  const [size, setSize] = useState<SizeBand>('all');
+  const [style, setStyle] = useState<StyleFilter>('all');
+  const [sort, setSort] = useState<SortKey>('featured');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [recentIds, setRecentIds] = useState<number[]>([]);
   const [selected, setSelected] = useState<Yacht | null>(null);
   const [overlay, setOverlay] = useState<Overlay>(null);
 
@@ -75,6 +91,11 @@ function AppShell() {
   const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
+    loadSavedIds().then(setSavedIds);
+    loadRecentIds().then(setRecentIds);
+  }, []);
+
+  useEffect(() => {
     let alive = true;
     (async () => {
       const cached = await loadCachedUser();
@@ -87,15 +108,11 @@ function AppShell() {
         }
       }
       const live = await fetchMe();
-      if (!alive) {
-        return;
-      }
+      if (!alive) return;
       if (live?.user) {
         setUser(live.user);
         setBookings(live.bookings);
-        if (live.user.settings) {
-          await applyRemote(live.user.settings);
-        }
+        if (live.user.settings) await applyRemote(live.user.settings);
         if (settings.prefillTalk) {
           setName(live.user.display_name || `${live.user.first_name || ''} ${live.user.last_name || ''}`.trim());
           setPhone(live.user.phone || '');
@@ -114,48 +131,45 @@ function AppShell() {
 
   useEffect(() => {
     const next = CITIES.find((c) => c.slug === settings.defaultCity);
-    if (next) {
-      setCity(next);
-    }
+    if (next) setCity(next);
   }, [settings.defaultCity]);
 
+  const loadFleet = useCallback(
+    async (soft?: boolean) => {
+      if (!soft) setLoading(true);
+      setError('');
+      try {
+        const rows = await fetchFleet(city.fleet);
+        setYachts(rows);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not load yachts');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [city.fleet]
+  );
+
   useEffect(() => {
-    let alive = true;
-    setLoading(true);
-    setError('');
-    fetchFleet(city.fleet)
-      .then((rows) => {
-        if (alive) {
-          setYachts(rows);
-        }
-      })
-      .catch((err: Error) => {
-        if (alive) {
-          setError(err.message || 'Could not load yachts');
-        }
-      })
-      .finally(() => {
-        if (alive) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      alive = false;
-    };
-  }, [city.fleet]);
+    loadFleet();
+  }, [loadFleet]);
 
-  const browse = useMemo(() => {
-    const list = browseYachts(yachts);
-    if (!query.trim()) {
-      return list;
-    }
-    const q = query.trim().toLowerCase();
-    return list.filter((y) => `${y.title} ${y.size_ft || ''}`.toLowerCase().includes(q));
-  }, [yachts, query]);
-
+  const browse = useMemo(
+    () => filterAndSort(yachts, { query, size, style, sort, savedIds, pinkOnly: false }),
+    [yachts, query, size, style, sort, savedIds]
+  );
   const promos = useMemo(() => promoYachts(yachts), [yachts]);
+  const promoFiltered = useMemo(
+    () => filterAndSort(yachts, { query, size, style: style === 'saved' ? 'saved' : 'all', sort, savedIds, pinkOnly: true }),
+    [yachts, query, size, style, sort, savedIds]
+  );
+  const featured = useMemo(() => featuredYachts(browse, 8), [browse]);
+  const recent = useMemo(() => yachtsByIds(yachts, recentIds), [yachts, recentIds]);
 
   async function openYacht(yacht: Yacht) {
+    const nextRecent = await pushRecentId(yacht.id);
+    setRecentIds(nextRecent);
     try {
       const full = await fetchYacht(yacht.id);
       setSelected(full);
@@ -163,6 +177,12 @@ function AppShell() {
       setSelected(yacht);
     }
     setOverlay('yacht');
+  }
+
+  async function toggleSave(id: number) {
+    const next = savedIds.includes(id) ? savedIds.filter((x) => x !== id) : [id, ...savedIds];
+    setSavedIds(next);
+    await saveSavedIds(next);
   }
 
   async function onSendTalk() {
@@ -205,6 +225,34 @@ function AppShell() {
     );
   }
 
+  const cardLabels = {
+    promoLabel: t(lang, 'promoOnly'),
+    fromLabel: t(lang, 'fromPrice'),
+    seePricesLabel: t(lang, 'seePrices'),
+    hoursLabel: t(lang, 'hoursLabel'),
+    hideHoursLabel: t(lang, 'hideHoursLabel'),
+    guestsLabel: t(lang, 'guestsShort'),
+  };
+
+  function renderYacht(item: Yacht, promo?: boolean) {
+    return (
+      <YachtCard
+        yacht={item}
+        colors={colors}
+        compact={settings.compactCards}
+        showPrice={settings.showPrices}
+        query={query}
+        expanded={expandedId === item.id}
+        saved={savedIds.includes(item.id)}
+        promo={promo}
+        onPress={() => openYacht(item)}
+        onToggleHours={() => setExpandedId(expandedId === item.id ? null : item.id)}
+        onToggleSave={() => toggleSave(item.id)}
+        {...cardLabels}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="light" />
@@ -221,9 +269,7 @@ function AppShell() {
               onPress={() => setCity(item)}
               style={[styles.cityPill, city.slug === item.slug && styles.cityPillOn]}
             >
-              <Text style={[styles.cityPillText, city.slug === item.slug && styles.cityPillTextOn]}>
-                {item.label}
-              </Text>
+              <Text style={[styles.cityPillText, city.slug === item.slug && styles.cityPillTextOn]}>{item.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -232,7 +278,9 @@ function AppShell() {
       {overlay === 'checkout' && selected && (
         <View style={styles.flex}>
           <View style={styles.topBar}>
-            <Pressable onPress={() => setOverlay('yacht')}><Text style={styles.back}>‹ Yacht</Text></Pressable>
+            <Pressable onPress={() => setOverlay('yacht')}>
+              <Text style={styles.back}>‹ Yacht</Text>
+            </Pressable>
             <Text style={styles.topTitle}>Book</Text>
             <View style={{ width: 56 }} />
           </View>
@@ -243,7 +291,9 @@ function AppShell() {
       {overlay === 'ghl-form' && (
         <View style={styles.flex}>
           <View style={styles.topBar}>
-            <Pressable onPress={() => setOverlay(null)}><Text style={styles.back}>‹ Talk</Text></Pressable>
+            <Pressable onPress={() => setOverlay(null)}>
+              <Text style={styles.back}>‹ Talk</Text>
+            </Pressable>
             <Text style={styles.topTitle}>Live form</Text>
             <View style={{ width: 56 }} />
           </View>
@@ -252,47 +302,24 @@ function AppShell() {
       )}
 
       {overlay === 'yacht' && selected && (
-        <ScrollView style={styles.flex} contentContainerStyle={{ paddingBottom: 40 }}>
-          <View style={styles.topBar}>
-            <Pressable onPress={() => setOverlay(null)}><Text style={styles.back}>‹ Back</Text></Pressable>
-            <Text style={styles.topTitle}>Yacht</Text>
-            <View style={{ width: 56 }} />
-          </View>
-          {!!selected.image_url && <Image source={{ uri: selected.image_url }} style={styles.hero} />}
-          <View style={{ padding: 16 }}>
-            {selected.is_pink && <Text style={styles.promoTag}>{t(lang, 'pinkPromo')}</Text>}
-            <Text style={styles.yachtTitle}>{selected.title}</Text>
-            <Text style={styles.meta}>
-              {selected.size_ft ? `${selected.size_ft} ft` : ''}
-              {selected.capacity_max ? ` · up to ${selected.capacity_max} guests` : ''}
-            </Text>
-            {!!selected.marina?.title && (
-              <Text style={styles.marina}>{t(lang, 'meetAt', { marina: selected.marina.title })}</Text>
-            )}
-            {!!selected.special_desc && (
-              <Text style={styles.blurb}>{stripHtml(selected.special_desc)}</Text>
-            )}
-            <Text style={styles.section}>{t(lang, 'tripTotals')}</Text>
-            {(selected.pricing || [])
-              .filter((row) => (row.type || 'price') === 'price')
-              .map((row, idx) => (
-                <View key={`${row.duration}-${idx}`} style={styles.priceRow}>
-                  <Text style={styles.priceDur}>{row.duration}</Text>
-                  <Text style={styles.priceAmt}>{money(Number(row.price || 0))}</Text>
-                </View>
-              ))}
-            <Pressable style={styles.book} onPress={() => setOverlay('checkout')}>
-              <Text style={styles.bookText}>{t(lang, 'bookYacht')}</Text>
-            </Pressable>
-            <Pressable style={styles.secondary} onPress={() => { setTab('talk'); setOverlay(null); }}>
-              <Text style={styles.secondaryText}>{t(lang, 'questionsTalk')}</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
+        <YachtDetail
+          yacht={selected}
+          colors={colors}
+          lang={lang}
+          onBack={() => setOverlay(null)}
+          onBook={() => setOverlay('checkout')}
+          onTalk={() => {
+            setTab('talk');
+            setOverlay(null);
+          }}
+        />
       )}
 
       {!overlay && tab === 'yachts' && (
         <View style={styles.flex}>
+          <Text style={styles.trust}>
+            {t(lang, 'trustLine', { n: browse.length || yachts.length, city: city.label })}
+          </Text>
           <TextInput
             value={query}
             onChangeText={setQuery}
@@ -300,29 +327,68 @@ function AppShell() {
             placeholderTextColor={colors.muted}
             style={styles.search}
           />
-          {loading && <ActivityIndicator color={colors.pink} style={{ marginTop: 28 }} />}
+          <FilterBar
+            colors={colors}
+            size={size}
+            style={style}
+            sort={sort}
+            savedCount={savedIds.length}
+            onSize={setSize}
+            onStyle={setStyle}
+            onSort={setSort}
+          />
+          {loading && <FeedSkeleton colors={colors} />}
           {!!error && <Text style={styles.error}>{error}</Text>}
           {!loading && !error && (
             <FlatList
               data={browse}
               keyExtractor={(item) => String(item.id)}
-              contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
+              extraData={`${expandedId}-${savedIds.join(',')}-${query}`}
+              initialNumToRender={8}
+              windowSize={7}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => {
+                    setRefreshing(true);
+                    loadFleet(true);
+                  }}
+                  tintColor={colors.pink}
+                />
+              }
+              contentContainerStyle={{ paddingBottom: 88 }}
               ListHeaderComponent={
-                <Text style={styles.listLead}>{t(lang, 'available', { n: browse.length, city: city.label })}</Text>
+                <View>
+                  <Text style={styles.valueNote}>{t(lang, 'valueNote')}</Text>
+                  {!!promos.length && (
+                    <Pressable onPress={() => setTab('promos')} style={styles.promoJump}>
+                      <Text style={styles.promoJumpText}>
+                        {t(lang, 'seeAllPromos')} · {promos.length}
+                      </Text>
+                    </Pressable>
+                  )}
+                  <FeaturedReel
+                    yachts={featured}
+                    colors={colors}
+                    kicker={t(lang, 'featuredKicker')}
+                    title={t(lang, 'featuredTitle')}
+                    onPress={openYacht}
+                  />
+                  {!!recent.length && (
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={styles.reelTitle}>{t(lang, 'continueBrowsing')}</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
+                        {recent.map((y) => (
+                          <MiniCard key={`r-${y.id}`} yacht={y} colors={colors} onPress={() => openYacht(y)} />
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
+                  <Text style={styles.listLead}>{t(lang, 'available', { n: browse.length, city: city.label })}</Text>
+                </View>
               }
               ListEmptyComponent={<Text style={styles.empty}>{t(lang, 'noMatch')}</Text>}
-              renderItem={({ item }) => (
-                <YachtCard
-                  yacht={item}
-                  colors={colors}
-                  compact={settings.compactCards}
-                  showPrice={settings.showPrices}
-                  promoLabel={t(lang, 'promoOnly')}
-                  fromLabel={t(lang, 'fromPrice')}
-                  seePricesLabel={t(lang, 'seePrices')}
-                  onPress={() => openYacht(item)}
-                />
-              )}
+              renderItem={({ item }) => renderYacht(item)}
             />
           )}
         </View>
@@ -335,30 +401,38 @@ function AppShell() {
             <Text style={styles.promoBannerTitle}>{t(lang, 'promoTitle')}</Text>
             <Text style={styles.promoBannerBody}>{t(lang, 'promoBody')}</Text>
           </View>
-          {loading && <ActivityIndicator color={colors.pink} style={{ marginTop: 28 }} />}
+          {loading && <FeedSkeleton colors={colors} />}
           {!loading && (
             <FlatList
-              data={promos}
+              data={promoFiltered}
               keyExtractor={(item) => String(item.id)}
-              contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
+              extraData={`${expandedId}-${savedIds.join(',')}`}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => {
+                    setRefreshing(true);
+                    loadFleet(true);
+                  }}
+                  tintColor={colors.pink}
+                />
+              }
+              contentContainerStyle={{ paddingBottom: 88 }}
+              ListHeaderComponent={
+                <FeaturedReel
+                  yachts={featuredYachts(promos, 8)}
+                  colors={colors}
+                  kicker={t(lang, 'pinkReelKicker')}
+                  title={t(lang, 'pinkReelTitle')}
+                  onPress={openYacht}
+                />
+              }
               ListEmptyComponent={
                 <Text style={styles.empty}>
                   {city.slug === 'panama' ? t(lang, 'promoEmptyPanama') : t(lang, 'promoEmptyMiami')}
                 </Text>
               }
-              renderItem={({ item }) => (
-                <YachtCard
-                  yacht={item}
-                  promo
-                  colors={colors}
-                  compact={settings.compactCards}
-                  showPrice={settings.showPrices}
-                  promoLabel={t(lang, 'promoOnly')}
-                  fromLabel={t(lang, 'fromPrice')}
-                  seePricesLabel={t(lang, 'seePrices')}
-                  onPress={() => openYacht(item)}
-                />
-              )}
+              renderItem={({ item }) => renderYacht(item, true)}
             />
           )}
         </View>
@@ -366,19 +440,24 @@ function AppShell() {
 
       {!overlay && tab === 'talk' && (
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-            <Text style={styles.talkTitle}>{t(lang, 'talkTitle')}</Text>
-            <Text style={styles.talkLead}>{t(lang, 'talkLead')}</Text>
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+            <View style={styles.talkHero}>
+              <Text style={styles.talkKicker}>24/7 LIVE</Text>
+              <Text style={styles.talkTitle}>{t(lang, 'talkTitle')}</Text>
+              <Text style={styles.talkLead}>{t(lang, 'talkLead')}</Text>
+            </View>
 
-            <Pressable style={styles.book} onPress={openPreferredContact}>
-              <Text style={styles.bookText}>
-                {settings.preferredContact === 'call'
-                  ? t(lang, 'callTeam')
-                  : settings.preferredContact === 'sms'
-                    ? t(lang, 'textTeam')
-                    : t(lang, 'waTeam')}
-              </Text>
-            </Pressable>
+            <PressScale onPress={openPreferredContact}>
+              <View style={styles.book}>
+                <Text style={styles.bookText}>
+                  {settings.preferredContact === 'call'
+                    ? t(lang, 'callTeam')
+                    : settings.preferredContact === 'sms'
+                      ? t(lang, 'textTeam')
+                      : t(lang, 'waTeam')}
+                </Text>
+              </View>
+            </PressScale>
 
             <View style={styles.liveRow}>
               <Pressable style={styles.liveBtn} onPress={() => Linking.openURL(`tel:${city.phone}`)}>
@@ -420,9 +499,7 @@ function AppShell() {
             <Pressable style={styles.book} onPress={onSendTalk} disabled={talkState === 'sending'}>
               <Text style={styles.bookText}>{talkState === 'sending' ? t(lang, 'sending') : t(lang, 'sendTeam')}</Text>
             </Pressable>
-            {talkState === 'sent' && (
-              <Text style={styles.ok}>{t(lang, 'talkSent')}</Text>
-            )}
+            {talkState === 'sent' && <Text style={styles.ok}>{t(lang, 'talkSent')}</Text>}
             {talkState === 'error' && <Text style={styles.error}>{talkError}</Text>}
           </ScrollView>
         </KeyboardAvoidingView>
@@ -436,12 +513,8 @@ function AppShell() {
             loading={profileLoading}
             onUser={(next, nextBookings) => {
               setUser(next);
-              if (nextBookings) {
-                setBookings(nextBookings);
-              }
-              if (next?.settings) {
-                applyRemote(next.settings);
-              }
+              if (nextBookings) setBookings(nextBookings);
+              if (next?.settings) applyRemote(next.settings);
               if (next && settings.prefillTalk) {
                 setName(next.display_name || `${next.first_name || ''} ${next.last_name || ''}`.trim());
                 setPhone(next.phone || '');
@@ -456,125 +529,28 @@ function AppShell() {
         </View>
       )}
 
+      {!overlay && tab !== 'talk' && tab !== 'profile' && (
+        <Pressable style={styles.fab} onPress={openPreferredContact}>
+          <Text style={styles.fabText}>{t(lang, 'liveHelp')}</Text>
+        </Pressable>
+      )}
+
       {!overlay && (
-        <View style={styles.tabs}>
-          <TabBtn label={t(lang, 'yachts')} active={tab === 'yachts'} onPress={() => setTab('yachts')} colors={colors} />
-          <TabBtn label={t(lang, 'promos')} active={tab === 'promos'} onPress={() => setTab('promos')} colors={colors} />
-          <TabBtn label={t(lang, 'talk')} active={tab === 'talk'} onPress={() => setTab('talk')} colors={colors} />
-          <TabBtn label={t(lang, 'profile')} active={tab === 'profile'} onPress={() => setTab('profile')} colors={colors} />
-        </View>
+        <TabBar
+          tab={tab}
+          onTab={setTab}
+          colors={colors}
+          promoCount={promos.length}
+          labels={{
+            yachts: t(lang, 'yachts'),
+            promos: t(lang, 'promos'),
+            talk: t(lang, 'talk'),
+            profile: t(lang, 'profile'),
+          }}
+        />
       )}
     </SafeAreaView>
   );
-}
-
-function TabBtn({
-  label,
-  active,
-  onPress,
-  colors,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  colors: Colors;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 12,
-        backgroundColor: active ? colors.pink : colors.navy,
-      }}
-    >
-      <Text style={{ color: active ? colors.white : colors.muted, fontWeight: '800', textAlign: 'center' }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function YachtCard({
-  yacht,
-  onPress,
-  promo,
-  colors,
-  compact,
-  showPrice,
-  promoLabel,
-  fromLabel,
-  seePricesLabel,
-}: {
-  yacht: Yacht;
-  onPress: () => void;
-  promo?: boolean;
-  colors: Colors;
-  compact?: boolean;
-  showPrice?: boolean;
-  promoLabel: string;
-  fromLabel: string;
-  seePricesLabel: string;
-}) {
-  const start = startingTotal(yacht);
-  return (
-    <Pressable
-      style={{
-        backgroundColor: colors.card,
-        borderRadius: 16,
-        overflow: 'hidden',
-        marginBottom: 14,
-        borderWidth: promo ? 2 : 1,
-        borderColor: promo ? colors.pink : colors.line,
-      }}
-      onPress={onPress}
-    >
-      {!!yacht.image_url && !compact && (
-        <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: 168, backgroundColor: colors.navy }} />
-      )}
-      <View style={{ padding: 12, flexDirection: compact ? 'row' : 'column', gap: 10 }}>
-        {!!yacht.image_url && compact && (
-          <Image source={{ uri: yacht.image_url }} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: colors.navy }} />
-        )}
-        <View style={{ flex: 1 }}>
-          {promo && (
-            <Text
-              style={{
-                alignSelf: 'flex-start',
-                backgroundColor: colors.pink,
-                color: colors.white,
-                fontWeight: '800',
-                fontSize: 10,
-                letterSpacing: 0.8,
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                borderRadius: 999,
-                marginBottom: 6,
-                overflow: 'hidden',
-              }}
-            >
-              {promoLabel}
-            </Text>
-          )}
-          <Text style={{ fontSize: compact ? 16 : 17, fontWeight: '800', color: colors.ink }}>{yacht.title}</Text>
-          <Text style={{ color: colors.muted, marginTop: 4 }}>
-            {yacht.size_ft ? `${yacht.size_ft} ft` : ''}
-            {yacht.capacity_max ? ` · ${yacht.capacity_max} guests` : ''}
-          </Text>
-          {showPrice !== false && (
-            <Text style={{ color: colors.pink, fontWeight: '800', marginTop: 8 }}>
-              {start
-                ? fromLabel.replace('{price}', money(start.amount)).replace('{duration}', start.duration)
-                : seePricesLabel}
-            </Text>
-          )}
-        </View>
-      </View>
-    </Pressable>
-  );
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function makeStyles(colors: Colors) {
@@ -584,7 +560,7 @@ function makeStyles(colors: Colors) {
     header: {
       backgroundColor: colors.navyDeep,
       paddingHorizontal: 14,
-      paddingBottom: 12,
+      paddingBottom: 10,
       paddingTop: 4,
       flexDirection: 'row',
       alignItems: 'center',
@@ -599,6 +575,23 @@ function makeStyles(colors: Colors) {
     cityPillOn: { backgroundColor: colors.pink },
     cityPillText: { color: colors.muted, fontWeight: '700', fontSize: 12 },
     cityPillTextOn: { color: colors.white },
+    trust: {
+      color: colors.pink,
+      fontWeight: '700',
+      fontSize: 12,
+      paddingHorizontal: 16,
+      paddingTop: 10,
+    },
+    valueNote: { color: colors.muted, paddingHorizontal: 16, marginBottom: 10, lineHeight: 18 },
+    promoJump: {
+      marginHorizontal: 16,
+      marginBottom: 14,
+      backgroundColor: colors.navy,
+      borderRadius: 14,
+      padding: 12,
+    },
+    promoJumpText: { color: colors.cream, fontWeight: '800', textAlign: 'center' },
+    reelTitle: { color: colors.ink, fontWeight: '800', fontSize: 18, paddingHorizontal: 16, marginBottom: 10 },
     topBar: {
       backgroundColor: colors.navy,
       paddingHorizontal: 16,
@@ -610,36 +603,23 @@ function makeStyles(colors: Colors) {
     topTitle: { color: colors.white, fontWeight: '800' },
     back: { color: '#ffb3d2', fontWeight: '700' },
     search: {
-      margin: 16,
-      marginBottom: 4,
+      margin: 12,
+      marginBottom: 8,
       backgroundColor: colors.white,
-      borderRadius: 12,
+      borderRadius: 14,
       paddingHorizontal: 14,
-      paddingVertical: 10,
+      paddingVertical: 11,
       borderWidth: 1,
       borderColor: colors.line,
       color: colors.ink,
     },
-    listLead: { color: colors.muted, marginBottom: 12, fontWeight: '600' },
+    listLead: { color: colors.muted, marginBottom: 12, fontWeight: '700', paddingHorizontal: 16, marginTop: 8 },
     empty: { color: colors.muted, padding: 24, textAlign: 'center' },
     error: { color: colors.pink, padding: 16, textAlign: 'center' },
     ok: { color: '#1db36a', paddingTop: 12, textAlign: 'center', fontWeight: '700' },
-    promoTag: {
-      alignSelf: 'flex-start',
-      backgroundColor: colors.pink,
-      color: colors.white,
-      fontWeight: '800',
-      fontSize: 10,
-      letterSpacing: 0.8,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 999,
-      marginBottom: 6,
-      overflow: 'hidden',
-    },
     promoBanner: {
       margin: 16,
-      marginBottom: 0,
+      marginBottom: 8,
       backgroundColor: colors.navy,
       borderRadius: 16,
       padding: 16,
@@ -647,26 +627,13 @@ function makeStyles(colors: Colors) {
     promoBannerKicker: { color: colors.pink, fontWeight: '800', letterSpacing: 1, fontSize: 11 },
     promoBannerTitle: { color: colors.white, fontWeight: '800', fontSize: 20, marginTop: 6 },
     promoBannerBody: { color: '#d7e6f5', marginTop: 8, lineHeight: 20 },
-    hero: { width: '100%', height: 220, backgroundColor: colors.navy },
-    yachtTitle: { fontSize: 24, fontWeight: '800', color: colors.ink },
-    marina: { marginTop: 8, color: colors.navy, fontWeight: '700' },
-    blurb: { marginTop: 12, color: colors.ink, lineHeight: 20 },
     section: { marginTop: 20, marginBottom: 8, color: colors.pink, fontWeight: '800' },
-    priceRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.line,
-    },
-    priceDur: { color: colors.ink },
-    priceAmt: { fontWeight: '800', color: colors.navy },
-    book: { backgroundColor: colors.pink, borderRadius: 14, padding: 16, marginTop: 20 },
+    book: { backgroundColor: colors.pink, borderRadius: 14, padding: 16, marginTop: 16 },
     bookText: { color: colors.white, fontWeight: '800', textAlign: 'center', fontSize: 17 },
-    secondary: { padding: 14 },
-    secondaryText: { color: colors.pink, textAlign: 'center', fontWeight: '700' },
-    talkTitle: { fontSize: 26, fontWeight: '800', color: colors.ink },
-    talkLead: { color: colors.muted, marginTop: 8, marginBottom: 16, lineHeight: 20 },
+    talkHero: { backgroundColor: colors.navy, borderRadius: 20, padding: 18, marginBottom: 8 },
+    talkKicker: { color: colors.pink, fontWeight: '800', letterSpacing: 1.2, fontSize: 11 },
+    talkTitle: { fontSize: 26, fontWeight: '800', color: colors.white, marginTop: 6 },
+    talkLead: { color: '#d7e6f5', marginTop: 8, lineHeight: 20 },
     liveRow: { flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 12 },
     liveBtn: { flex: 1, backgroundColor: colors.navy, borderRadius: 12, paddingVertical: 14 },
     liveBtnText: { color: colors.white, fontWeight: '800', textAlign: 'center' },
@@ -682,13 +649,16 @@ function makeStyles(colors: Colors) {
       marginBottom: 10,
       color: colors.ink,
     },
-    tabs: {
-      flexDirection: 'row',
-      backgroundColor: colors.navyDeep,
-      paddingHorizontal: 10,
-      paddingVertical: 8,
-      gap: 8,
+    fab: {
+      position: 'absolute',
+      right: 14,
+      bottom: 78,
+      backgroundColor: colors.pink,
+      borderRadius: 999,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      maxWidth: 220,
     },
-    meta: { color: colors.muted, marginTop: 4 },
+    fabText: { color: colors.white, fontWeight: '800', fontSize: 12 },
   });
 }

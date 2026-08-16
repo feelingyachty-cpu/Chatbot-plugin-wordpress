@@ -9,9 +9,14 @@ Four tabs, live fleet, WooCommerce checkout and customer accounts, GHL inbox. No
 | **Talk** | Call, WhatsApp, SMS, live GHL form, and a message box that creates a GHL contact |
 | **Profile** | WooCommerce login/register, photo, billing, My Charters, experience settings, app colors |
 
-## Test the Android APK
+## Test the Android APK + source
 
-The built APK is **Feeling-Yachty.apk** (sideload / allow unknown sources).
+Always hand over both files:
+
+- **APK:** `dist/Feeling-Yachty.apk` (sideload / allow unknown sources)
+- **Source:** `dist/Feeling-Yachty-source.zip` (the code that built that APK)
+
+Rebuild both with `scripts/package-app-release.sh`.
 
 On the phone:
 
@@ -29,11 +34,14 @@ Register creates a real customer on feelingyachty.com (same My Account / My Char
 export ANDROID_HOME=$HOME/android-sdk
 cd apps/feeling-yachty
 npm install
-CI=1 npx expo prebuild --platform android
 echo "sdk.dir=$ANDROID_HOME" > android/local.properties
-cd android && ./gradlew assembleDebug
+cd android && ./gradlew assembleRelease
+# then from the repo root:
+# scripts/package-app-release.sh
 ```
 
-APK: `android/app/build/outputs/apk/debug/app-debug.apk`
+Use **release**, not debug. Debug has no JS bundle and opens to a red error.
+
+APK: `android/app/build/outputs/apk/release/app-release.apk`
 
 Store accounts are only needed for Play / TestFlight, not for this APK.

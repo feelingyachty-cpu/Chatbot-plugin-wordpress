@@ -6,7 +6,7 @@ This repo does **not** ship a website chatbot. **GoHighLevel** handles SMS, What
 
 ## Guest app (iPhone + Android)
 
-One Expo codebase: [apps/feeling-yachty](apps/feeling-yachty). **Android test APK:** [dist/Feeling-Yachty.apk](dist/Feeling-Yachty.apk).
+One Expo codebase: [apps/feeling-yachty](apps/feeling-yachty). **Android APK:** [dist/Feeling-Yachty.apk](dist/Feeling-Yachty.apk). **App source zip:** [dist/Feeling-Yachty-source.zip](dist/Feeling-Yachty-source.zip). Always ship both.
 
 Tabs: **Yachts** (browse) · **Promos** (pink boats only — not in browse) · **Talk** (GHL live: call / WhatsApp / SMS / form / inbox message) · **Profile** (WooCommerce login, photo, settings, app colors).
 

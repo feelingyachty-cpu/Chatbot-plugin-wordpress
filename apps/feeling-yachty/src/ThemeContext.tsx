@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { saveSettingsLocal, updateAccount } from './auth';
 import { colorsFromSettings, type Colors, type ThemeId } from './theme';
 import type { AppSettings } from './types';
@@ -9,6 +9,7 @@ type ThemeCtx = {
   settings: AppSettings;
   setSettings: (next: AppSettings, persistRemote?: boolean) => Promise<void>;
   patchSettings: (patch: Partial<AppSettings>, persistRemote?: boolean) => Promise<void>;
+  applyRemote: (partial?: Partial<AppSettings>) => Promise<void>;
 };
 
 const Ctx = createContext<ThemeCtx>({
@@ -16,6 +17,7 @@ const Ctx = createContext<ThemeCtx>({
   settings: DEFAULT_SETTINGS,
   setSettings: async () => undefined,
   patchSettings: async () => undefined,
+  applyRemote: async () => undefined,
 });
 
 export function ThemeProvider({
@@ -36,7 +38,7 @@ export function ThemeProvider({
     [settings.themeId, settings.customAccent, settings.customHeader]
   );
 
-  async function setSettings(next: AppSettings, persistRemote = false) {
+  const setSettings = useCallback(async (next: AppSettings, persistRemote = false) => {
     setLocal(next);
     await saveSettingsLocal(next);
     if (persistRemote) {
@@ -46,14 +48,31 @@ export function ThemeProvider({
         // Local theme still applies.
       }
     }
-  }
+  }, []);
 
-  async function patchSettings(patch: Partial<AppSettings>, persistRemote = false) {
-    const next = { ...settings, ...patch };
-    await setSettings(next, persistRemote);
-  }
+  const patchSettings = useCallback(
+    async (patch: Partial<AppSettings>, persistRemote = false) => {
+      const next = { ...settings, ...patch };
+      await setSettings(next, persistRemote);
+    },
+    [settings, setSettings]
+  );
 
-  return <Ctx.Provider value={{ colors, settings, setSettings, patchSettings }}>{children}</Ctx.Provider>;
+  const applyRemote = useCallback(async (partial?: Partial<AppSettings>) => {
+    if (!partial || !Object.keys(partial).length) {
+      return;
+    }
+    let next: AppSettings | null = null;
+    setLocal((cur) => {
+      next = { ...cur, ...partial };
+      return next;
+    });
+    if (next) {
+      await saveSettingsLocal(next);
+    }
+  }, []);
+
+  return <Ctx.Provider value={{ colors, settings, setSettings, patchSettings, applyRemote }}>{children}</Ctx.Provider>;
 }
 
 export function useTheme() {

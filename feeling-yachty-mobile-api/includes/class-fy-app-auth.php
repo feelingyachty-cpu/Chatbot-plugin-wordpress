@@ -58,6 +58,9 @@ class FY_App_Auth {
 		if ( ! is_email( $email ) ) {
 			return new WP_Error( 'fy_app_email', __( 'Enter a valid email.', 'fy-app' ), array( 'status' => 400 ) );
 		}
+		if ( ! $first ) {
+			return new WP_Error( 'fy_app_name', __( 'First name is required.', 'fy-app' ), array( 'status' => 400 ) );
+		}
 		if ( strlen( $pass ) < 8 ) {
 			return new WP_Error( 'fy_app_password', __( 'Password must be at least 8 characters.', 'fy-app' ), array( 'status' => 400 ) );
 		}
@@ -119,9 +122,9 @@ class FY_App_Auth {
 
 		$user = wp_authenticate( $email, $pass );
 		if ( is_wp_error( $user ) ) {
-			$by_login = get_user_by( 'login', $email );
-			if ( $by_login ) {
-				$user = wp_authenticate( $by_login->user_login, $pass );
+			$by_email = get_user_by( 'email', $email );
+			if ( $by_email ) {
+				$user = wp_authenticate( $by_email->user_login, $pass );
 			}
 		}
 		if ( is_wp_error( $user ) ) {

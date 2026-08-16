@@ -18,6 +18,7 @@ import {
   updateAccount,
   uploadPhoto,
 } from './auth';
+import { t } from './i18n';
 import { ACCENT_SWATCHES, HEADER_SWATCHES, THEME_LABELS } from './theme';
 import type { Colors } from './theme';
 import { useTheme } from './ThemeContext';
@@ -35,10 +36,11 @@ export function ProfileTab({
   user: AppUser | null;
   bookings: Booking[];
   loading: boolean;
-  onUser: (user: AppUser | null) => void;
+  onUser: (user: AppUser | null, bookings?: Booking[]) => void;
   onLogout: () => Promise<void>;
 }) {
   const { colors, settings, patchSettings } = useTheme();
+  const lang = settings.language;
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -63,6 +65,19 @@ export function ProfileTab({
     setError('');
     setOk('');
     try {
+      if (mode === 'register') {
+        if (!first.trim()) {
+          throw new Error(t(lang, 'firstRequired'));
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+          throw new Error(t(lang, 'emailRequired'));
+        }
+        if (password.length < 8) {
+          throw new Error(t(lang, 'passwordRequired'));
+        }
+      } else if (!email.trim() || !password) {
+        throw new Error(t(lang, 'authRequired'));
+      }
       const next =
         mode === 'register'
           ? await registerAccount({
@@ -74,10 +89,10 @@ export function ProfileTab({
               region,
             })
           : await loginAccount(email.trim(), password);
-      onUser(next);
-      setEdit(next);
+      onUser(next.user, next.bookings);
+      setEdit(next.user);
       setPassword('');
-      setOk(mode === 'register' ? 'WooCommerce account created.' : 'Welcome back.');
+      setOk(mode === 'register' ? t(lang, 'accountCreated') : t(lang, 'welcomeBack'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not sign in.');
     } finally {
@@ -107,7 +122,7 @@ export function ProfileTab({
       });
       onUser(next);
       setEdit(next);
-      setOk('Profile saved to your WooCommerce account.');
+      setOk(t(lang, 'profileSaved'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save.');
     } finally {
@@ -120,14 +135,14 @@ export function ProfileTab({
       const ImagePicker = await import('expo-image-picker');
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        setError('Photo access is needed to set a profile picture.');
+        setError(t(lang, 'needPhoto'));
         return;
       }
       const picked = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.55,
+        quality: 0.4,
         base64: true,
       });
       if (picked.canceled || !picked.assets?.[0]?.base64) {
@@ -135,11 +150,15 @@ export function ProfileTab({
       }
       const asset = picked.assets[0];
       const mime = asset.mimeType || 'image/jpeg';
+      if ((asset.base64 || '').length > 420000) {
+        setError(t(lang, 'photoLarge'));
+        return;
+      }
       setBusy(true);
       const next = await uploadPhoto(`data:${mime};base64,${asset.base64}`);
       onUser(next);
       setEdit(next);
-      setOk('Photo saved.');
+      setOk(t(lang, 'photoSaved'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not update photo.');
     } finally {
@@ -154,29 +173,26 @@ export function ProfileTab({
   if (!user) {
     return (
       <ScrollView contentContainerStyle={styles.pad}>
-        <Text style={styles.h1}>Your charter account</Text>
-        <Text style={styles.lead}>
-          This is a real WooCommerce customer account — the same login used on feelingyachty.com for My Charters,
-          deposits, and invoices. No chatbot.
-        </Text>
+        <Text style={styles.h1}>{t(lang, 'accountTitle')}</Text>
+        <Text style={styles.lead}>{t(lang, 'accountLead')}</Text>
         <View style={styles.row}>
           <Pressable style={[styles.pill, mode === 'login' && styles.pillOn]} onPress={() => setMode('login')}>
-            <Text style={[styles.pillText, mode === 'login' && styles.pillTextOn]}>Log in</Text>
+            <Text style={[styles.pillText, mode === 'login' && styles.pillTextOn]}>{t(lang, 'logIn')}</Text>
           </Pressable>
           <Pressable style={[styles.pill, mode === 'register' && styles.pillOn]} onPress={() => setMode('register')}>
-            <Text style={[styles.pillText, mode === 'register' && styles.pillTextOn]}>Create account</Text>
+            <Text style={[styles.pillText, mode === 'register' && styles.pillTextOn]}>{t(lang, 'createAccount')}</Text>
           </Pressable>
         </View>
         {mode === 'register' && (
           <>
-            <TextInput value={first} onChangeText={setFirst} placeholder="First name" placeholderTextColor={colors.muted} style={styles.input} />
-            <TextInput value={last} onChangeText={setLast} placeholder="Last name" placeholderTextColor={colors.muted} style={styles.input} />
-            <TextInput value={phone} onChangeText={setPhone} placeholder="Mobile number" placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
-            <Text style={styles.label}>Home fleet</Text>
+            <TextInput value={first} onChangeText={setFirst} placeholder={t(lang, 'firstName')} placeholderTextColor={colors.muted} style={styles.input} />
+            <TextInput value={last} onChangeText={setLast} placeholder={t(lang, 'lastName')} placeholderTextColor={colors.muted} style={styles.input} />
+            <TextInput value={phone} onChangeText={setPhone} placeholder={t(lang, 'mobile')} placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
+            <Text style={styles.label}>{t(lang, 'homeFleet')}</Text>
             <View style={styles.row}>
               {(['miami', 'panama'] as const).map((r) => (
                 <Pressable key={r} style={[styles.pill, region === r && styles.pillOn]} onPress={() => setRegion(r)}>
-                  <Text style={[styles.pillText, region === r && styles.pillTextOn]}>{r === 'miami' ? 'Miami' : 'Panama'}</Text>
+                  <Text style={[styles.pillText, region === r && styles.pillTextOn]}>{t(lang, r)}</Text>
                 </Pressable>
               ))}
             </View>
@@ -185,7 +201,7 @@ export function ProfileTab({
         <TextInput
           value={email}
           onChangeText={setEmail}
-          placeholder="Email"
+          placeholder={t(lang, 'email')}
           placeholderTextColor={colors.muted}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -194,20 +210,17 @@ export function ProfileTab({
         <TextInput
           value={password}
           onChangeText={setPassword}
-          placeholder={mode === 'register' ? 'Password (8+ characters)' : 'Password'}
+          placeholder={mode === 'register' ? t(lang, 'passwordHint') : t(lang, 'password')}
           placeholderTextColor={colors.muted}
           secureTextEntry
           style={styles.input}
         />
         <Pressable style={styles.book} onPress={onAuth} disabled={busy}>
-          <Text style={styles.bookText}>{busy ? 'Please wait…' : mode === 'register' ? 'Create WooCommerce account' : 'Log in'}</Text>
+          <Text style={styles.bookText}>{busy ? t(lang, 'pleaseWait') : mode === 'register' ? t(lang, 'createWoo') : t(lang, 'logIn')}</Text>
         </Pressable>
         {!!ok && <Text style={styles.ok}>{ok}</Text>}
         {!!error && <Text style={styles.error}>{error}</Text>}
-        <Text style={styles.hint}>
-          Already booked as a guest? Create an account with the same email, then claim the order from My Account on the
-          website.
-        </Text>
+        <Text style={styles.hint}>{t(lang, 'guestHint')}</Text>
       </ScrollView>
     );
   }
@@ -231,29 +244,29 @@ export function ProfileTab({
           <Text style={styles.lead}>{u.email}</Text>
           <Text style={styles.woo}>WooCommerce customer #{u.woo_id || u.id}</Text>
           <Pressable onPress={onPickPhoto}>
-            <Text style={styles.link}>Change profile photo</Text>
+            <Text style={styles.link}>{t(lang, 'changePhoto')}</Text>
           </Pressable>
         </View>
       </View>
 
-      <Text style={styles.section}>Profile</Text>
-      <TextInput value={u.first_name || ''} onChangeText={(v) => setEdit({ ...u, first_name: v })} placeholder="First name" placeholderTextColor={colors.muted} style={styles.input} />
-      <TextInput value={u.last_name || ''} onChangeText={(v) => setEdit({ ...u, last_name: v })} placeholder="Last name" placeholderTextColor={colors.muted} style={styles.input} />
-      <TextInput value={u.display_name || ''} onChangeText={(v) => setEdit({ ...u, display_name: v })} placeholder="Display name (reviews)" placeholderTextColor={colors.muted} style={styles.input} />
-      <TextInput value={u.phone || ''} onChangeText={(v) => setEdit({ ...u, phone: v })} placeholder="Mobile" placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
-      <Text style={styles.label}>Home fleet</Text>
+      <Text style={styles.section}>{t(lang, 'profile')}</Text>
+      <TextInput value={u.first_name || ''} onChangeText={(v) => setEdit({ ...u, first_name: v })} placeholder={t(lang, 'firstName')} placeholderTextColor={colors.muted} style={styles.input} />
+      <TextInput value={u.last_name || ''} onChangeText={(v) => setEdit({ ...u, last_name: v })} placeholder={t(lang, 'lastName')} placeholderTextColor={colors.muted} style={styles.input} />
+      <TextInput value={u.display_name || ''} onChangeText={(v) => setEdit({ ...u, display_name: v })} placeholder={t(lang, 'displayName')} placeholderTextColor={colors.muted} style={styles.input} />
+      <TextInput value={u.phone || ''} onChangeText={(v) => setEdit({ ...u, phone: v })} placeholder={t(lang, 'mobile')} placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
+      <Text style={styles.label}>{t(lang, 'homeFleet')}</Text>
       <View style={styles.row}>
         {(['miami', 'panama'] as const).map((r) => (
           <Pressable key={r} style={[styles.pill, (u.region || 'miami') === r && styles.pillOn]} onPress={() => setEdit({ ...u, region: r })}>
-            <Text style={[styles.pillText, (u.region || 'miami') === r && styles.pillTextOn]}>{r === 'miami' ? 'Miami' : 'Panama'}</Text>
+            <Text style={[styles.pillText, (u.region || 'miami') === r && styles.pillTextOn]}>{t(lang, r)}</Text>
           </Pressable>
         ))}
       </View>
-      <TextInput value={u.occasion || ''} onChangeText={(v) => setEdit({ ...u, occasion: v })} placeholder="Typical occasion (birthday, corporate…)" placeholderTextColor={colors.muted} style={styles.input} />
+      <TextInput value={u.occasion || ''} onChangeText={(v) => setEdit({ ...u, occasion: v })} placeholder={t(lang, 'occasion')} placeholderTextColor={colors.muted} style={styles.input} />
       <TextInput
         value={u.typical_guests ? String(u.typical_guests) : ''}
         onChangeText={(v) => setEdit({ ...u, typical_guests: Number(v.replace(/[^0-9]/g, '')) || 0 })}
-        placeholder="Typical guest count"
+        placeholder={t(lang, 'guests')}
         placeholderTextColor={colors.muted}
         keyboardType="number-pad"
         style={styles.input}
@@ -261,24 +274,24 @@ export function ProfileTab({
       <TextInput
         value={u.notes || ''}
         onChangeText={(v) => setEdit({ ...u, notes: v })}
-        placeholder="Notes for the team (allergies, marina preference…)"
+        placeholder={t(lang, 'notes')}
         placeholderTextColor={colors.muted}
         multiline
         style={[styles.input, { height: 90, textAlignVertical: 'top' }]}
       />
 
-      <Text style={styles.section}>Billing</Text>
+      <Text style={styles.section}>{t(lang, 'billing')}</Text>
       <TextInput
         value={u.billing?.address_1 || ''}
         onChangeText={(v) => setEdit({ ...u, billing: { ...u.billing, address_1: v } })}
-        placeholder="Street address"
+        placeholder={t(lang, 'street')}
         placeholderTextColor={colors.muted}
         style={styles.input}
       />
       <TextInput
         value={u.billing?.city || ''}
         onChangeText={(v) => setEdit({ ...u, billing: { ...u.billing, city: v } })}
-        placeholder="City"
+        placeholder={t(lang, 'city')}
         placeholderTextColor={colors.muted}
         style={styles.input}
       />
@@ -286,14 +299,14 @@ export function ProfileTab({
         <TextInput
           value={u.billing?.state || ''}
           onChangeText={(v) => setEdit({ ...u, billing: { ...u.billing, state: v } })}
-          placeholder="State"
+          placeholder={t(lang, 'state')}
           placeholderTextColor={colors.muted}
           style={[styles.input, styles.half]}
         />
         <TextInput
           value={u.billing?.postcode || ''}
           onChangeText={(v) => setEdit({ ...u, billing: { ...u.billing, postcode: v } })}
-          placeholder="ZIP / postal"
+          placeholder={t(lang, 'zip')}
           placeholderTextColor={colors.muted}
           style={[styles.input, styles.half]}
         />
@@ -301,21 +314,21 @@ export function ProfileTab({
       <TextInput
         value={u.billing?.country || ''}
         onChangeText={(v) => setEdit({ ...u, billing: { ...u.billing, country: v } })}
-        placeholder="Country (US, PA…)"
+        placeholder={t(lang, 'country')}
         placeholderTextColor={colors.muted}
         autoCapitalize="characters"
         style={styles.input}
       />
 
       <Pressable style={styles.book} onPress={onSaveProfile} disabled={busy}>
-        <Text style={styles.bookText}>{busy ? 'Saving…' : 'Save profile'}</Text>
+        <Text style={styles.bookText}>{busy ? t(lang, 'saving') : t(lang, 'saveProfile')}</Text>
       </Pressable>
       {!!ok && <Text style={styles.ok}>{ok}</Text>}
       {!!error && <Text style={styles.error}>{error}</Text>}
 
-      <Text style={styles.section}>My charters</Text>
+      <Text style={styles.section}>{t(lang, 'myCharters')}</Text>
       {bookings.length === 0 ? (
-        <Text style={styles.lead}>No WooCommerce orders on this account yet. Book a yacht and it will show here.</Text>
+        <Text style={styles.lead}>{t(lang, 'noOrders')}</Text>
       ) : (
         bookings.map((b) => (
           <View key={b.order_id} style={styles.order}>
@@ -335,56 +348,56 @@ export function ProfileTab({
       )}
       {!!user.account_url && (
         <Pressable onPress={() => Linking.openURL(user.account_url as string)}>
-          <Text style={styles.link}>Open My Account on the website</Text>
+          <Text style={styles.link}>{t(lang, 'openAccount')}</Text>
         </Pressable>
       )}
 
-      <Text style={styles.section}>Experience</Text>
+      <Text style={styles.section}>{t(lang, 'experience')}</Text>
       <Toggle
         colors={colors}
-        label="Prefill Talk with my name and phone"
+        label={t(lang, 'prefillTalk')}
         value={settings.prefillTalk}
         onValueChange={(v) => patchSettings({ prefillTalk: v }, true)}
       />
       <Toggle
         colors={colors}
-        label="Show trip totals on yacht cards"
+        label={t(lang, 'showPrices')}
         value={settings.showPrices}
         onValueChange={(v) => patchSettings({ showPrices: v }, true)}
       />
       <Toggle
         colors={colors}
-        label="Compact yacht cards"
+        label={t(lang, 'compactCards')}
         value={settings.compactCards}
         onValueChange={(v) => patchSettings({ compactCards: v }, true)}
       />
-      <Text style={styles.label}>Default city</Text>
+      <Text style={styles.label}>{t(lang, 'defaultCity')}</Text>
       <View style={styles.row}>
         {(['miami', 'panama'] as const).map((c) => (
           <Pressable key={c} style={[styles.pill, settings.defaultCity === c && styles.pillOn]} onPress={() => patchSettings({ defaultCity: c }, true)}>
-            <Text style={[styles.pillText, settings.defaultCity === c && styles.pillTextOn]}>{c === 'miami' ? 'Miami' : 'Panama'}</Text>
+            <Text style={[styles.pillText, settings.defaultCity === c && styles.pillTextOn]}>{t(lang, c)}</Text>
           </Pressable>
         ))}
       </View>
-      <Text style={styles.label}>Preferred live contact</Text>
+      <Text style={styles.label}>{t(lang, 'preferredContact')}</Text>
       <View style={styles.row}>
         {(['whatsapp', 'call', 'sms'] as const).map((c) => (
           <Pressable key={c} style={[styles.pill, settings.preferredContact === c && styles.pillOn]} onPress={() => patchSettings({ preferredContact: c }, true)}>
-            <Text style={[styles.pillText, settings.preferredContact === c && styles.pillTextOn]}>{c === 'whatsapp' ? 'WhatsApp' : c === 'call' ? 'Call' : 'SMS'}</Text>
+            <Text style={[styles.pillText, settings.preferredContact === c && styles.pillTextOn]}>{t(lang, c)}</Text>
           </Pressable>
         ))}
       </View>
-      <Text style={styles.label}>Language</Text>
+      <Text style={styles.label}>{t(lang, 'language')}</Text>
       <View style={styles.row}>
         {(['en', 'es'] as const).map((c) => (
           <Pressable key={c} style={[styles.pill, settings.language === c && styles.pillOn]} onPress={() => patchSettings({ language: c }, true)}>
-            <Text style={[styles.pillText, settings.language === c && styles.pillTextOn]}>{c === 'en' ? 'English' : 'Español'}</Text>
+            <Text style={[styles.pillText, settings.language === c && styles.pillTextOn]}>{c === 'en' ? t(lang, 'english') : t(lang, 'spanish')}</Text>
           </Pressable>
         ))}
       </View>
 
-      <Text style={styles.section}>App colors</Text>
-      <Text style={styles.lead}>Pick a look. It stays on this phone and syncs to your WooCommerce profile.</Text>
+      <Text style={styles.section}>{t(lang, 'appColors')}</Text>
+      <Text style={styles.lead}>{t(lang, 'colorsLead')}</Text>
       <View style={styles.themeGrid}>
         {THEME_LABELS.map((t) => (
           <Pressable
@@ -399,7 +412,7 @@ export function ProfileTab({
       </View>
       {settings.themeId === 'custom' && (
         <>
-          <Text style={styles.label}>Accent</Text>
+          <Text style={styles.label}>{t(lang, 'accent')}</Text>
           <View style={styles.swatches}>
             {ACCENT_SWATCHES.map((hex) => (
               <Pressable
@@ -409,7 +422,7 @@ export function ProfileTab({
               />
             ))}
           </View>
-          <Text style={styles.label}>Header</Text>
+          <Text style={styles.label}>{t(lang, 'header')}</Text>
           <View style={styles.swatches}>
             {HEADER_SWATCHES.map((hex) => (
               <Pressable
@@ -429,7 +442,7 @@ export function ProfileTab({
           await onLogout();
         }}
       >
-        <Text style={styles.secondaryText}>Log out</Text>
+        <Text style={styles.secondaryText}>{t(lang, 'logOut')}</Text>
       </Pressable>
     </ScrollView>
   );

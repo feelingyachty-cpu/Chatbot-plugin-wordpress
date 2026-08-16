@@ -7,6 +7,8 @@ const TOKEN_KEY = 'fy.token';
 const USER_KEY = 'fy.user';
 const SETTINGS_KEY = 'fy.settings';
 
+export type AuthSession = { user: AppUser; bookings: Booking[] };
+
 export async function loadToken(): Promise<string> {
   return (await AsyncStorage.getItem(TOKEN_KEY)) || '';
 }
@@ -56,22 +58,28 @@ type AccountOk = { ok: true; token?: string; user?: AppUser; bookings?: Booking[
 type AccountErr = { ok: false; error?: string };
 
 async function tryWp<T>(path: string, init: RequestInit): Promise<T | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE}/wp-json/fy-app/v1${path}`, init);
+    res = await fetch(`${API_BASE}/wp-json/fy-app/v1${path}`, init);
+  } catch {
+    return null;
+  }
+  let json = {} as T & { message?: string; code?: string };
+  try {
+    json = (await res.json()) as T & { message?: string; code?: string };
+  } catch {
     if (res.status === 404) {
       return null;
     }
-    const json = (await res.json()) as T & { message?: string; code?: string };
-    if (!res.ok) {
-      throw new Error((json as { message?: string }).message || `Request failed (${res.status})`);
-    }
-    return json;
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('Request failed')) {
-      throw err;
-    }
+    throw new Error(`Request failed (${res.status})`);
+  }
+  if (res.status === 404 || json.code === 'rest_no_route') {
     return null;
   }
+  if (!res.ok) {
+    throw new Error(json.message || `Request failed (${res.status})`);
+  }
+  return json as T;
 }
 
 async function n8n(action: string, body: Record<string, unknown>, token?: string): Promise<AccountOk> {
@@ -97,6 +105,13 @@ function authHeaders(token: string): Record<string, string> {
   };
 }
 
+function sessionFrom(data: AccountOk): AuthSession {
+  if (!data.token || !data.user) {
+    throw new Error('Email or password is not correct.');
+  }
+  return { user: data.user, bookings: data.bookings || [] };
+}
+
 export async function registerAccount(input: {
   email: string;
   password: string;
@@ -104,32 +119,28 @@ export async function registerAccount(input: {
   last_name: string;
   phone?: string;
   region?: string;
-}): Promise<AppUser> {
+}): Promise<AuthSession> {
   const wp = await tryWp<AccountOk>('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
   const data = wp || (await n8n('register', input));
-  if (!data.token || !data.user) {
-    throw new Error('Account created but login failed. Try logging in.');
-  }
-  await saveSession(data.token, data.user);
-  return data.user;
+  const session = sessionFrom(data);
+  await saveSession(data.token as string, session.user);
+  return session;
 }
 
-export async function loginAccount(email: string, password: string): Promise<AppUser> {
+export async function loginAccount(email: string, password: string): Promise<AuthSession> {
   const wp = await tryWp<AccountOk>('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
   const data = wp || (await n8n('login', { email, password }));
-  if (!data.token || !data.user) {
-    throw new Error('Email or password is not correct.');
-  }
-  await saveSession(data.token, data.user);
-  return data.user;
+  const session = sessionFrom(data);
+  await saveSession(data.token as string, session.user);
+  return session;
 }
 
 export async function logoutAccount(): Promise<void> {
@@ -151,7 +162,7 @@ export async function logoutAccount(): Promise<void> {
   await clearSession();
 }
 
-export async function fetchMe(): Promise<{ user: AppUser; bookings: Booking[] } | null> {
+export async function fetchMe(): Promise<AuthSession | null> {
   const token = await loadToken();
   if (!token) {
     return null;
@@ -160,11 +171,16 @@ export async function fetchMe(): Promise<{ user: AppUser; bookings: Booking[] } 
     const wp = await tryWp<AccountOk>('/me', { headers: authHeaders(token) });
     const data = wp || (await n8n('me', {}, token));
     if (!data.user) {
+      await clearSession();
       return null;
     }
-    await saveSession(token, data.user);
+    await saveSession(data.token || token, data.user);
     return { user: data.user, bookings: data.bookings || [] };
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    if (/please log in|not correct|unauthorized|401/i.test(msg)) {
+      await clearSession();
+    }
     return null;
   }
 }
@@ -174,12 +190,13 @@ export async function updateAccount(patch: Record<string, unknown>): Promise<App
   if (!token) {
     throw new Error('Please log in.');
   }
+  const { action: _ignored, ...safePatch } = patch;
   const wp = await tryWp<AccountOk>('/me', {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify(patch),
+    body: JSON.stringify(safePatch),
   });
-  const data = wp || (await n8n('update', patch, token));
+  const data = wp || (await n8n('update', safePatch, token));
   if (!data.user) {
     throw new Error('Could not save your profile.');
   }
@@ -188,5 +205,9 @@ export async function updateAccount(patch: Record<string, unknown>): Promise<App
 }
 
 export async function uploadPhoto(photoData: string): Promise<AppUser> {
-  return updateAccount({ photo_data: photoData, action: 'photo' });
+  const raw = photoData.includes(',') ? photoData.split(',')[1] || '' : photoData;
+  if (raw.length > 420000) {
+    throw new Error('Photo is too large. Choose a closer crop or a smaller picture.');
+  }
+  return updateAccount({ photo_data: photoData });
 }

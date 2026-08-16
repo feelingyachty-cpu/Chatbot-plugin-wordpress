@@ -17,8 +17,9 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { checkoutUrl, fetchFleet, fetchYacht, money, sendTalkMessage, startingTotal } from './src/api';
-import { fetchMe, loadCachedUser, loadSettings } from './src/auth';
+import { fetchMe, loadCachedUser, loadSettings, loadToken } from './src/auth';
 import { CITIES, GHL_FORM, type City } from './src/config';
+import { t } from './src/i18n';
 import { ProfileTab } from './src/ProfileTab';
 import { browseYachts, promoYachts } from './src/promo';
 import { ThemeProvider, useTheme } from './src/ThemeContext';
@@ -48,8 +49,9 @@ export default function App() {
 }
 
 function AppShell() {
-  const { colors, settings } = useTheme();
+  const { colors, settings, applyRemote } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const lang = settings.language;
   const defaultCity = CITIES.find((c) => c.slug === settings.defaultCity) || CITIES[0];
 
   const [tab, setTab] = useState<Tab>('yachts');
@@ -91,11 +93,17 @@ function AppShell() {
       if (live?.user) {
         setUser(live.user);
         setBookings(live.bookings);
+        if (live.user.settings) {
+          await applyRemote(live.user.settings);
+        }
         if (settings.prefillTalk) {
           setName(live.user.display_name || `${live.user.first_name || ''} ${live.user.last_name || ''}`.trim());
           setPhone(live.user.phone || '');
           setEmail(live.user.email || '');
         }
+      } else if (!(await loadToken())) {
+        setUser(null);
+        setBookings([]);
       }
       setProfileLoading(false);
     })();
@@ -103,6 +111,13 @@ function AppShell() {
       alive = false;
     };
   }, [settings.prefillTalk]);
+
+  useEffect(() => {
+    const next = CITIES.find((c) => c.slug === settings.defaultCity);
+    if (next) {
+      setCity(next);
+    }
+  }, [settings.defaultCity]);
 
   useEffect(() => {
     let alive = true;
@@ -153,7 +168,7 @@ function AppShell() {
   async function onSendTalk() {
     if (!name.trim() || !phone.trim() || !message.trim()) {
       setTalkState('error');
-      setTalkError('Name, phone, and a message are required.');
+      setTalkError(t(lang, 'talkRequired'));
       return;
     }
     setTalkState('sending');
@@ -196,8 +211,8 @@ function AppShell() {
       <View style={styles.header}>
         <Image source={require('./assets/logo.png')} style={styles.logo} />
         <View style={styles.headerText}>
-          <Text style={styles.brand}>FEELING YACHTY</Text>
-          <Text style={styles.sub}>Miami & Panama yacht charters</Text>
+          <Text style={styles.brand}>{t(lang, 'brand')}</Text>
+          <Text style={styles.sub}>{t(lang, 'tagline')}</Text>
         </View>
         <View style={styles.citySwitch}>
           {CITIES.map((item) => (
@@ -245,19 +260,19 @@ function AppShell() {
           </View>
           {!!selected.image_url && <Image source={{ uri: selected.image_url }} style={styles.hero} />}
           <View style={{ padding: 16 }}>
-            {selected.is_pink && <Text style={styles.promoTag}>PINK PROMO</Text>}
+            {selected.is_pink && <Text style={styles.promoTag}>{t(lang, 'pinkPromo')}</Text>}
             <Text style={styles.yachtTitle}>{selected.title}</Text>
             <Text style={styles.meta}>
               {selected.size_ft ? `${selected.size_ft} ft` : ''}
               {selected.capacity_max ? ` · up to ${selected.capacity_max} guests` : ''}
             </Text>
             {!!selected.marina?.title && (
-              <Text style={styles.marina}>Meet at {selected.marina.title}</Text>
+              <Text style={styles.marina}>{t(lang, 'meetAt', { marina: selected.marina.title })}</Text>
             )}
             {!!selected.special_desc && (
               <Text style={styles.blurb}>{stripHtml(selected.special_desc)}</Text>
             )}
-            <Text style={styles.section}>Trip totals</Text>
+            <Text style={styles.section}>{t(lang, 'tripTotals')}</Text>
             {(selected.pricing || [])
               .filter((row) => (row.type || 'price') === 'price')
               .map((row, idx) => (
@@ -267,10 +282,10 @@ function AppShell() {
                 </View>
               ))}
             <Pressable style={styles.book} onPress={() => setOverlay('checkout')}>
-              <Text style={styles.bookText}>Book this yacht</Text>
+              <Text style={styles.bookText}>{t(lang, 'bookYacht')}</Text>
             </Pressable>
             <Pressable style={styles.secondary} onPress={() => { setTab('talk'); setOverlay(null); }}>
-              <Text style={styles.secondaryText}>Questions? Talk to us live</Text>
+              <Text style={styles.secondaryText}>{t(lang, 'questionsTalk')}</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -281,7 +296,7 @@ function AppShell() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search name or size"
+            placeholder={t(lang, 'search')}
             placeholderTextColor={colors.muted}
             style={styles.search}
           />
@@ -293,15 +308,18 @@ function AppShell() {
               keyExtractor={(item) => String(item.id)}
               contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
               ListHeaderComponent={
-                <Text style={styles.listLead}>{browse.length} yachts available in {city.label}</Text>
+                <Text style={styles.listLead}>{t(lang, 'available', { n: browse.length, city: city.label })}</Text>
               }
-              ListEmptyComponent={<Text style={styles.empty}>No yachts match that search.</Text>}
+              ListEmptyComponent={<Text style={styles.empty}>{t(lang, 'noMatch')}</Text>}
               renderItem={({ item }) => (
                 <YachtCard
                   yacht={item}
                   colors={colors}
                   compact={settings.compactCards}
                   showPrice={settings.showPrices}
+                  promoLabel={t(lang, 'promoOnly')}
+                  fromLabel={t(lang, 'fromPrice')}
+                  seePricesLabel={t(lang, 'seePrices')}
                   onPress={() => openYacht(item)}
                 />
               )}
@@ -313,11 +331,9 @@ function AppShell() {
       {!overlay && tab === 'promos' && (
         <View style={styles.flex}>
           <View style={styles.promoBanner}>
-            <Text style={styles.promoBannerKicker}>PINK PROMO FLEET</Text>
-            <Text style={styles.promoBannerTitle}>Special yachts — only in this tab</Text>
-            <Text style={styles.promoBannerBody}>
-              These boats do not appear in Browse. They are the pink / promo fleet guests ask for first.
-            </Text>
+            <Text style={styles.promoBannerKicker}>{t(lang, 'promoKicker')}</Text>
+            <Text style={styles.promoBannerTitle}>{t(lang, 'promoTitle')}</Text>
+            <Text style={styles.promoBannerBody}>{t(lang, 'promoBody')}</Text>
           </View>
           {loading && <ActivityIndicator color={colors.pink} style={{ marginTop: 28 }} />}
           {!loading && (
@@ -327,9 +343,7 @@ function AppShell() {
               contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
               ListEmptyComponent={
                 <Text style={styles.empty}>
-                  {city.slug === 'panama'
-                    ? 'Panama promos are coming. Talk to us live and we will send options.'
-                    : 'No promo yachts loaded. Pull to refresh or Talk to us.'}
+                  {city.slug === 'panama' ? t(lang, 'promoEmptyPanama') : t(lang, 'promoEmptyMiami')}
                 </Text>
               }
               renderItem={({ item }) => (
@@ -339,6 +353,9 @@ function AppShell() {
                   colors={colors}
                   compact={settings.compactCards}
                   showPrice={settings.showPrices}
+                  promoLabel={t(lang, 'promoOnly')}
+                  fromLabel={t(lang, 'fromPrice')}
+                  seePricesLabel={t(lang, 'seePrices')}
                   onPress={() => openYacht(item)}
                 />
               )}
@@ -350,24 +367,22 @@ function AppShell() {
       {!overlay && tab === 'talk' && (
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-            <Text style={styles.talkTitle}>Speak with us live</Text>
-            <Text style={styles.talkLead}>
-              This goes straight into GoHighLevel — the same inbox as our website texts, WhatsApp, and calls. No chatbot.
-            </Text>
+            <Text style={styles.talkTitle}>{t(lang, 'talkTitle')}</Text>
+            <Text style={styles.talkLead}>{t(lang, 'talkLead')}</Text>
 
             <Pressable style={styles.book} onPress={openPreferredContact}>
               <Text style={styles.bookText}>
                 {settings.preferredContact === 'call'
-                  ? 'Call the team'
+                  ? t(lang, 'callTeam')
                   : settings.preferredContact === 'sms'
-                    ? 'Text the team'
-                    : 'WhatsApp the team'}
+                    ? t(lang, 'textTeam')
+                    : t(lang, 'waTeam')}
               </Text>
             </Pressable>
 
             <View style={styles.liveRow}>
               <Pressable style={styles.liveBtn} onPress={() => Linking.openURL(`tel:${city.phone}`)}>
-                <Text style={styles.liveBtnText}>Call</Text>
+                <Text style={styles.liveBtnText}>{t(lang, 'call')}</Text>
               </Pressable>
               <Pressable
                 style={styles.liveBtn}
@@ -379,34 +394,34 @@ function AppShell() {
                   )
                 }
               >
-                <Text style={styles.liveBtnText}>WhatsApp</Text>
+                <Text style={styles.liveBtnText}>{t(lang, 'whatsapp')}</Text>
               </Pressable>
               <Pressable style={styles.liveBtn} onPress={() => Linking.openURL(`sms:${city.phone}`)}>
-                <Text style={styles.liveBtnText}>SMS</Text>
+                <Text style={styles.liveBtnText}>{t(lang, 'sms')}</Text>
               </Pressable>
             </View>
 
             <Pressable style={styles.ghlLink} onPress={() => setOverlay('ghl-form')}>
-              <Text style={styles.ghlLinkText}>Open the live GHL form</Text>
+              <Text style={styles.ghlLinkText}>{t(lang, 'ghlForm')}</Text>
             </Pressable>
 
-            <Text style={styles.section}>Or message the inbox now</Text>
-            <TextInput value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor={colors.muted} style={styles.input} />
-            <TextInput value={phone} onChangeText={setPhone} placeholder="Mobile number" placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
-            <TextInput value={email} onChangeText={setEmail} placeholder="Email (optional)" placeholderTextColor={colors.muted} keyboardType="email-address" autoCapitalize="none" style={styles.input} />
+            <Text style={styles.section}>{t(lang, 'messageNow')}</Text>
+            <TextInput value={name} onChangeText={setName} placeholder={t(lang, 'yourName')} placeholderTextColor={colors.muted} style={styles.input} />
+            <TextInput value={phone} onChangeText={setPhone} placeholder={t(lang, 'mobile')} placeholderTextColor={colors.muted} keyboardType="phone-pad" style={styles.input} />
+            <TextInput value={email} onChangeText={setEmail} placeholder={t(lang, 'emailOptional')} placeholderTextColor={colors.muted} keyboardType="email-address" autoCapitalize="none" style={styles.input} />
             <TextInput
               value={message}
               onChangeText={setMessage}
-              placeholder="How can we help? Date, guests, budget…"
+              placeholder={t(lang, 'helpPlaceholder')}
               placeholderTextColor={colors.muted}
               multiline
               style={[styles.input, { height: 110, textAlignVertical: 'top' }]}
             />
             <Pressable style={styles.book} onPress={onSendTalk} disabled={talkState === 'sending'}>
-              <Text style={styles.bookText}>{talkState === 'sending' ? 'Sending…' : 'Send to the team'}</Text>
+              <Text style={styles.bookText}>{talkState === 'sending' ? t(lang, 'sending') : t(lang, 'sendTeam')}</Text>
             </Pressable>
             {talkState === 'sent' && (
-              <Text style={styles.ok}>Got it. A specialist will reply in GHL / SMS / WhatsApp.</Text>
+              <Text style={styles.ok}>{t(lang, 'talkSent')}</Text>
             )}
             {talkState === 'error' && <Text style={styles.error}>{talkError}</Text>}
           </ScrollView>
@@ -419,8 +434,14 @@ function AppShell() {
             user={user}
             bookings={bookings}
             loading={profileLoading}
-            onUser={(next) => {
+            onUser={(next, nextBookings) => {
               setUser(next);
+              if (nextBookings) {
+                setBookings(nextBookings);
+              }
+              if (next?.settings) {
+                applyRemote(next.settings);
+              }
               if (next && settings.prefillTalk) {
                 setName(next.display_name || `${next.first_name || ''} ${next.last_name || ''}`.trim());
                 setPhone(next.phone || '');
@@ -437,10 +458,10 @@ function AppShell() {
 
       {!overlay && (
         <View style={styles.tabs}>
-          <TabBtn label="Yachts" active={tab === 'yachts'} onPress={() => setTab('yachts')} colors={colors} />
-          <TabBtn label="Promos" active={tab === 'promos'} onPress={() => setTab('promos')} colors={colors} />
-          <TabBtn label="Talk" active={tab === 'talk'} onPress={() => setTab('talk')} colors={colors} />
-          <TabBtn label="Profile" active={tab === 'profile'} onPress={() => setTab('profile')} colors={colors} />
+          <TabBtn label={t(lang, 'yachts')} active={tab === 'yachts'} onPress={() => setTab('yachts')} colors={colors} />
+          <TabBtn label={t(lang, 'promos')} active={tab === 'promos'} onPress={() => setTab('promos')} colors={colors} />
+          <TabBtn label={t(lang, 'talk')} active={tab === 'talk'} onPress={() => setTab('talk')} colors={colors} />
+          <TabBtn label={t(lang, 'profile')} active={tab === 'profile'} onPress={() => setTab('profile')} colors={colors} />
         </View>
       )}
     </SafeAreaView>
@@ -465,7 +486,7 @@ function TabBtn({
         flex: 1,
         paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: active ? colors.pink : '#12263a',
+        backgroundColor: active ? colors.pink : colors.navy,
       }}
     >
       <Text style={{ color: active ? colors.white : colors.muted, fontWeight: '800', textAlign: 'center' }}>{label}</Text>
@@ -480,6 +501,9 @@ function YachtCard({
   colors,
   compact,
   showPrice,
+  promoLabel,
+  fromLabel,
+  seePricesLabel,
 }: {
   yacht: Yacht;
   onPress: () => void;
@@ -487,6 +511,9 @@ function YachtCard({
   colors: Colors;
   compact?: boolean;
   showPrice?: boolean;
+  promoLabel: string;
+  fromLabel: string;
+  seePricesLabel: string;
 }) {
   const start = startingTotal(yacht);
   return (
@@ -525,7 +552,7 @@ function YachtCard({
                 overflow: 'hidden',
               }}
             >
-              PROMO ONLY
+              {promoLabel}
             </Text>
           )}
           <Text style={{ fontSize: compact ? 16 : 17, fontWeight: '800', color: colors.ink }}>{yacht.title}</Text>
@@ -535,7 +562,9 @@ function YachtCard({
           </Text>
           {showPrice !== false && (
             <Text style={{ color: colors.pink, fontWeight: '800', marginTop: 8 }}>
-              {start ? `From ${money(start.amount)} · ${start.duration}` : 'See trip prices'}
+              {start
+                ? fromLabel.replace('{price}', money(start.amount)).replace('{duration}', start.duration)
+                : seePricesLabel}
             </Text>
           )}
         </View>

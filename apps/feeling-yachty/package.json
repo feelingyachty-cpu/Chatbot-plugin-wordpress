@@ -11,6 +11,7 @@
     "apk": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
+    "@expo/config-plugins": "^8.0.11",
     "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.39",
     "expo-image-picker": "~15.1.0",

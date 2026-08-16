@@ -109,6 +109,10 @@ const EN: Record<string, string> = {
   seeAllPromos: 'See all pink promos',
   liveHelp: 'Need a match? Talk live — 24/7',
   valueNote: 'Each card shows the lowest trip total. Open hours for every duration.',
+  openBrowser: 'Browser',
+  openWooCheckout: 'Open WooCommerce checkout',
+  checkoutHint: 'Same checkout as feelingyachty.com. Confirm duration and guests, then Book Experience.',
+  checkoutError: 'Checkout could not open in the app. Use the website checkout — it is the same WooCommerce payment.',
 };
 
 const ES: Record<string, string> = {
@@ -222,6 +226,10 @@ const ES: Record<string, string> = {
   seeAllPromos: 'Ver todas las promos rosa',
   liveHelp: '¿Necesitas un match? Habla en vivo — 24/7',
   valueNote: 'Cada tarjeta muestra el total más bajo. Abre horas para cada duración.',
+  openBrowser: 'Navegador',
+  openWooCheckout: 'Abrir checkout WooCommerce',
+  checkoutHint: 'El mismo checkout de feelingyachty.com. Confirma duración e invitados y toca Book Experience.',
+  checkoutError: 'El checkout no abrió en la app. Usa el checkout del sitio — es el mismo pago WooCommerce.',
 };
 
 export function t(lang: string | undefined, key: string, vars?: Record<string, string | number>): string {

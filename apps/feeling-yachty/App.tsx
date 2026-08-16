@@ -27,6 +27,7 @@ import { loadRecentIds, loadSavedIds, pushRecentId, saveSavedIds } from './src/s
 import { ThemeProvider, useTheme } from './src/ThemeContext';
 import type { Colors } from './src/theme';
 import type { AppSettings, AppUser, Booking, Yacht } from './src/types';
+import { CheckoutWeb } from './src/ui/CheckoutWeb';
 import { FeaturedReel } from './src/ui/FeaturedReel';
 import { FilterBar } from './src/ui/FilterBar';
 import { PressScale } from './src/ui/PressScale';
@@ -77,6 +78,7 @@ function AppShell() {
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [recentIds, setRecentIds] = useState<number[]>([]);
   const [selected, setSelected] = useState<Yacht | null>(null);
+  const [bookDuration, setBookDuration] = useState('');
   const [overlay, setOverlay] = useState<Overlay>(null);
 
   const [name, setName] = useState('');
@@ -276,16 +278,15 @@ function AppShell() {
       </View>
 
       {overlay === 'checkout' && selected && (
-        <View style={styles.flex}>
-          <View style={styles.topBar}>
-            <Pressable onPress={() => setOverlay('yacht')}>
-              <Text style={styles.back}>‹ Yacht</Text>
-            </Pressable>
-            <Text style={styles.topTitle}>Book</Text>
-            <View style={{ width: 56 }} />
-          </View>
-          <WebView source={{ uri: checkoutUrl(selected) }} style={styles.flex} />
-        </View>
+        <CheckoutWeb
+          uri={checkoutUrl(selected, {
+            duration: bookDuration,
+            guests: user?.typical_guests || undefined,
+          })}
+          colors={colors}
+          lang={lang}
+          onBack={() => setOverlay('yacht')}
+        />
       )}
 
       {overlay === 'ghl-form' && (
@@ -307,7 +308,10 @@ function AppShell() {
           colors={colors}
           lang={lang}
           onBack={() => setOverlay(null)}
-          onBook={() => setOverlay('checkout')}
+          onBook={(duration) => {
+            setBookDuration(duration || '');
+            setOverlay('checkout');
+          }}
           onTalk={() => {
             setTab('talk');
             setOverlay(null);

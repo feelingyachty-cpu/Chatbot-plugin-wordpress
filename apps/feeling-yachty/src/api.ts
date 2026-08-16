@@ -61,8 +61,35 @@ export function startingTotal(yacht: Yacht): { amount: number; duration: string 
   return { amount: Number(row.price), duration: row.duration || '' };
 }
 
-export function checkoutUrl(yacht: Yacht): string {
-  return yacht.product_url || yacht.button_url || `${API_BASE}/miami-yacht-rental/`;
+export function durationSlug(duration?: string): string {
+  if (!duration) {
+    return '';
+  }
+  const match = String(duration).toLowerCase().match(/(\d+)\s*hour/);
+  if (match) {
+    return `${match[1]}-hours`;
+  }
+  return String(duration).toLowerCase().trim().replace(/\s+/g, '-');
+}
+
+/** Same Woo product page the website uses. Duration/guests preselect the variable product. */
+export function checkoutUrl(
+  yacht: Yacht,
+  opts?: { duration?: string; guests?: number }
+): string {
+  const base = yacht.product_url || yacht.button_url || `${API_BASE}/miami-yacht-rental/`;
+  const parts: string[] = [];
+  const slug = durationSlug(opts?.duration);
+  if (slug) {
+    parts.push(`attribute_pa_charter-duration=${encodeURIComponent(slug)}`);
+  }
+  if (opts?.guests && opts.guests > 0) {
+    parts.push(`attribute_pa_passenger-count=${encodeURIComponent(String(opts.guests))}`);
+  }
+  if (!parts.length) {
+    return base;
+  }
+  return `${base}${base.includes('?') ? '&' : '?'}${parts.join('&')}`;
 }
 
 export function money(amount: number): string {

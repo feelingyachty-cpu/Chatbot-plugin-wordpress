@@ -18,7 +18,7 @@ export function YachtDetail({
   colors: Colors;
   lang: string;
   onBack: () => void;
-  onBook: () => void;
+  onBook: (duration?: string) => void;
   onTalk: () => void;
 }) {
   const rows = useMemo(
@@ -167,7 +167,7 @@ export function YachtDetail({
             <Text style={{ color: colors.white, fontWeight: '800' }}>{t(lang, 'talk')}</Text>
           </View>
         </PressScale>
-        <PressScale onPress={onBook}>
+        <PressScale onPress={() => onBook(selected?.duration)}>
           <View style={{ backgroundColor: colors.pink, paddingHorizontal: 18, paddingVertical: 14, borderRadius: 14 }}>
             <Text style={{ color: colors.white, fontWeight: '800' }}>{t(lang, 'bookYacht')}</Text>
           </View>

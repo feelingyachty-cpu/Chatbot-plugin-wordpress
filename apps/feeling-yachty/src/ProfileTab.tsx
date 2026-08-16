@@ -220,6 +220,9 @@ export function ProfileTab({
         </Pressable>
         {!!ok && <Text style={styles.ok}>{ok}</Text>}
         {!!error && <Text style={styles.error}>{error}</Text>}
+        <Pressable onPress={() => Linking.openURL('https://feelingyachty.com/my-account/lost-password/')}>
+          <Text style={styles.link}>{t(lang, 'forgotPassword')}</Text>
+        </Pressable>
         <Text style={styles.hint}>{t(lang, 'guestHint')}</Text>
       </ScrollView>
     );

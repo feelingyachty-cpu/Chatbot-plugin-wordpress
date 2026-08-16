@@ -78,6 +78,7 @@ function AppShell() {
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [recentIds, setRecentIds] = useState<number[]>([]);
   const [selected, setSelected] = useState<Yacht | null>(null);
+  const [talkYacht, setTalkYacht] = useState<Yacht | null>(null);
   const [bookDuration, setBookDuration] = useState('');
   const [overlay, setOverlay] = useState<Overlay>(null);
 
@@ -202,6 +203,10 @@ function AppShell() {
         email: email.trim(),
         message: message.trim(),
         city: city.label,
+        yacht_id: talkYacht?.id,
+        yacht_title: talkYacht?.title,
+        product_url: talkYacht?.product_url,
+        duration: bookDuration || undefined,
       });
       setTalkState('sent');
       setMessage('');
@@ -282,6 +287,7 @@ function AppShell() {
           uri={checkoutUrl(selected, {
             duration: bookDuration,
             guests: user?.typical_guests || undefined,
+            cityPath: city.fleet,
           })}
           colors={colors}
           lang={lang}
@@ -313,6 +319,10 @@ function AppShell() {
             setOverlay('checkout');
           }}
           onTalk={() => {
+            setTalkYacht(selected);
+            if (!message.trim()) {
+              setMessage(`I want ${selected.title}${selected.size_ft ? `, ${selected.size_ft} ft` : ''}.`);
+            }
             setTab('talk');
             setOverlay(null);
           }}
@@ -343,7 +353,18 @@ function AppShell() {
           />
           {loading && <FeedSkeleton colors={colors} />}
           {!!error && <Text style={styles.error}>{error}</Text>}
-          {!loading && !error && (
+          {!loading && !error && city.slug === 'panama' && yachts.length === 0 && (
+            <View style={{ padding: 20 }}>
+              <Text style={[styles.talkTitle, { color: colors.ink }]}>{t(lang, 'panamaEmptyTitle')}</Text>
+              <Text style={[styles.talkLead, { color: colors.muted }]}>{t(lang, 'panamaEmptyBody')}</Text>
+              <PressScale onPress={openPreferredContact}>
+                <View style={styles.book}>
+                  <Text style={styles.bookText}>{t(lang, 'waTeam')}</Text>
+                </View>
+              </PressScale>
+            </View>
+          )}
+          {!loading && !error && !(city.slug === 'panama' && yachts.length === 0) && (
             <FlatList
               data={browse}
               keyExtractor={(item) => String(item.id)}

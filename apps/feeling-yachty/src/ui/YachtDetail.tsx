@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { money } from '../api';
 import { t } from '../i18n';
 import type { Colors } from '../theme';
@@ -81,9 +81,44 @@ export function YachtDetail({
               {t(lang, 'meetAt', { marina: yacht.marina.title })}
             </Text>
           )}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+            {!!yacht.captain_included && (
+              <Text style={{ backgroundColor: colors.navy, color: colors.white, fontWeight: '800', fontSize: 11, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, overflow: 'hidden' }}>
+                {t(lang, 'captainIncluded')}
+              </Text>
+            )}
+            {!!yacht.rating && (
+              <Text style={{ backgroundColor: colors.pink, color: colors.white, fontWeight: '800', fontSize: 11, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, overflow: 'hidden' }}>
+                ★ {yacht.rating}
+              </Text>
+            )}
+          </View>
           {!!yacht.special_desc && (
             <Text style={{ color: colors.ink, lineHeight: 22, marginBottom: 8 }}>{stripHtml(yacht.special_desc)}</Text>
           )}
+          {!!(yacht.reviews && yacht.reviews.length) && (
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ color: colors.pink, fontWeight: '800', marginBottom: 8 }}>{t(lang, 'reviewsTitle')}</Text>
+              {yacht.reviews.slice(0, 2).map((review, idx) => (
+                <View key={`${review.name}-${idx}`} style={{ backgroundColor: colors.white, borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.line }}>
+                  <Text style={{ color: colors.ink, fontWeight: '800' }}>
+                    {review.name || 'Guest'}
+                    {review.rating ? ` · ★ ${review.rating}` : ''}
+                  </Text>
+                  {!!review.text && <Text style={{ color: colors.ink, marginTop: 6, lineHeight: 20 }}>{review.text}</Text>}
+                </View>
+              ))}
+            </View>
+          )}
+          <Pressable
+            onPress={() => {
+              const url = yacht.product_url || '';
+              Share.share({ message: url ? `${yacht.title} — ${url}` : yacht.title, url: url || undefined });
+            }}
+            style={{ marginBottom: 12 }}
+          >
+            <Text style={{ color: colors.pink, fontWeight: '800' }}>{t(lang, 'shareYacht')}</Text>
+          </Pressable>
 
           <Text style={{ marginTop: 12, marginBottom: 10, color: colors.pink, fontWeight: '800' }}>
             {t(lang, 'tripTotals')}

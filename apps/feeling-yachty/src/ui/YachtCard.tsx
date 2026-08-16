@@ -89,10 +89,12 @@ export function YachtCard({
                     </Text>
                   )}
                 </View>
-                <View style={{ position: 'absolute', top: 10, left: 10, flexDirection: 'row', gap: 6 }}>
+                <View style={{ position: 'absolute', top: 10, left: 10, flexDirection: 'row', flexWrap: 'wrap', gap: 6, maxWidth: '78%' }}>
                   {promo && <Chip colors={colors} text={promoLabel} hot />}
                   {!!yacht.size_ft && <Chip colors={colors} text={`${yacht.size_ft} ft`} />}
                   {!!yacht.capacity_max && <Chip colors={colors} text={`${yacht.capacity_max} ${guestsLabel}`} />}
+                  {!!yacht.captain_included && <Chip colors={colors} text="Captain" />}
+                  {!!yacht.rating && <Chip colors={colors} text={`★ ${yacht.rating}`} hot />}
                 </View>
               </View>
             </PressScale>
@@ -136,6 +138,7 @@ export function YachtCard({
               {yacht.size_ft ? `${yacht.size_ft} ft` : ''}
               {yacht.capacity_max ? ` · ${yacht.capacity_max} ${guestsLabel}` : ''}
               {yacht.marina?.title ? ` · ${yacht.marina.title}` : ''}
+              {yacht.rating ? ` · ★ ${yacht.rating}` : ''}
             </Text>
             {compact && showPrice !== false && (
               <Text style={{ color: colors.pink, fontWeight: '800', marginTop: 6 }}>

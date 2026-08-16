@@ -1,6 +1,8 @@
 import { API_BASE, APP_KEY, TALK_WEBHOOK } from './config';
 import type { CatalogYacht, PricingRow, Yacht } from './types';
 
+let appApiMissing = false;
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
   if (!res.ok) {
@@ -9,56 +11,109 @@ async function getJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function fetchFleet(fleet: string): Promise<CatalogYacht[]> {
-  try {
-    const app = await getJson<{ yachts: CatalogYacht[] }>(
-      `/wp-json/fy-app/v1/catalog?fleet=${encodeURIComponent(fleet)}&per_page=50&page=1`
-    );
-    if (Array.isArray(app.yachts) && app.yachts.length) {
-      const all = [...app.yachts];
-      // fy-app pages at 50; pull the rest so Browse is complete.
-      for (let page = 2; page <= 8; page += 1) {
-        const more = await getJson<{ yachts: CatalogYacht[]; total_pages?: number }>(
-          `/wp-json/fy-app/v1/catalog?fleet=${encodeURIComponent(fleet)}&per_page=50&page=${page}`
-        );
-        if (!more.yachts?.length) {
-          break;
-        }
-        all.push(...more.yachts);
-        if (page >= (more.total_pages || page)) {
-          break;
-        }
-      }
-      return all;
-    }
-  } catch {
-    // Plugin not uploaded yet.
+function decodeHtml(value?: string): string {
+  if (!value) {
+    return '';
   }
-  return getJson<CatalogYacht[]>(`/wp-json/fy/v1/fleets/${encodeURIComponent(fleet)}/yachts`);
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/&#8216;|&#8217;/g, "'")
+    .replace(/&#8220;|&#8221;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function normalizeYacht<T extends Yacht>(yacht: T): T {
+  return { ...yacht, title: decodeHtml(yacht.title) || yacht.title };
+}
+
+function mergeById(primary: CatalogYacht[], extra: CatalogYacht[]): CatalogYacht[] {
+  const seen = new Set(primary.map((y) => y.id));
+  const out = primary.map(normalizeYacht);
+  for (const yacht of extra) {
+    if (!seen.has(yacht.id)) {
+      seen.add(yacht.id);
+      out.push(normalizeYacht(yacht));
+    }
+  }
+  return out;
+}
+
+async function fetchSuiteFleet(fleet: string): Promise<CatalogYacht[]> {
+  const rows = await getJson<CatalogYacht[]>(`/wp-json/fy/v1/fleets/${encodeURIComponent(fleet)}/yachts`);
+  return Array.isArray(rows) ? rows.map(normalizeYacht) : [];
+}
+
+export async function fetchFleet(fleet: string): Promise<CatalogYacht[]> {
+  if (!appApiMissing) {
+    try {
+      const app = await getJson<{ yachts: CatalogYacht[] }>(
+        `/wp-json/fy-app/v1/catalog?fleet=${encodeURIComponent(fleet)}&per_page=50&page=1`
+      );
+      if (Array.isArray(app.yachts) && app.yachts.length) {
+        const all = [...app.yachts];
+        for (let page = 2; page <= 8; page += 1) {
+          const more = await getJson<{ yachts: CatalogYacht[]; total_pages?: number }>(
+            `/wp-json/fy-app/v1/catalog?fleet=${encodeURIComponent(fleet)}&per_page=50&page=${page}`
+          );
+          if (!more.yachts?.length) {
+            break;
+          }
+          all.push(...more.yachts);
+          if (page >= (more.total_pages || page)) {
+            break;
+          }
+        }
+        return all.map(normalizeYacht);
+      }
+    } catch {
+      appApiMissing = true;
+    }
+  }
+
+  const primary = await fetchSuiteFleet(fleet);
+  if (fleet === 'miami-yacht-rental') {
+    try {
+      const leftover = await fetchSuiteFleet('miami-yacht-rentals');
+      return mergeById(primary, leftover);
+    } catch {
+      return primary;
+    }
+  }
+  return primary;
 }
 
 export async function fetchYacht(id: number): Promise<Yacht> {
-  try {
-    const app = await getJson<{ yacht: Yacht }>(`/wp-json/fy-app/v1/yachts/${id}`);
-    if (app.yacht) {
-      return app.yacht;
+  if (!appApiMissing) {
+    try {
+      const app = await getJson<{ yacht: Yacht }>(`/wp-json/fy-app/v1/yachts/${id}`);
+      if (app.yacht) {
+        return normalizeYacht(app.yacht);
+      }
+    } catch {
+      // Fall through to Suite.
     }
-  } catch {
-    // Fall through.
   }
-  return getJson<Yacht>(`/wp-json/fy/v1/yachts/${id}`);
+  return normalizeYacht(await getJson<Yacht>(`/wp-json/fy/v1/yachts/${id}`));
 }
 
+function priceRows(yacht: Yacht): PricingRow[] {
+  return (yacht.pricing || []).filter((r) => (r.type || 'price') === 'price' && r.price != null);
+}
+
+/** Cheapest trip total. Never hourly `price` × hours. */
 export function startingTotal(yacht: Yacht): { amount: number; duration: string } | null {
+  const rows = priceRows(yacht);
+  if (rows.length) {
+    const best = rows.reduce((a, b) => (Number(a.price) <= Number(b.price) ? a : b));
+    return { amount: Number(best.price), duration: best.duration || '' };
+  }
   if (yacht.starting && yacht.starting.amount != null) {
     return yacht.starting;
   }
-  const rows = yacht.pricing || [];
-  const row = rows.find((r: PricingRow) => (r.type || 'price') === 'price' && r.price != null);
-  if (!row || row.price == null) {
-    return null;
-  }
-  return { amount: Number(row.price), duration: row.duration || '' };
+  return null;
 }
 
 export function durationSlug(duration?: string): string {
@@ -67,7 +122,7 @@ export function durationSlug(duration?: string): string {
   }
   const match = String(duration).toLowerCase().match(/(\d+)\s*hour/);
   if (match) {
-    return `${match[1]}-hours`;
+    return match[1] === '1' ? '1-hour' : `${match[1]}-hours`;
   }
   return String(duration).toLowerCase().trim().replace(/\s+/g, '-');
 }
@@ -75,9 +130,10 @@ export function durationSlug(duration?: string): string {
 /** Same Woo product page the website uses. Duration/guests preselect the variable product. */
 export function checkoutUrl(
   yacht: Yacht,
-  opts?: { duration?: string; guests?: number }
+  opts?: { duration?: string; guests?: number; cityPath?: string }
 ): string {
-  const base = yacht.product_url || yacht.button_url || `${API_BASE}/miami-yacht-rental/`;
+  const fallback = `${API_BASE}/${opts?.cityPath || 'miami-yacht-rental'}/`;
+  const base = yacht.product_url || yacht.button_url || fallback;
   const parts: string[] = [];
   const slug = durationSlug(opts?.duration);
   if (slug) {
@@ -102,6 +158,10 @@ export async function sendTalkMessage(payload: {
   email?: string;
   message: string;
   city: string;
+  yacht_id?: number;
+  yacht_title?: string;
+  product_url?: string;
+  duration?: string;
 }): Promise<void> {
   const res = await fetch(TALK_WEBHOOK, {
     method: 'POST',

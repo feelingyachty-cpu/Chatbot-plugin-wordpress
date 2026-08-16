@@ -77,7 +77,10 @@ export function CheckoutWeb({
             onLoadEnd={() => setLoading(false)}
             onError={() => setFailed(true)}
             onHttpError={(event) => {
-              if (event.nativeEvent.statusCode >= 400) {
+              const code = event.nativeEvent.statusCode;
+              const url = String(event.nativeEvent.url || '');
+              const isMain = url.split('?')[0] === uri.split('?')[0];
+              if (isMain && code >= 500) {
                 setFailed(true);
               }
             }}

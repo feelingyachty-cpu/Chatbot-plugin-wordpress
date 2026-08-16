@@ -48,6 +48,7 @@ export function FeaturedReel({
                   <Text style={{ color: colors.cream, marginTop: 4, fontWeight: '700' }}>
                     {item.size_ft ? `${item.size_ft} ft` : ''}
                     {start ? ` · ${money(start.amount)}` : ''}
+                    {item.rating ? ` · ★ ${item.rating}` : ''}
                   </Text>
                 </View>
               </View>

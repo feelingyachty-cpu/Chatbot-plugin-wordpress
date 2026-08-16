@@ -146,7 +146,7 @@ class FY_App_REST {
 						'label'      => 'Miami',
 						'fleet'      => 'miami-yacht-rental',
 						'phone'      => isset( $booking['phone_miami'] ) ? $booking['phone_miami'] : '+1 954-246-3636',
-						'whatsapp'   => isset( $display['whatsapp_number'] ) ? $display['whatsapp_number'] : '17543253827',
+						'whatsapp'   => isset( $display['whatsapp_number'] ) ? $display['whatsapp_number'] : '19542463636',
 					),
 					array(
 						'slug'     => 'panama',
@@ -279,32 +279,55 @@ class FY_App_REST {
 			$image = (string) get_post_meta( $yacht_id, '_fy_image_url', true );
 		}
 
+		$pricing = array();
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				if ( isset( $row['type'] ) && 'price' === $row['type'] && isset( $row['price'] ) ) {
+					$pricing[] = array(
+						'type'     => 'price',
+						'duration' => isset( $row['duration'] ) ? $row['duration'] : '',
+						'price'    => (float) $row['price'],
+					);
+				}
+			}
+		}
+
 		return array(
-			'id'           => $yacht_id,
-			'title'        => get_the_title( $yacht_id ),
-			'size_ft'      => (int) get_post_meta( $yacht_id, '_fy_size_ft', true ),
-			'capacity_max' => class_exists( 'FY_Fleet_CPT' ) ? FY_Fleet_CPT::capacity( $yacht_id ) : (int) get_post_meta( $yacht_id, '_fy_capacity_max', true ),
-			'is_pink'      => (bool) get_post_meta( $yacht_id, '_fy_is_pink', true ),
-			'is_free_hour' => (bool) get_post_meta( $yacht_id, '_fy_is_free_hour', true ),
-			'image_url'    => $image ? $image : '',
-			'product_id'   => $product_id,
-			'product_url'  => ( $product_id && 'product' === get_post_type( $product_id ) ) ? get_permalink( $product_id ) : '',
-			'starting'     => $starting,
+			'id'               => $yacht_id,
+			'title'            => get_the_title( $yacht_id ),
+			'size_ft'          => (int) get_post_meta( $yacht_id, '_fy_size_ft', true ),
+			'capacity_max'     => class_exists( 'FY_Fleet_CPT' ) ? FY_Fleet_CPT::capacity( $yacht_id ) : (int) get_post_meta( $yacht_id, '_fy_capacity_max', true ),
+			'is_pink'          => (bool) get_post_meta( $yacht_id, '_fy_is_pink', true ),
+			'is_free_hour'     => (bool) get_post_meta( $yacht_id, '_fy_is_free_hour', true ),
+			'captain_included' => (bool) get_post_meta( $yacht_id, '_fy_captain_included', true ),
+			'image_url'        => $image ? $image : '',
+			'product_id'       => $product_id,
+			'product_url'      => ( $product_id && 'product' === get_post_type( $product_id ) ) ? get_permalink( $product_id ) : '',
+			'pricing'          => $pricing,
+			'starting'         => $starting,
+			'marina'           => array(
+				'title' => (string) get_post_meta( $yacht_id, '_fy_marina_title', true ),
+			),
 		);
 	}
 
 	/**
-	 * First price-row total. Never hourly `price` × hours.
+	 * Lowest price-row total. Never hourly `price` × hours.
 	 */
 	private static function starting_total( $rows ) {
+		$best = null;
 		foreach ( $rows as $row ) {
-			if ( isset( $row['type'] ) && 'price' === $row['type'] && isset( $row['price'] ) ) {
-				return array(
-					'amount'   => (float) $row['price'],
+			if ( ! isset( $row['type'] ) || 'price' !== $row['type'] || ! isset( $row['price'] ) ) {
+				continue;
+			}
+			$amount = (float) $row['price'];
+			if ( null === $best || $amount < $best['amount'] ) {
+				$best = array(
+					'amount'   => $amount,
 					'duration' => isset( $row['duration'] ) ? $row['duration'] : '',
 				);
 			}
 		}
-		return null;
+		return $best;
 	}
 }

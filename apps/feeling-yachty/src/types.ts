@@ -21,6 +21,9 @@ export type Yacht = {
   starting?: { amount: number; duration: string } | null;
   marina?: { title?: string; address?: string; note?: string } | null;
   badges?: { style?: string; text?: string }[];
+  rating?: string | number;
+  reviews?: { name?: string; rating?: number; date?: string; text?: string }[];
+  captain_included?: boolean;
 };
 
 export type CatalogYacht = Yacht;

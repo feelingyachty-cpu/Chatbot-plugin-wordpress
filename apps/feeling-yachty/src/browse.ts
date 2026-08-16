@@ -3,7 +3,7 @@ import { browseYachts, promoYachts } from './promo';
 import type { Yacht } from './types';
 
 export type SizeBand = 'all' | 'u40' | '40s' | '50s' | '60s' | '70p';
-export type StyleFilter = 'all' | 'value' | 'twohr' | 'saved';
+export type StyleFilter = 'all' | 'value' | 'captain' | 'saved';
 export type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'size_asc' | 'size_desc';
 
 export const SIZE_CHIPS: { id: SizeBand; label: string }[] = [
@@ -18,7 +18,7 @@ export const SIZE_CHIPS: { id: SizeBand; label: string }[] = [
 export const STYLE_CHIPS: { id: StyleFilter; label: string }[] = [
   { id: 'all', label: 'All styles' },
   { id: 'value', label: 'Under $1,400' },
-  { id: 'twohr', label: '2-hour trips' },
+  { id: 'captain', label: 'Captain included' },
   { id: 'saved', label: 'Saved' },
 ];
 
@@ -41,8 +41,8 @@ function inSize(yacht: Yacht, band: SizeBand): boolean {
   return ft >= 70;
 }
 
-function hasTwoHour(yacht: Yacht): boolean {
-  return (yacht.pricing || []).some((row) => /2\s*hour/i.test(String(row.duration || '')));
+function hasCaptain(yacht: Yacht): boolean {
+  return Boolean(yacht.captain_included);
 }
 
 export function filterAndSort(
@@ -65,7 +65,7 @@ export function filterAndSort(
       const start = startingTotal(y);
       if (!start || start.amount >= 1400) return false;
     }
-    if (opts.style === 'twohr' && !hasTwoHour(y)) return false;
+    if (opts.style === 'captain' && !hasCaptain(y)) return false;
     if (q && !`${y.title} ${y.size_ft || ''} ${y.capacity_max || ''}`.toLowerCase().includes(q)) {
       return false;
     }

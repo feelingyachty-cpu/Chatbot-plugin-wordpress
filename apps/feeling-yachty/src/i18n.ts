@@ -113,6 +113,12 @@ const EN: Record<string, string> = {
   openWooCheckout: 'Open WooCommerce checkout',
   checkoutHint: 'Same checkout as feelingyachty.com. Confirm duration and guests, then Book Experience.',
   checkoutError: 'Checkout could not open in the app. Use the website checkout — it is the same WooCommerce payment.',
+  forgotPassword: 'Forgot password? Reset it on the website',
+  panamaEmptyTitle: 'Panama charters are booked live',
+  panamaEmptyBody: 'The Panama fleet is not listed in the app yet. WhatsApp or call the Panama desk and we will match a boat.',
+  shareYacht: 'Share this yacht',
+  captainIncluded: 'Captain included',
+  reviewsTitle: 'Guest reviews',
 };
 
 const ES: Record<string, string> = {
@@ -230,6 +236,12 @@ const ES: Record<string, string> = {
   openWooCheckout: 'Abrir checkout WooCommerce',
   checkoutHint: 'El mismo checkout de feelingyachty.com. Confirma duración e invitados y toca Book Experience.',
   checkoutError: 'El checkout no abrió en la app. Usa el checkout del sitio — es el mismo pago WooCommerce.',
+  forgotPassword: '¿Olvidaste la contraseña? Restablécela en el sitio',
+  panamaEmptyTitle: 'Los charters de Panamá se reservan en vivo',
+  panamaEmptyBody: 'La flota de Panamá aún no está en la app. WhatsApp o llama al escritorio de Panamá y te conseguimos un yate.',
+  shareYacht: 'Compartir este yate',
+  captainIncluded: 'Capitán incluido',
+  reviewsTitle: 'Reseñas',
 };
 
 export function t(lang: string | undefined, key: string, vars?: Record<string, string | number>): string {

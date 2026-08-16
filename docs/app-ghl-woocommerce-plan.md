@@ -168,40 +168,28 @@ Shortcodes: `[fy_yacht_fleet]`, `[fy_yacht_info]`, `[fy_yacht_details]`, `[fy_ya
 
 ---
 
-## Build sequence (agent work, not calendar dates)
+## ETA (clock times)
 
-This is what I can finish in the repo versus what only you can click.
+Today is **Sunday 16 Aug 2026**. These are how long each slice takes **me** (this agent) plus what **you** must click. Store review is Apple/Google, not me.
 
-### Slice A — in this PR (started)
+| Slice | What you get | My work time | You must do | Earliest you can use it |
+| --- | --- | --- | --- | --- |
+| **A — done** | Browse live boats + Book on the real Woo product + Call/WhatsApp (GHL). No chatbot. | **Done now** (~3 hours already spent) | `npm install && npx expo start` on a phone (15 min) | **Today**, in Expo Go |
+| **B — next** | `fy-app/v1` on the site, in-app quote, My Charters after login, n8n order lookup | **4 hours** | Upload the 2 plugin zips (10 min) + one Stripe test booking (15 min) | **Same day** if you upload the zips before I start B. If you upload tonight, B is done **Sunday night / Monday morning**. |
+| **C — stores** | TestFlight (iPhone) + Play internal track (Android) | **3 hours** (EAS config, icons, first builds) | Apple Developer ($99/year) + Google Play ($25, one-time). If you already have them: 30 min to invite me / run EAS. If you do not: **1–2 days** for Apple to approve the account. | **~24 hours after** accounts are active (first TestFlight). **Apple App Store public review: 1–3 days** after you submit. **Play production: ~1–3 days** (often faster on internal track: same day). |
+| **D — optional** | Native Apple Pay / Google Pay sheet (no WebView) | **8 hours** | Stripe test keys confirmed, one more TestFlight | **1 extra day** of my work after C, then another TestFlight (~2 hours for you to install) |
 
-- Plan (this file)
-- Expo app: city → fleet → yacht → Woo WebView checkout → GHL contact buttons
-- `feeling-yachty-mobile-api` plugin (upload to WP when you want `fy-app/v1`)
-- `feeling-yachty-no-chatbot` plugin
-- App talks to **live** `feelingyachty.com` now (no wait on the upload)
+### Simple version
 
-### Slice B — next agent pass (after you upload the mobile API plugin)
+- **Use the app on a phone today:** 15 minutes (Expo Go). Slice A is already built.
+- **Finish the real app features (quote + my bookings):** **4 hours** after you upload the two zips.
+- **Put it on TestFlight / Play for staff:** **3 hours** of my work + your store accounts. First installable store build: **same day** if accounts exist, **1–2 days** if Apple is still approving the developer account.
+- **Public in the App Store / Play Store:** **1–3 days of store review** after you tap Submit. I cannot skip that.
+- **Whole thing, you already have Apple + Google accounts:** about **1 working day** of my time (B + C), then **1–3 days** of Apple/Google review.
+- **Whole thing, you still need store accounts:** **2–4 days** end-to-end (account wait + my build + review).
+- **Native Apple Pay later:** add **1 day** of my time.
 
-- Wire the app to `fy-app/v1` catalog + quote
-- Customer login (Woo My Account) → My Charters list
-- n8n webhook that looks up a Woo order by email for the app (uses existing Woo credential, **keys stay in n8n**)
-
-### Slice C — store submission (needs your accounts)
-
-- Apple Developer + Google Play Console
-- Expo EAS build + icons/screenshots
-- TestFlight / internal testing track
-- I can prepare the project and EAS config; **you** must accept store agreements and install the build on a phone
-
-### Slice D — native Apple Pay sheet (optional later)
-
-- Replace WebView with Stripe Payment Sheet
-- Same Suite quote + same Woo order + same GHL webhooks
-- One function change in the app client
-
-**Blocked on you, not on code:** upload the two small plugins, Apple/Google accounts, a TestFlight device.
-
-I will not quote days or weeks. Each slice is one focused agent PR. Slice A is the one that already lets you browse real boats and pay on the real Woo product.
+I am ready to start **Slice B as soon as the two zips are on feelingyachty.com**. That is the only blocker for the next 4 hours.
 
 ---
 

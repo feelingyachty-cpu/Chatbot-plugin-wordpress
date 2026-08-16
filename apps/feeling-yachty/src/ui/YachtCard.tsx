@@ -51,6 +51,7 @@ export function YachtCard({
     <View
       style={{
         marginBottom: 16,
+        marginHorizontal: 16,
         backgroundColor: colors.card,
         borderRadius: 20,
         overflow: 'hidden',

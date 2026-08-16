@@ -1,6 +1,6 @@
 {
   "name": "feeling-yachty",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -11,7 +11,9 @@
     "apk": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.39",
+    "expo-image-picker": "~15.1.0",
     "expo-linking": "~6.3.1",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",

@@ -1,4 +1,4 @@
-import { API_BASE, TALK_WEBHOOK } from './config';
+import { API_BASE, APP_KEY, TALK_WEBHOOK } from './config';
 import type { CatalogYacht, PricingRow, Yacht } from './types';
 
 async function getJson<T>(path: string): Promise<T> {
@@ -80,7 +80,7 @@ export async function sendTalkMessage(payload: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-fy-app-key': 'fy-app-talk-2026',
+      'x-fy-app-key': APP_KEY,
     },
     body: JSON.stringify({
       ...payload,

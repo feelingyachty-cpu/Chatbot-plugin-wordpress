@@ -22,8 +22,8 @@ class FY_App_REST {
 			return $served;
 		}
 		header( 'Access-Control-Allow-Origin: *' );
-		header( 'Access-Control-Allow-Methods: GET, POST, OPTIONS' );
-		header( 'Access-Control-Allow-Headers: Authorization, Content-Type' );
+		header( 'Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS' );
+		header( 'Access-Control-Allow-Headers: Authorization, Content-Type, x-fy-app-key' );
 		return $served;
 	}
 
@@ -70,13 +70,63 @@ class FY_App_REST {
 
 		register_rest_route(
 			self::NS,
+			'/auth/register',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( 'FY_App_Auth', 'register' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/auth/login',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( 'FY_App_Auth', 'login' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/auth/logout',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( 'FY_App_Auth', 'logout' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/me',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( 'FY_App_Auth', 'me' ),
+					'permission_callback' => '__return_true',
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( 'FY_App_Auth', 'update_me' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/me/photo',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( 'FY_App_Auth', 'photo' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+		register_rest_route(
+			self::NS,
 			'/me/bookings',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( __CLASS__, 'my_bookings' ),
-				'permission_callback' => function () {
-					return is_user_logged_in();
-				},
+				'permission_callback' => '__return_true',
 			)
 		);
 	}
@@ -212,50 +262,12 @@ class FY_App_REST {
 		);
 	}
 
-	public static function my_bookings() {
-		if ( ! function_exists( 'wc_get_orders' ) ) {
-			return new WP_Error( 'fy_app_no_woo', __( 'WooCommerce is not available.', 'fy-app' ), array( 'status' => 503 ) );
+	public static function my_bookings( $request ) {
+		$user_id = class_exists( 'FY_App_Auth' ) ? FY_App_Auth::user_id( $request ) : 0;
+		if ( ! $user_id ) {
+			return new WP_Error( 'fy_app_auth', __( 'Please log in.', 'fy-app' ), array( 'status' => 401 ) );
 		}
-
-		$user  = wp_get_current_user();
-		$orders = wc_get_orders(
-			array(
-				'customer' => $user->ID,
-				'limit'    => 20,
-				'orderby'  => 'date',
-				'order'    => 'DESC',
-			)
-		);
-
-		$out = array();
-		foreach ( $orders as $order ) {
-			$lines = array();
-			foreach ( $order->get_items() as $item ) {
-				$lines[] = array(
-					'name'     => $item->get_name(),
-					'yacht_id' => (int) $item->get_meta( '_fy_yacht_id' ),
-					'date'     => $item->get_meta( '_fy_date' ),
-					'time'     => $item->get_meta( '_fy_time' ),
-					'duration' => $item->get_meta( '_fy_duration' ),
-					'guests'   => (int) $item->get_meta( '_fy_guests' ),
-					'marina'   => $item->get_meta( '_fy_marina' ),
-					'total'    => (float) $item->get_meta( '_fy_charter_total' ),
-					'deposit'  => (float) $item->get_meta( '_fy_deposit' ),
-					'balance'  => (float) $item->get_meta( '_fy_balance' ),
-				);
-			}
-			$out[] = array(
-				'order_id'     => $order->get_id(),
-				'order_no'     => $order->get_order_number(),
-				'status'       => $order->get_status(),
-				'total'        => (float) $order->get_total(),
-				'currency'     => $order->get_currency(),
-				'date_created' => $order->get_date_created() ? $order->get_date_created()->date( 'c' ) : '',
-				'lines'        => $lines,
-			);
-		}
-
-		return rest_ensure_response( array( 'bookings' => $out ) );
+		return rest_ensure_response( array( 'bookings' => FY_App_Auth::bookings( $user_id ) ) );
 	}
 
 	private static function card( $yacht_id ) {

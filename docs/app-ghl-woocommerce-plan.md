@@ -87,6 +87,10 @@ The plugin already linked every listing to a product. Fastest stable pay path:
 4. Guest pays with the same Stripe / PayPal / Apple Pay / Google Pay the site uses
 5. Woo status `processing`/`completed` → n8n → GHL
 
+### Guest accounts (WooCommerce customers)
+
+Each app login is a real WooCommerce customer (same My Account / My Charters as the website). Register/login hit `fy-app/v1` when that plugin is on the site; until then they use the n8n webhook `fy-app-account`, which creates the Woo customer with Suite’s required `fy_region` (Miami or Panama). Profile photo, billing, theme, and experience settings save on that account. No chatbot.
+
 Later we can swap the WebView for a native Stripe Payment Sheet **without rewriting the catalog**. The Book button stays `openCheckout(productUrl)`. That is the stability rule: **UI talks to a tiny API client; payment method is swappable.**
 
 Do **not** put Woo consumer keys in the iPhone/Android binary.

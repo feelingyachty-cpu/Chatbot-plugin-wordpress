@@ -24,3 +24,84 @@ export type Yacht = {
 };
 
 export type CatalogYacht = Yacht;
+
+export type ThemeId = 'yachty' | 'midnight' | 'ocean' | 'sunset' | 'ivory' | 'custom';
+
+export type AppSettings = {
+  defaultCity: 'miami' | 'panama';
+  prefillTalk: boolean;
+  preferredContact: 'call' | 'whatsapp' | 'sms';
+  compactCards: boolean;
+  showPrices: boolean;
+  language: 'en' | 'es';
+  themeId: ThemeId;
+  customAccent: string;
+  customHeader: string;
+};
+
+export type Billing = {
+  first_name?: string;
+  last_name?: string;
+  company?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
+  phone?: string;
+};
+
+export type AppUser = {
+  id: number;
+  woo_id?: number;
+  email: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  phone?: string;
+  region?: string;
+  photo_url?: string;
+  notes?: string;
+  occasion?: string;
+  typical_guests?: number;
+  billing?: Billing;
+  settings?: Partial<AppSettings>;
+  account_url?: string;
+};
+
+export type BookingLine = {
+  name?: string;
+  yacht_id?: number;
+  date?: string;
+  time?: string;
+  duration?: string;
+  guests?: number;
+  marina?: string;
+  total?: number;
+  deposit?: number;
+  balance?: number;
+};
+
+export type Booking = {
+  order_id: number;
+  order_no?: string;
+  status?: string;
+  total?: number;
+  currency?: string;
+  date_created?: string;
+  lines?: BookingLine[];
+};
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  defaultCity: 'miami',
+  prefillTalk: true,
+  preferredContact: 'whatsapp',
+  compactCards: false,
+  showPrices: true,
+  language: 'en',
+  themeId: 'yachty',
+  customAccent: '#e11d74',
+  customHeader: '#081018',
+};

@@ -8,13 +8,13 @@ This repo does **not** ship a website chatbot. **GoHighLevel** handles SMS, What
 
 One Expo codebase: [apps/feeling-yachty](apps/feeling-yachty). **Android test APK:** [dist/Feeling-Yachty.apk](dist/Feeling-Yachty.apk).
 
-Tabs: **Yachts** (browse) · **Promos** (pink boats only — not in browse) · **Talk** (GHL live: call / WhatsApp / SMS / form / inbox message).
+Tabs: **Yachts** (browse) · **Promos** (pink boats only — not in browse) · **Talk** (GHL live: call / WhatsApp / SMS / form / inbox message) · **Profile** (WooCommerce login, photo, settings, app colors).
 
 Full plan: [docs/app-ghl-woocommerce-plan.md](docs/app-ghl-woocommerce-plan.md).
 
 Upload to WordPress when ready:
 
-- [feeling-yachty-mobile-api](feeling-yachty-mobile-api/) — `fy-app/v1` catalog + quote
+- [feeling-yachty-mobile-api](feeling-yachty-mobile-api/) — `fy-app/v1` catalog, quote, and WooCommerce login/profile (`/auth/login`, `/me`)
 - [feeling-yachty-no-chatbot](feeling-yachty-no-chatbot/) — hides Suite Support Bot menus/scripts
 
 ## How the fleet plugin works

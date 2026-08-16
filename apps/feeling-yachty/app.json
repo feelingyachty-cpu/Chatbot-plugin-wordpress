@@ -2,7 +2,7 @@
   "expo": {
     "name": "Feeling Yachty",
     "slug": "feeling-yachty",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -21,10 +21,17 @@
         "backgroundColor": "#12263a"
       },
       "package": "com.feelingyachty.app",
-      "permissions": ["INTERNET"],
+      "permissions": ["INTERNET", "READ_MEDIA_IMAGES", "READ_EXTERNAL_STORAGE"],
       "usesCleartextTraffic": false
     },
-    "plugins": [],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Feeling Yachty uses your photos so you can set a profile picture on your charter account."
+        }
+      ]
+    ],
     "extra": {
       "apiBase": "https://feelingyachty.com"
     }

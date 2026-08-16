@@ -20,6 +20,7 @@ export function YachtCard({
   hoursLabel,
   hideHoursLabel,
   guestsLabel,
+  captainIncludedLabel,
   onPress,
   onToggleHours,
   onToggleSave,
@@ -38,6 +39,7 @@ export function YachtCard({
   hoursLabel: string;
   hideHoursLabel: string;
   guestsLabel: string;
+  captainIncludedLabel: string;
   onPress: () => void;
   onToggleHours?: () => void;
   onToggleSave?: () => void;
@@ -45,18 +47,23 @@ export function YachtCard({
   const start = startingTotal(yacht);
   const rows = (yacht.pricing || []).filter((row) => (row.type || 'price') === 'price' && row.price != null);
   const lowest = start?.amount;
-  const imageH = compact ? 0 : promo ? 230 : 200;
+  const imageH = compact ? 0 : 224;
 
   return (
     <View
       style={{
-        marginBottom: 16,
-        marginHorizontal: 16,
+        marginBottom: 20,
+        marginHorizontal: 18,
         backgroundColor: colors.card,
-        borderRadius: 20,
+        borderRadius: 26,
         overflow: 'hidden',
-        borderWidth: promo || saved ? 2 : 1,
-        borderColor: promo ? colors.pink : saved ? colors.pinkHot : colors.line,
+        borderWidth: 1,
+        borderColor: saved ? colors.pinkHot : colors.line,
+        shadowColor: colors.navyDeep,
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 4,
       }}
     >
         {!!yacht.image_url && !compact && (
@@ -64,37 +71,9 @@ export function YachtCard({
             <PressScale onPress={onPress}>
               <View style={{ height: imageH }}>
                 <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: '100%' }} />
-                <View
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 110,
-                    backgroundColor: 'rgba(8,16,24,0.55)',
-                  }}
-                />
-                <View style={{ position: 'absolute', left: 12, right: 56, bottom: 12 }}>
-                  <HighlightText
-                    text={yacht.title}
-                    query={query}
-                    style={{ color: colors.white, fontWeight: '800', fontSize: 20 }}
-                    highlightStyle={{ backgroundColor: colors.pink, color: colors.white }}
-                  />
-                  {showPrice !== false && (
-                    <Text style={{ color: colors.cream, fontWeight: '800', marginTop: 4, fontSize: 14 }}>
-                      {start
-                        ? fromLabel.replace('{price}', money(start.amount)).replace('{duration}', start.duration)
-                        : seePricesLabel}
-                    </Text>
-                  )}
-                </View>
-                <View style={{ position: 'absolute', top: 10, left: 10, flexDirection: 'row', flexWrap: 'wrap', gap: 6, maxWidth: '78%' }}>
+                <View style={{ position: 'absolute', top: 14, left: 14, flexDirection: 'row', gap: 6 }}>
                   {promo && <Chip colors={colors} text={promoLabel} hot />}
                   {!!yacht.size_ft && <Chip colors={colors} text={`${yacht.size_ft} ft`} />}
-                  {!!yacht.capacity_max && <Chip colors={colors} text={`${yacht.capacity_max} ${guestsLabel}`} />}
-                  {!!yacht.captain_included && <Chip colors={colors} text="Captain" />}
-                  {!!yacht.rating && <Chip colors={colors} text={`★ ${yacht.rating}`} hot />}
                 </View>
               </View>
             </PressScale>
@@ -104,44 +83,45 @@ export function YachtCard({
                 hitSlop={10}
                 style={{
                   position: 'absolute',
-                  top: 10,
-                  right: 10,
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: saved ? colors.pink : 'rgba(8,16,24,0.55)',
+                  top: 14,
+                  right: 14,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 21,
+                  backgroundColor: saved ? colors.pink : 'rgba(6,24,36,0.68)',
                   alignItems: 'center',
                   justifyContent: 'center',
                   zIndex: 2,
                 }}
               >
-                <Text style={{ color: colors.white, fontSize: 16 }}>{saved ? '♥' : '♡'}</Text>
+                <Text style={{ color: colors.white, fontSize: 20 }}>{saved ? '♥' : '♡'}</Text>
               </Pressable>
             )}
           </View>
         )}
 
-        <Pressable onPress={onPress} style={{ padding: 12, flexDirection: compact ? 'row' : 'column', gap: 10 }}>
+        <Pressable onPress={onPress} style={{ padding: 16, flexDirection: compact ? 'row' : 'column', gap: 12 }}>
           {!!yacht.image_url && compact && (
-            <Image source={{ uri: yacht.image_url }} style={{ width: 78, height: 78, borderRadius: 12, backgroundColor: colors.navy }} />
+            <Image source={{ uri: yacht.image_url }} style={{ width: 88, height: 88, borderRadius: 16, backgroundColor: colors.navy }} />
           )}
           <View style={{ flex: 1 }}>
-            {compact && (
-              <HighlightText
-                text={yacht.title}
-                query={query}
-                style={{ fontSize: 16, fontWeight: '800', color: colors.ink }}
-                highlightStyle={{ backgroundColor: '#ffe3f0', color: colors.pink }}
-              />
-            )}
-            <Text style={{ color: colors.muted, marginTop: compact ? 4 : 0, fontWeight: '600' }}>
+            <HighlightText
+              text={yacht.title}
+              query={query}
+              style={{ fontSize: compact ? 17 : 22, lineHeight: compact ? 21 : 27, fontWeight: '900', color: colors.ink }}
+              highlightStyle={{ backgroundColor: '#FFE3F0', color: colors.pink }}
+            />
+            <Text style={{ color: colors.muted, marginTop: 7, fontWeight: '700', fontSize: 13 }}>
               {yacht.size_ft ? `${yacht.size_ft} ft` : ''}
               {yacht.capacity_max ? ` · ${yacht.capacity_max} ${guestsLabel}` : ''}
               {yacht.marina?.title ? ` · ${yacht.marina.title}` : ''}
-              {yacht.rating ? ` · ★ ${yacht.rating}` : ''}
             </Text>
-            {compact && showPrice !== false && (
-              <Text style={{ color: colors.pink, fontWeight: '800', marginTop: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 12 }}>
+              {!!yacht.captain_included && <MetaPill colors={colors} text={captainIncludedLabel} />}
+              {!!yacht.rating && <MetaPill colors={colors} text={`★ ${yacht.rating}`} hot />}
+            </View>
+            {showPrice !== false && (
+              <Text style={{ color: colors.pink, fontWeight: '900', marginTop: 14, fontSize: compact ? 14 : 17 }}>
                 {start
                   ? fromLabel.replace('{price}', money(start.amount)).replace('{duration}', start.duration)
                   : seePricesLabel}
@@ -150,13 +130,25 @@ export function YachtCard({
           </View>
         </Pressable>
         {!!onToggleHours && rows.length > 0 && (
-          <Pressable onPress={onToggleHours} style={{ paddingHorizontal: 12, paddingBottom: expanded ? 4 : 12 }}>
-            <Text style={{ color: colors.pink, fontWeight: '800' }}>{expanded ? hideHoursLabel : hoursLabel}</Text>
+          <Pressable
+            onPress={onToggleHours}
+            style={{
+              marginHorizontal: 16,
+              marginBottom: expanded ? 8 : 16,
+              borderTopWidth: 1,
+              borderTopColor: colors.line,
+              paddingTop: 13,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text style={{ color: colors.ink, fontWeight: '900' }}>{expanded ? hideHoursLabel : hoursLabel}</Text>
+            <Text style={{ color: colors.pink, fontWeight: '900', fontSize: 18 }}>{expanded ? '−' : '+'}</Text>
           </Pressable>
         )}
 
         {expanded && rows.length > 0 && (
-          <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
             {rows.map((row, idx) => {
               const amt = Number(row.price || 0);
               const best = lowest != null && amt === lowest;
@@ -168,9 +160,9 @@ export function YachtCard({
                     justifyContent: 'space-between',
                     paddingVertical: 9,
                     paddingHorizontal: 10,
-                    borderRadius: 10,
+                    borderRadius: 12,
                     marginBottom: 4,
-                    backgroundColor: best ? '#ffe3f0' : colors.paper,
+                    backgroundColor: best ? '#FFE5F0' : colors.paper,
                   }}
                 >
                   <Text style={{ color: colors.ink, fontWeight: best ? '800' : '600' }}>{row.duration}</Text>
@@ -188,13 +180,21 @@ function Chip({ colors, text, hot }: { colors: Colors; text: string; hot?: boole
   return (
     <View
       style={{
-        backgroundColor: hot ? colors.pink : 'rgba(8,16,24,0.55)',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
+        backgroundColor: hot ? colors.pink : 'rgba(6,24,36,0.72)',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
         borderRadius: 999,
       }}
     >
-      <Text style={{ color: colors.white, fontWeight: '800', fontSize: 11 }}>{text}</Text>
+      <Text style={{ color: colors.white, fontWeight: '900', fontSize: 11 }}>{text}</Text>
+    </View>
+  );
+}
+
+function MetaPill({ colors, text, hot }: { colors: Colors; text: string; hot?: boolean }) {
+  return (
+    <View style={{ backgroundColor: hot ? '#FFE5F0' : colors.paper, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 }}>
+      <Text style={{ color: hot ? colors.pink : colors.ink, fontWeight: '800', fontSize: 11 }}>{text}</Text>
     </View>
   );
 }
@@ -213,9 +213,9 @@ export function MiniCard({
   const start = startingTotal(yacht);
   return (
     <PressScale onPress={onPress} style={{ width, marginRight: 12 }}>
-      <View style={{ borderRadius: 16, overflow: 'hidden', backgroundColor: colors.navy }}>
+      <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.navy }}>
         {!!yacht.image_url && <Image source={{ uri: yacht.image_url }} style={{ width, height: 110 }} />}
-        <View style={{ padding: 10, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderTopWidth: 0, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
+        <View style={{ padding: 11, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, borderTopWidth: 0, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}>
           <Text numberOfLines={1} style={{ fontWeight: '800', color: colors.ink }}>
             {yacht.title}
           </Text>

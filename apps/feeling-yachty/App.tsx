@@ -239,7 +239,49 @@ function AppShell() {
     hoursLabel: t(lang, 'hoursLabel'),
     hideHoursLabel: t(lang, 'hideHoursLabel'),
     guestsLabel: t(lang, 'guestsShort'),
+    captainIncludedLabel: t(lang, 'captainIncluded'),
   };
+
+  const browseControls = (
+    <View>
+      <View style={styles.discovery}>
+        <Text style={styles.discoveryKicker}>{t(lang, 'browseKicker')}</Text>
+        <Text style={styles.discoveryTitle}>{t(lang, 'browseTitle')}</Text>
+        <Text style={styles.discoveryLead}>{t(lang, 'browseLead')}</Text>
+        <View style={styles.trustRow}>
+          <View style={styles.liveDot} />
+          <Text style={styles.trust}>
+            {t(lang, 'trustLine', { n: browse.length || yachts.length, city: city.label })}
+          </Text>
+        </View>
+        <View style={styles.searchShell}>
+          <Text style={styles.searchIcon}>⌕</Text>
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t(lang, 'search')}
+            placeholderTextColor={colors.muted}
+            style={styles.search}
+          />
+          {!!query && (
+            <Pressable onPress={() => setQuery('')} hitSlop={10} style={styles.clearSearch}>
+              <Text style={styles.clearSearchText}>×</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+      <FilterBar
+        colors={colors}
+        size={size}
+        style={style}
+        sort={sort}
+        savedCount={savedIds.length}
+        onSize={setSize}
+        onStyle={setStyle}
+        onSort={setSort}
+      />
+    </View>
+  );
 
   function renderYacht(item: Yacht, promo?: boolean) {
     return (
@@ -264,10 +306,16 @@ function AppShell() {
     <SafeAreaView style={styles.safe}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <Image source={require('./assets/logo.png')} style={styles.logo} />
-        <View style={styles.headerText}>
-          <Text style={styles.brand}>{t(lang, 'brand')}</Text>
-          <Text style={styles.sub}>{t(lang, 'tagline')}</Text>
+        <View style={styles.headerTop}>
+          <Image source={require('./assets/logo.png')} style={styles.logo} resizeMode="contain" />
+          <View style={styles.headerText}>
+            <Text style={styles.brand}>{t(lang, 'brand')}</Text>
+            <Text style={styles.sub}>{t(lang, 'tagline')}</Text>
+          </View>
+          <Pressable onPress={() => setTab('talk')} style={styles.concierge}>
+            <View style={styles.liveDot} />
+            <Text style={styles.conciergeText}>24/7</Text>
+          </Pressable>
         </View>
         <View style={styles.citySwitch}>
           {CITIES.map((item) => (
@@ -331,27 +379,12 @@ function AppShell() {
 
       {!overlay && tab === 'yachts' && (
         <View style={styles.flex}>
-          <Text style={styles.trust}>
-            {t(lang, 'trustLine', { n: browse.length || yachts.length, city: city.label })}
-          </Text>
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t(lang, 'search')}
-            placeholderTextColor={colors.muted}
-            style={styles.search}
-          />
-          <FilterBar
-            colors={colors}
-            size={size}
-            style={style}
-            sort={sort}
-            savedCount={savedIds.length}
-            onSize={setSize}
-            onStyle={setStyle}
-            onSort={setSort}
-          />
-          {loading && <FeedSkeleton colors={colors} />}
+          {loading && (
+            <ScrollView>
+              {browseControls}
+              <FeedSkeleton colors={colors} />
+            </ScrollView>
+          )}
           {!!error && <Text style={styles.error}>{error}</Text>}
           {!loading && !error && city.slug === 'panama' && yachts.length === 0 && (
             <View style={{ padding: 20 }}>
@@ -384,12 +417,14 @@ function AppShell() {
               contentContainerStyle={{ paddingBottom: 88 }}
               ListHeaderComponent={
                 <View>
-                  <Text style={styles.valueNote}>{t(lang, 'valueNote')}</Text>
+                  {browseControls}
                   {!!promos.length && (
                     <Pressable onPress={() => setTab('promos')} style={styles.promoJump}>
+                      <Text style={styles.promoJumpIcon}>✦</Text>
                       <Text style={styles.promoJumpText}>
                         {t(lang, 'seeAllPromos')} · {promos.length}
                       </Text>
+                      <Text style={styles.promoJumpArrow}>›</Text>
                     </Pressable>
                   )}
                   <FeaturedReel
@@ -584,38 +619,71 @@ function makeStyles(colors: Colors) {
     flex: { flex: 1, backgroundColor: colors.paper },
     header: {
       backgroundColor: colors.navyDeep,
-      paddingHorizontal: 14,
-      paddingBottom: 10,
-      paddingTop: 4,
+      paddingHorizontal: 18,
+      paddingBottom: 14,
+      paddingTop: 6,
+      gap: 12,
+    },
+    headerTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+    logo: { width: 46, height: 46 },
+    headerText: { flex: 1 },
+    brand: { color: colors.cream, fontWeight: '900', letterSpacing: 1.6, fontSize: 13 },
+    sub: { color: '#9CB2C1', fontSize: 11, marginTop: 3 },
+    concierge: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 10,
+      gap: 6,
+      backgroundColor: 'rgba(255,255,255,0.08)',
+      borderRadius: 999,
+      paddingHorizontal: 11,
+      paddingVertical: 8,
     },
-    logo: { width: 52, height: 52, borderRadius: 26 },
-    headerText: { flex: 1 },
-    brand: { color: colors.cream, fontWeight: '800', letterSpacing: 1, fontSize: 13 },
-    sub: { color: colors.muted, fontSize: 11, marginTop: 2 },
-    citySwitch: { flexDirection: 'row', backgroundColor: colors.navy, borderRadius: 999, padding: 3 },
-    cityPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+    conciergeText: { color: colors.white, fontSize: 11, fontWeight: '900' },
+    citySwitch: { flexDirection: 'row', backgroundColor: colors.navy, borderRadius: 14, padding: 4 },
+    cityPill: { flex: 1, alignItems: 'center', paddingHorizontal: 12, paddingVertical: 9, borderRadius: 11 },
     cityPillOn: { backgroundColor: colors.pink },
-    cityPillText: { color: colors.muted, fontWeight: '700', fontSize: 12 },
+    cityPillText: { color: '#9CB2C1', fontWeight: '800', fontSize: 12 },
     cityPillTextOn: { color: colors.white },
-    trust: {
-      color: colors.pink,
-      fontWeight: '700',
-      fontSize: 12,
-      paddingHorizontal: 16,
-      paddingTop: 10,
+    discovery: { paddingHorizontal: 18, paddingTop: 22, paddingBottom: 14 },
+    discoveryKicker: { color: colors.pink, fontSize: 11, fontWeight: '900', letterSpacing: 1.8 },
+    discoveryTitle: { color: colors.ink, fontSize: 30, lineHeight: 34, fontWeight: '900', marginTop: 8, letterSpacing: -0.7 },
+    discoveryLead: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 8, maxWidth: 350 },
+    trustRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
+    liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#39D98A' },
+    trust: { color: colors.ink, fontWeight: '800', fontSize: 11, flex: 1 },
+    searchShell: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 18,
+      backgroundColor: colors.white,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: colors.line,
+      paddingHorizontal: 14,
+      shadowColor: colors.navyDeep,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 5 },
+      elevation: 2,
     },
-    valueNote: { color: colors.muted, paddingHorizontal: 16, marginBottom: 10, lineHeight: 18 },
+    searchIcon: { color: colors.pink, fontWeight: '900', fontSize: 22, marginRight: 8, transform: [{ rotate: '-20deg' }] },
+    clearSearch: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.paper, alignItems: 'center', justifyContent: 'center' },
+    clearSearchText: { color: colors.muted, fontSize: 18, lineHeight: 20 },
     promoJump: {
       marginHorizontal: 16,
-      marginBottom: 14,
-      backgroundColor: colors.navy,
-      borderRadius: 14,
-      padding: 12,
+      marginTop: 10,
+      marginBottom: 22,
+      backgroundColor: '#FFE8F1',
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 13,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 9,
     },
-    promoJumpText: { color: colors.cream, fontWeight: '800', textAlign: 'center' },
+    promoJumpIcon: { color: colors.pink, fontSize: 17 },
+    promoJumpText: { color: colors.ink, fontWeight: '800', flex: 1 },
+    promoJumpArrow: { color: colors.pink, fontSize: 24, lineHeight: 24 },
     reelTitle: { color: colors.ink, fontWeight: '800', fontSize: 18, paddingHorizontal: 16, marginBottom: 10 },
     topBar: {
       backgroundColor: colors.navy,
@@ -628,15 +696,10 @@ function makeStyles(colors: Colors) {
     topTitle: { color: colors.white, fontWeight: '800' },
     back: { color: '#ffb3d2', fontWeight: '700' },
     search: {
-      margin: 12,
-      marginBottom: 8,
-      backgroundColor: colors.white,
-      borderRadius: 14,
-      paddingHorizontal: 14,
-      paddingVertical: 11,
-      borderWidth: 1,
-      borderColor: colors.line,
+      flex: 1,
+      paddingVertical: 14,
       color: colors.ink,
+      fontSize: 14,
     },
     listLead: { color: colors.muted, marginBottom: 12, fontWeight: '700', paddingHorizontal: 16, marginTop: 8 },
     empty: { color: colors.muted, padding: 24, textAlign: 'center' },
@@ -677,12 +740,17 @@ function makeStyles(colors: Colors) {
     fab: {
       position: 'absolute',
       right: 14,
-      bottom: 78,
+      bottom: 86,
       backgroundColor: colors.pink,
       borderRadius: 999,
       paddingHorizontal: 14,
       paddingVertical: 12,
       maxWidth: 220,
+      shadowColor: colors.pink,
+      shadowOpacity: 0.3,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
     },
     fabText: { color: colors.white, fontWeight: '800', fontSize: 12 },
   });

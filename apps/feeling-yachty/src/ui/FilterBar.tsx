@@ -15,7 +15,7 @@ function ChipRow<T extends string>({
   colors: Colors;
 }) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 16 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 18 }}>
       {items.map((item) => {
         const on = item.id === value;
         return (
@@ -23,12 +23,12 @@ function ChipRow<T extends string>({
             key={item.id}
             onPress={() => onChange(item.id)}
             style={{
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: 999,
-              backgroundColor: on ? colors.pink : colors.white,
+              paddingHorizontal: 14,
+              paddingVertical: 9,
+              borderRadius: 12,
+              backgroundColor: on ? colors.navy : colors.white,
               borderWidth: 1,
-              borderColor: on ? colors.pink : colors.line,
+              borderColor: on ? colors.navy : colors.line,
             }}
           >
             <Text style={{ color: on ? colors.white : colors.ink, fontWeight: '800', fontSize: 12 }}>{item.label}</Text>
@@ -62,7 +62,7 @@ export function FilterBar({
     c.id === 'saved' ? { ...c, label: savedCount ? `Saved ${savedCount}` : c.label } : c
   );
   return (
-    <View style={{ gap: 8, paddingLeft: 16, marginBottom: 4 }}>
+    <View style={{ gap: 9, paddingLeft: 18, paddingBottom: 12 }}>
       <ChipRow items={SIZE_CHIPS} value={size} onChange={onSize} colors={colors} />
       <ChipRow items={styles} value={style} onChange={onStyle} colors={colors} />
       <ChipRow items={SORT_CHIPS} value={sort} onChange={onSort} colors={colors} />

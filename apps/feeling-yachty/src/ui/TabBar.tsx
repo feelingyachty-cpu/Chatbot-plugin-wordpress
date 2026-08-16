@@ -17,19 +17,26 @@ export function TabBar({
   promoCount?: number;
 }) {
   const items: { id: Tab; icon: string }[] = [
-    { id: 'yachts', icon: '◆' },
+    { id: 'yachts', icon: '◈' },
     { id: 'promos', icon: '✦' },
-    { id: 'talk', icon: '◈' },
-    { id: 'profile', icon: '●' },
+    { id: 'talk', icon: '◎' },
+    { id: 'profile', icon: '○' },
   ];
   return (
     <View
       style={{
         flexDirection: 'row',
-        backgroundColor: colors.navyDeep,
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        gap: 6,
+        backgroundColor: colors.white,
+        paddingHorizontal: 12,
+        paddingTop: 8,
+        paddingBottom: 10,
+        borderTopWidth: 1,
+        borderTopColor: colors.line,
+        shadowColor: colors.navyDeep,
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        shadowOffset: { width: 0, height: -5 },
+        elevation: 12,
       }}
     >
       {items.map((item) => {
@@ -40,14 +47,21 @@ export function TabBar({
             onPress={() => onTab(item.id)}
             style={{
               flex: 1,
-              paddingVertical: 8,
-              borderRadius: 14,
-              backgroundColor: active ? colors.pink : colors.navy,
+              paddingVertical: 3,
               alignItems: 'center',
             }}
           >
-            <View>
-              <Text style={{ color: active ? colors.white : colors.muted, textAlign: 'center', fontSize: 12 }}>
+            <View
+              style={{
+                width: 34,
+                height: 28,
+                borderRadius: 14,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: active ? '#FFE5F0' : 'transparent',
+              }}
+            >
+              <Text style={{ color: active ? colors.pink : colors.muted, textAlign: 'center', fontSize: 16, fontWeight: '900' }}>
                 {item.icon}
               </Text>
               {item.id === 'promos' && !!promoCount && (
@@ -55,14 +69,14 @@ export function TabBar({
                   style={{
                     position: 'absolute',
                     top: -6,
-                    right: -16,
-                    backgroundColor: colors.cream,
+                    right: -10,
+                    backgroundColor: colors.pink,
                     borderRadius: 8,
                     minWidth: 16,
                     paddingHorizontal: 4,
                   }}
                 >
-                  <Text style={{ color: colors.navyDeep, fontSize: 9, fontWeight: '800', textAlign: 'center' }}>
+                  <Text style={{ color: colors.white, fontSize: 9, fontWeight: '900', textAlign: 'center' }}>
                     {promoCount}
                   </Text>
                 </View>
@@ -70,10 +84,10 @@ export function TabBar({
             </View>
             <Text
               style={{
-                color: active ? colors.white : colors.muted,
-                fontWeight: '800',
+                color: active ? colors.ink : colors.muted,
+                fontWeight: active ? '900' : '700',
                 fontSize: 11,
-                marginTop: 2,
+                marginTop: 3,
               }}
             >
               {labels[item.id]}

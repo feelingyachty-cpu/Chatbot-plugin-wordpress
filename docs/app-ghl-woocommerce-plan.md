@@ -189,6 +189,8 @@ Today is **Sunday 16 Aug 2026**. These are how long each slice takes **me** (thi
 - **Whole thing, you still need store accounts:** **2–4 days** end-to-end (account wait + my build + review).
 - **Native Apple Pay later:** add **1 day** of my time.
 
+**Android APK (ready to sideload):** `dist/Feeling-Yachty.apk` and the cloud-run artifact `Feeling-Yachty.apk`. Three tabs: Yachts (browse, no pink boats), Promos (pink boats only), Talk (GHL live). No store account needed to install this APK.
+
 I am ready to start **Slice B as soon as the two zips are on feelingyachty.com**. That is the only blocker for the next 4 hours.
 
 ---

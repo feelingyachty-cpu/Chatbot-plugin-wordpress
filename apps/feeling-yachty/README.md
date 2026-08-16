@@ -1,24 +1,34 @@
-# Feeling Yachty guest app (iPhone + Android)
+# Feeling Yachty app (Android + iPhone)
 
-One Expo / React Native codebase. Both stores ship from `src/`.
+Three tabs, live fleet, WooCommerce checkout, GHL inbox. No chatbot.
 
-## What it does today
+| Tab | What it shows |
+| --- | --- |
+| **Yachts** | All bookable boats except the promo set |
+| **Promos** | Pink / promo yachts **only** — they do not appear in Yachts |
+| **Talk** | Call, WhatsApp, SMS, live GHL form, and a message box that creates a GHL contact |
 
-- Loads the **live** Miami / Panama fleets from Suite `fy/v1` (or `fy-app/v1` after you upload the companion plugin)
-- Shows **trip totals** from `pricing[]`, not hourly × hours
-- **Book** opens the yacht’s existing WooCommerce product (same Stripe / PayPal / Apple Pay as the website)
-- Contact is Call / WhatsApp / SMS only. **GoHighLevel owns the inbox. No chatbot.**
+## Test the Android APK
 
-## Run
+The built APK is on this cloud run as **Feeling-Yachty.apk** (sideload / allow unknown sources).
+
+On the phone:
+
+1. Open **Yachts** — Miami fleet loads from feelingyachty.com
+2. Open **Promos** — only the 12 pink boats
+3. Tap a boat → **Book this yacht** — WooCommerce product (same Stripe/PayPal as the site)
+4. Open **Talk** — Call / WhatsApp go to the GHL numbers; **Send to the team** upserts a GHL contact
+
+## Rebuild the APK
 
 ```bash
+export ANDROID_HOME=$HOME/android-sdk
 cd apps/feeling-yachty
 npm install
-npx expo start
+CI=1 npx expo prebuild --platform android
+cd android && ./gradlew assembleDebug
 ```
 
-Scan the QR code with Expo Go on a phone.
+APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-## Do not put secrets here
-
-Woo, WordPress, and GHL keys stay in n8n / WordPress. The app only calls public catalog URLs and the guest checkout page.
+Store accounts are only needed for Play / TestFlight, not for this APK.

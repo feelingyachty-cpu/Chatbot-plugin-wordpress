@@ -20,11 +20,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#12263a"
       },
-      "package": "com.feelingyachty.app"
+      "package": "com.feelingyachty.app",
+      "permissions": ["INTERNET"],
+      "usesCleartextTraffic": false
     },
-    "plugins": [
-      "expo-linking"
-    ],
+    "plugins": [],
     "extra": {
       "apiBase": "https://feelingyachty.com"
     }

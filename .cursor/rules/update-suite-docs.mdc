@@ -19,4 +19,4 @@ Whenever you change Suite behavior you must update that file in the same PR:
 
 Do not invent yacht names or prices. Quote Suite `pricing[]` rows.
 
-Do not add a website chatbot, chat widget, or chatbot settings back into this repo unless the owner explicitly asks.
+Do not add a website chatbot, chat widget, or chatbot settings back into this repo unless the owner explicitly asks. Guest communication is GoHighLevel only (SMS, WhatsApp, email, calls).

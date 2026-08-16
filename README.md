@@ -2,7 +2,18 @@
 
 Living documentation for **feeling-yachty-suite 3.65.0**, the fleet plugin on [feelingyachty.com](https://feelingyachty.com/).
 
-This repo does **not** ship a website chatbot. That work was removed; chat is handled elsewhere.
+This repo does **not** ship a website chatbot. **GoHighLevel** handles SMS, WhatsApp, email, and calls.
+
+## Guest app (iPhone + Android)
+
+One Expo codebase: [apps/feeling-yachty](apps/feeling-yachty). It reads the live Suite fleet and books on the **already-linked WooCommerce product**.
+
+Full plan: [docs/app-ghl-woocommerce-plan.md](docs/app-ghl-woocommerce-plan.md).
+
+Upload to WordPress when ready:
+
+- [feeling-yachty-mobile-api](feeling-yachty-mobile-api/) — `fy-app/v1` catalog + quote
+- [feeling-yachty-no-chatbot](feeling-yachty-no-chatbot/) — hides Suite Support Bot menus/scripts
 
 ## How the fleet plugin works
 

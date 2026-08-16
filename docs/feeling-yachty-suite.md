@@ -1,12 +1,12 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-14** against production **feeling-yachty-suite 3.65.0** on feelingyachty.com.
+Last reviewed: **2026-08-16** against production **feeling-yachty-suite 3.65.0** on feelingyachty.com (zip + live API).
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
 
-The PHP zip for 3.65.0 is not yet in this git repo. This file is the source of truth for *behavior we can see live*. When the plugin source is added, fill in the “Source map” and “Shortcodes (PHP names)” sections from the actual files.
+Suite **3.65.0 zip was read on 2026-08-16**. Source map and shortcodes below are from that zip. Production is still the live site; this repo does not replace the uploaded plugin until you install a new zip.
 
 ---
 
@@ -190,19 +190,17 @@ If an upgrade changes class names, data attributes, or schema `@id`s, list the d
 
 ## Shortcodes (PHP names)
 
-**Not yet confirmed from source.** Rendered HTML does not keep the `[shortcode]` text.
+From Suite 3.65.0 source:
 
-When the 3.65.0 zip is in the repo, inventory every `add_shortcode(` here. Expected families (from live UI + owner description):
-
-- Fleet / card grids on hub pages
-- Single-yacht block on Woo product pages (`fy-auto` injector)
-- Duration price table
-- Badge row
-- Marina / map
-- Gallery / lightbox
-- Filter / search bar
-- FAQ / accordion
-- CTA (WhatsApp, call, book)
+| Shortcode | File |
+| --- | --- |
+| `[fy_yacht_fleet]` | `includes/class-fy-render.php` |
+| `[fy_yacht_info]` and section tags | `includes/class-fy-woo.php` |
+| `[fy_yacht_details]` | `includes/class-fy-woo.php` |
+| `[fy_yacht_layout]` | `includes/class-fy-woo.php` |
+| `[fy_saved_yachts]` | `includes/class-fy-woo.php` |
+| `[fy_yacht_marina]` | `includes/class-fy-marina.php` |
+| `[fy_yacht_gallery]` | `includes/class-fy-gallery.php` |
 
 ---
 
@@ -236,24 +234,36 @@ n8n **My Database - WordPress Price Push** can PATCH `price` weekly from the Goo
 
 ## Source map
 
-Add paths here once `feeling-yachty-suite/` is in git.
+From the 3.65.0 zip (not copied into git — production stays the uploaded plugin).
 
-| Area | File (to fill) |
+| Area | File |
 | --- | --- |
 | Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.65.0 |
-| CPT + taxonomies | |
-| Yacht meta / pricing | |
-| REST `fy/v1` | |
-| Webhooks | |
-| Shortcodes | |
-| `fy-auto` product injector | |
-| Front CSS/JS (`fy-*`) | |
-| Marinas | |
-| Activity log | |
+| CPT + taxonomies | `includes/class-fy-cpt.php` |
+| Yacht meta | `includes/class-fy-metaboxes.php` |
+| Pricing / quote | `includes/class-fy-pricing.php` |
+| REST `fy/v1` | `includes/class-fy-rest.php` |
+| Woo product sync + `booking.paid` | `includes/class-fy-woo.php` |
+| Checkout / bareboat gate | `includes/class-fy-checkout.php` |
+| Payments hub (Stripe/PayPal status) | `includes/class-fy-payments.php` |
+| Account portal | `includes/class-fy-account.php` |
+| Settings / GHL form / webhook secret | `includes/class-fy-settings.php` |
+| Marinas | `includes/class-fy-marina.php` |
+| Activity log | `includes/class-fy-log.php` |
+| Support Bot | `includes/class-fy-support-bot.php` — **do not use; GHL owns comms** |
+| App API (this repo) | `feeling-yachty-mobile-api/` → `fy-app/v1` |
 
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-16 — mobile + GHL plan, Suite zip read
+
+- Read `feeling-yachty-suite-3.65.0` zip. Filled source map and shortcodes.
+- Confirmed live Miami fleet: **178/178** yachts have a Woo `product_id` + `product_url`.
+- Added [app-ghl-woocommerce-plan.md](app-ghl-woocommerce-plan.md): one Expo app, Woo checkout, GHL for all messages. No chatbot.
+- Companion plugins: `feeling-yachty-mobile-api`, `feeling-yachty-no-chatbot`.
+- Expo app: `apps/feeling-yachty`.
 
 ### 2026-08-15 — staff add-a-yacht PDF
 

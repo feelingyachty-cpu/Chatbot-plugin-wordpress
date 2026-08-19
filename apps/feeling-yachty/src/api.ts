@@ -1,7 +1,7 @@
 import { API_BASE, APP_KEY, TALK_WEBHOOK } from './config';
 import { durationSlug } from './pricing';
 import type { CatalogYacht, Yacht } from './types';
-export { durationSlug, money, startingTotal } from './pricing';
+export { durationSlug, listedTotal, money, startingListed, startingTotal } from './pricing';
 
 let appApiMissing = false;
 

@@ -123,6 +123,16 @@ const c4 = dockQuote(coco, '4 Hours', 500);
 assert.equal(c4.tripTotal, 1140);
 assert.equal(c4.payNow, 500);
 assert.equal(c4.dueAtDock, 940);
+
+const listed = (yacht, duration) => {
+  const boat = tripTotal(yacht, duration);
+  const hours = hoursFromDuration(duration) || 0;
+  const crewRate = boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE;
+  return roundMoney(boat + crewRate * hours);
+};
+assert.equal(listed(coco, '3 Hours'), 1080); // 855 + 225
+assert.equal(listed(coco, '4 Hours'), 1440); // 1140 + 300
+assert.equal(listed(sundeck, '3 Hours'), 555); // 330 + 225
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');

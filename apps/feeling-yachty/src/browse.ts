@@ -1,4 +1,4 @@
-import { startingTotal } from './api';
+import { startingListed } from './api';
 import { browseYachts, promoYachts } from './promo';
 import type { Yacht } from './types';
 
@@ -62,7 +62,7 @@ export function filterAndSort(
     if (!inSize(y, opts.size)) return false;
     if (opts.style === 'saved' && !opts.savedIds.includes(y.id)) return false;
     if (opts.style === 'value') {
-      const start = startingTotal(y);
+      const start = startingListed(y);
       if (!start || start.amount >= 1400) return false;
     }
     if (opts.style === 'captain' && !hasCaptain(y)) return false;
@@ -81,7 +81,7 @@ export function filterAndSort(
     });
   }
 
-  const priced = (y: Yacht) => startingTotal(y)?.amount ?? Number.POSITIVE_INFINITY;
+  const priced = (y: Yacht) => startingListed(y)?.amount ?? Number.POSITIVE_INFINITY;
   if (opts.sort === 'price_asc') list = [...list].sort((a, b) => priced(a) - priced(b));
   if (opts.sort === 'price_desc') list = [...list].sort((a, b) => priced(b) - priced(a));
   if (opts.sort === 'size_asc') list = [...list].sort((a, b) => (a.size_ft || 0) - (b.size_ft || 0));

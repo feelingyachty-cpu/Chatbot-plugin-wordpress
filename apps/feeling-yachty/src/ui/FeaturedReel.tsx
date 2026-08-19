@@ -1,5 +1,5 @@
 import { Dimensions, FlatList, Image, Text, View } from 'react-native';
-import { money, startingTotal } from '../api';
+import { money, startingListed } from '../api';
 import type { Colors } from '../theme';
 import type { Yacht } from '../types';
 import { PressScale } from './PressScale';
@@ -37,7 +37,7 @@ export function FeaturedReel({
         decelerationRate="fast"
         contentContainerStyle={{ paddingHorizontal: 18 }}
         renderItem={({ item }) => {
-          const start = startingTotal(item);
+          const start = startingListed(item);
           return (
             <PressScale onPress={() => onPress(item)} style={{ width: CARD_W, marginRight: 12 }}>
               <View style={{ height: 222, borderRadius: 26, overflow: 'hidden', backgroundColor: colors.navy }}>

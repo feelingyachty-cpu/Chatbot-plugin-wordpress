@@ -1,5 +1,5 @@
 import { Image, Pressable, Text, View } from 'react-native';
-import { money, startingTotal } from '../api';
+import { money, startingListed } from '../api';
 import type { Colors } from '../theme';
 import type { Yacht } from '../types';
 import { HighlightText } from './HighlightText';
@@ -44,7 +44,7 @@ export function YachtCard({
   onToggleHours?: () => void;
   onToggleSave?: () => void;
 }) {
-  const start = startingTotal(yacht);
+  const start = startingListed(yacht);
   const rows = (yacht.pricing || []).filter((row) => (row.type || 'price') === 'price' && row.price != null);
   const lowest = start?.amount;
   const imageH = compact ? 0 : 224;
@@ -210,7 +210,7 @@ export function MiniCard({
   onPress: () => void;
   width?: number;
 }) {
-  const start = startingTotal(yacht);
+  const start = startingListed(yacht);
   return (
     <PressScale onPress={onPress} style={{ width, marginRight: 12 }}>
       <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.navy }}>

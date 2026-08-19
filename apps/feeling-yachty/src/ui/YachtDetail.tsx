@@ -136,7 +136,7 @@ export function YachtDetail({
               <Text style={{ color: colors.cream, fontWeight: '800', marginBottom: 8 }}>{quote.duration}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                 <Text style={{ color: '#9CB2C1' }}>{t(lang, 'tripTotal')}</Text>
-                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.tripTotal)}</Text>
+                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.listedTotal)}</Text>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                 <Text style={{ color: '#9CB2C1' }}>{t(lang, 'payNow')}</Text>

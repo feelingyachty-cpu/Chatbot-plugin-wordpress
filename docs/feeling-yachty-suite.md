@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.14** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.15** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -256,6 +256,17 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — listed price is boat + crew (3.73.15)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.15.zip` and hard-refresh the fleet. No product re-sync.
+
+Live cards were showing boat-only (Coco From $855) with “Crew and fuel are additional.” The listed From / Hours & Pricing total is now **boat + crew** — what the guest actually pays. The hourly boat deposit is credited toward the boat, so it is not added on top.
+
+Coco 3 hours: listed **$1,080** ($855 boat + $225 crew).  
+Coco 4 hours: listed **$1,440** ($1,140 + $300). Today still $500, dock still $940.
+
+Fleet intro copy that still said fuel is additional is rewritten on first load.
 
 ### 2026-08-19 — no leftover fuel-fee copy (3.73.14)
 

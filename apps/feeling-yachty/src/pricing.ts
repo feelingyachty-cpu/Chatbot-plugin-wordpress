@@ -71,9 +71,36 @@ export function startingTotal(yacht: Yacht): { amount: number; duration: string 
   return null;
 }
 
+function crewRateForBoat(yacht: Yacht, boat: number): number {
+  return yacht.crew_rate == null
+    ? (boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
+    : Number(yacht.crew_rate);
+}
+
+/** Guest-facing listed total: boat + crew. Deposits are not added on top. */
+export function listedTotal(yacht: Yacht, duration?: string): number | null {
+  const label = duration || startingTotal(yacht)?.duration || '';
+  const boat = tripTotal(yacht, label);
+  if (boat == null || boat <= 0) {
+    return null;
+  }
+  const hours = hoursFromDuration(label) || 0;
+  return roundMoney(boat + crewRateForBoat(yacht, boat) * hours);
+}
+
+export function startingListed(yacht: Yacht): { amount: number; duration: string } | null {
+  const start = startingTotal(yacht);
+  if (!start) {
+    return null;
+  }
+  const listed = listedTotal(yacht, start.duration);
+  return listed == null ? start : { amount: listed, duration: start.duration };
+}
+
 export type DockQuote = {
   duration: string;
   tripTotal: number;
+  listedTotal: number;
   payNow: number;
   dueAtDock: number;
   depositRate: number;
@@ -140,6 +167,7 @@ export function dockQuote(yacht: Yacht, duration?: string, wooPayNow?: number | 
   return {
     duration: label,
     tripTotal: roundMoney(total),
+    listedTotal: roundMoney(total + crewRateForBoat(yacht, total) * hours),
     payNow,
     dueAtDock: dockBalance(total, hourlyDeposit(yacht, total, hours), boatPctDeposit(total)),
     depositRate: DEPOSIT_RATE,

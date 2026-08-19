@@ -1,6 +1,8 @@
-/* Patched copy of Suite 3.73.4 product-express.js.
- * Dock = boat − today’s payment (crew + fuel + reservation).
- * Coco 4 hours: $1,140 − $700 = $440. Stock Suite still prints $1,140. */
+/* Patched copy of the Suite's product-express.js.
+ * Dock = boat − fuel − % boat deposit. Crew is a reservation fee and is
+ * NOT credited. Coco 4 hours: $1,140 − $200 fuel = $940 at the dock.
+ * Retire this plugin when the Suite is active — the Suite ships the same
+ * summary and both running at once injects two conflicting cards. */
 /* Feeling Yachty — show express checkout on product pages only after the
    booking is fully specified (date + start time + duration/passengers).
    Until then customers see just the Book Experience button. */
@@ -201,6 +203,12 @@ jQuery( function ( $ ) {
 		return;
 	}
 
+	// The Suite injects the same card — never show two conflicting summaries
+	// when both plugins happen to be active. Checking for the Suite's own
+	// script tag works regardless of which ready-handler runs first.
+	if ( $( '.fy-pay-summary' ).length || $( 'script[src*="feeling-yachty-suite"]' ).length ) {
+		return;
+	}
 	var $summary = $( '<div class="fy-pay-summary" aria-live="polite"></div>' );
 	$form.find( '.woocommerce-variation-add-to-cart' ).before( $summary );
 
@@ -373,44 +381,57 @@ jQuery( function ( $ ) {
 		var freshVariation = ( lastVariation && lastVariation.attributes &&
 			lastVariation.attributes[ 'attribute_pa_charter-duration' ] === durationVal )
 			? lastVariation : null;
-		if ( hasHours && ( row || freshVariation || charges.hourlyRate > 0 ) ) {
-			var boatHours     = row ? Number( row.hours ) : parseHours( hours );
-			var bookingTotal  = row ? Number( row.price ) : Math.round( charges.hourlyRate * boatHours * 100 ) / 100;
-			var crewTotal     = Math.round( charges.crewRate * boatHours * 100 ) / 100;
-			var fuelTotal     = Math.round( charges.fuelRate * boatHours * 100 ) / 100;
+		// Without a pricing row or real hourly rate there is no boat cost to
+		// show — rendering the breakdown anyway prints "Booking $0" and a
+		// near-zero dock balance.
+		var boatHours    = hasHours ? ( row ? Number( row.hours ) : parseHours( hours ) ) : 0;
+		var bookingTotal = hasHours ? ( row ? Number( row.price ) : Math.round( charges.hourlyRate * boatHours * 100 ) / 100 ) : 0;
+		if ( hasHours && boatHours > 0 && bookingTotal > 0 ) {
+			// Crew and fuel follow the fleet bands, same as the Suite:
+			// crew drops to the under rate at or below the $1,400 line and
+			// fuel drops at or below the $800 line. A flat charges.crewRate
+			// here overstated both on every cheaper boat.
+			var depThr        = Number( charges.depositThreshold ) || 0;
+			var depPct        = Number( charges.depositPct ) || 0;
+			var crewRateUnder = ( charges.crewRateUnder !== undefined && charges.crewRateUnder !== '' ) ? Number( charges.crewRateUnder ) : 75;
+			var crewRate      = ( depThr > 0 && bookingTotal <= depThr ) ? crewRateUnder : Number( charges.crewRate ) || 0;
+			var fuelThr       = ( charges.fuelThreshold !== undefined && charges.fuelThreshold !== '' ) ? Number( charges.fuelThreshold ) : 800;
+			var fuelRateUnder = ( charges.fuelRateUnder !== undefined && charges.fuelRateUnder !== '' ) ? Number( charges.fuelRateUnder ) : 25;
+			var fuelRate      = ( fuelThr > 0 && bookingTotal <= fuelThr ) ? fuelRateUnder : Number( charges.fuelRate ) || 0;
+			var crewTotal     = Math.round( crewRate * boatHours * 100 ) / 100;
+			var fuelTotal     = Math.round( fuelRate * boatHours * 100 ) / 100;
 			// Reservation deposit: bookings whose boat cost tops the threshold
 			// ($1,400 default) also pay a percentage of it online —
 			// non-refundable, credited in full against the dock balance.
 			// Mirrors FY_Fleet_Woo::sync_variations(), which actually charges it.
-			var depThr = Number( charges.depositThreshold ) || 0;
-			var depPct = Number( charges.depositPct ) || 0;
 			var expectedResDep = ( depThr > 0 && depPct > 0 && bookingTotal > depThr )
 				? Math.round( bookingTotal * depPct ) / 100
 				: 0;
 			var resDep = expectedResDep;
 			chargedNow = Math.round( ( crewTotal + fuelTotal + resDep + addonsNow ) * 100 ) / 100;
-			// Today's payment (crew + fuel + reservation + extras now) comes
-			// off the boat. Coco 4h at $50/hr fuel: $1,140 − $600 = $540.
+			// Dock = boat − fuel − % deposit. Crew is NOT credited.
+			// Coco 4h: $1,140 − $200 fuel = $940.
 			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 
-			// The ground truth: whatever WooCommerce itself resolved this
-			// exact variation's price to is what checkout will actually
-			// charge (crew + fuel + reservation deposit, per
-			// FY_Fleet_Woo::sync_variations()). Reconcile the two summary
-			// numbers that reach the customer's card — chargedNow and the
-			// deposit line — to it directly, so nothing shown here can ever
-			// disagree with the real charge, even on an ambiguous yacht.
-			if ( freshVariation && freshVariation.display_price !== undefined ) {
+			// When the Suite has a pricing row the server recomputes the
+			// charge at cart time, so a stale Woo variation price is never
+			// what checkout charges — only trust it when there is NO row,
+			// and even then guard it: never accept the boat price, never
+			// invent a deposit that doesn't match the threshold rule.
+			if ( ! row && freshVariation && freshVariation.display_price !== undefined ) {
 				var wooCharged = Number( freshVariation.display_price );
 				var suiteNow   = Math.round( ( crewTotal + fuelTotal + expectedResDep ) * 100 ) / 100;
 				var wooIsBoat  = bookingTotal > 0 && Math.abs( wooCharged - bookingTotal ) <= 1.05 && Math.abs( wooCharged - suiteNow ) > 1.05;
-				if ( wooIsBoat ) {
-					resDep = expectedResDep;
-				} else {
-					resDep     = Math.max( 0, Math.round( ( wooCharged - crewTotal - fuelTotal ) * 100 ) / 100 );
+				if ( ! wooIsBoat && wooCharged > 0 ) {
 					chargedNow = Math.round( ( wooCharged + addonsNow ) * 100 ) / 100;
-					if ( resDep > 0 && depPct > 0 ) {
-						bookingTotal = Math.round( ( resDep / depPct * 100 ) * 100 ) / 100;
+					var impliedResDep = Math.max( 0, Math.round( ( wooCharged - crewTotal - fuelTotal ) * 100 ) / 100 );
+					if ( expectedResDep > 0 && Math.abs( impliedResDep - expectedResDep ) <= 1.05 ) {
+						resDep = impliedResDep;
+						if ( depPct > 0 ) {
+							bookingTotal = Math.round( ( resDep / depPct * 100 ) * 100 ) / 100;
+						}
+					} else {
+						resDep = expectedResDep;
 					}
 				}
 				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
@@ -423,11 +444,11 @@ jQuery( function ( $ ) {
 				: 'Booking (' + money( charges.hourlyRate ) + '/hr &times; ' + boatHours + ' hrs)';
 			html += '<div class="fy-pay-summary__breakdown">';
 			html += '<div class="fy-pay-summary__line"><span>' + bookingLabel + '</span><span>' + money( bookingTotal ) + '</span></div>';
-			if ( charges.crewRate > 0 ) {
-				html += '<div class="fy-pay-summary__line"><span>Crew (' + money( charges.crewRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( crewTotal ) + '</span></div>';
+			if ( crewRate > 0 ) {
+				html += '<div class="fy-pay-summary__line"><span>Crew (' + money( crewRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( crewTotal ) + '</span></div>';
 			}
-			if ( charges.fuelRate > 0 ) {
-				html += '<div class="fy-pay-summary__line"><span>Fuel (' + money( charges.fuelRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( fuelTotal ) + '</span></div>';
+			if ( fuelRate > 0 ) {
+				html += '<div class="fy-pay-summary__line"><span>Fuel (' + money( fuelRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( fuelTotal ) + '</span></div>';
 			}
 			if ( resDep ) {
 				html += '<div class="fy-pay-summary__line"><span>Boat deposit (' + depPct + '% of booking &mdash; credited at the dock)</span><span>' + money( resDep ) + '</span></div>';

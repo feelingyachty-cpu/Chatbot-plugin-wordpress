@@ -1,12 +1,12 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.20** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.21** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
 
-Suite **3.73.4 zip was read on 2026-08-19**. Pricing/quote PHP and `product-express.js` are **byte-identical** to 3.65.0. New in 3.73.4: booking-ui skin, gallery slider, empty-cart scene, native date/time fields, `%fleet%` permalinks. This repo does not replace the uploaded plugin until you install the zip.
+Historical note: the 3.73.4 zip (read 2026-08-19) still carried 3.65.0-era pricing PHP and `product-express.js`. That stopped being true in 3.73.5+ — pricing PHP and the product JS have changed in nearly every release since; trust the changelog below, not that old comparison. This repo does not replace the uploaded plugin until you install the zip.
 
 ---
 
@@ -66,7 +66,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 | `capacity_max` | Guest cap (Miami private boats are often 13) |
 | `special_desc` | Marketing blurb |
 | `price` | Starting **hourly** number (not always the charter total) |
-| `listed_from` | Guest From total: shortest row **boat + crew + fuel** |
+| `listed_from` | Guest From total: shortest row **boat + crew + fuel, plus the 20% boat deposit when that row's boat tops $1,400** |
 | `duration_label` | Label for the starting price (e.g. `3 Hours`) |
 | `price_note` | Human note (`4-hour weekday charter`, `5 hours total (pay for 4)`) |
 | `pricing[]` | Duration table. Row `type` is `price`, `heading`, or `note` |
@@ -94,7 +94,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 ### `pricing[]` rows
 
 - `type: price` — `{duration, price, listed, free}`  
-  `price` is the boat trip total. `listed` is boat + crew + fuel (what From / Hours show).  
+  `price` is the boat trip total. `listed` is boat + crew + fuel — plus the 20% boat deposit on rows whose boat tops $1,400 (what From / Hours show).  
   Durations seen: `2 Hours` … `8 Hours`, `4 Hours + 1 Free Hour`, `Pay for 4 Hours Get 5 Hours Total`, etc.
 - `type: heading` — weekday vs weekend blocks (e.g. Monday–Thursday)
 - `type: note` — e.g. `Weekend surcharge — $150`
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.20 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.21 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,25 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — deep-dive bug-fix release (3.73.21)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.21.zip` and hard-refresh. No product re-sync.
+
+Money fixes:
+
+- **Extras were charged 150% online.** The yacht line already contained 50% of the extras and the add-ons hook added the same 50% again. Bookings with add-ons now charge exactly crew + fuel (+ 20% deposit) + half the extras.
+- **Thank-you page understated “Deposit paid”** (it showed only fuel + deposit, missing crew). It now reads the real amount charged.
+- **“Full charter price” now includes crew**, so on cart, checkout, order emails, and the thank-you page: full price = charged today + due at the dock. Barbie 3h: full **$942** = today **$300** + dock **$642**. (Listed From stays **$1,017** — fuel and the 20% deposit are credited at the dock.)
+- **Yachts with no duration rows** were priced at the retired 30% deposit. Their simple product now charges the shown price in full (nothing due at the dock).
+
+Safety and display fixes:
+
+- The fuel FAQ rewrite now backs up every yacht FAQ (`_fy_faq_before_fuel_copy`), only removes lines the Suite itself seeded, and skips yachts with no FAQ (auto-answers keep following settings there).
+- The product-page summary always shows the Suite’s own math when a pricing row exists (a stale Woo variation price can no longer appear as “Charged today”), never renders a “$0 boat” breakdown, and labels the charter total “boat + crew + fuel + deposit” when the 20% applies.
+- Per-yacht single overrides no longer mislabel the other rate (“$100/hr crew” on a $75/hr boat).
+- Rows with unparseable duration labels (“Full Day”) list the plain boat price instead of boat + 20%.
+- App: expanded Hours rows on cards now show listed totals (they showed boat-only prices contradicting the From line), Spanish copy now matches the fuel-as-deposit policy, and “Pay for 4 Get 5” durations parse as 5 hours like the Suite.
 
 ### 2026-08-19 — hourly charge is fuel again; cancel keeps it as a deposit (3.73.20)
 

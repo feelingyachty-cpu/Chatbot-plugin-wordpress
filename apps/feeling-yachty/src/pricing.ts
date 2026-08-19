@@ -1,6 +1,11 @@
 import type { PricingRow, Yacht } from './types';
 
-/** Fallback only when today’s Woo / crew+deposit charge does not fit the boat total. */
+/**
+ * Fallback only when the crew + fuel charge can't be computed at all — a
+ * duration with no parseable hours on a boat under the pct-deposit line.
+ * It is NOT a cap: crew + fuel are charged in full even when they exceed
+ * half the boat total (sundeck 8h charges $1,000 on an $880 boat).
+ */
 export const DEPOSIT_RATE = 0.5;
 /** Fleet defaults from Suite Checkout settings — blank yacht fields use these. */
 export const FLEET_CREW_RATE = 100;
@@ -20,6 +25,13 @@ export function priceRows(yacht: Pick<Yacht, 'pricing'>): PricingRow[] {
 export function hoursFromDuration(duration?: string): number | null {
   if (!duration) {
     return null;
+  }
+  // "Pay for 4 Hours Get 5 Hours Total" is a 5-hour charter — the Suite's
+  // hours_from_label() gives "get N hours" precedence, so mirror it here or
+  // crew/fuel math disagrees with what checkout charges on promo rows.
+  const bonus = String(duration).match(/get\s+(\d+(?:\.\d+)?)\s*hour/i);
+  if (bonus) {
+    return Number(bonus[1]);
   }
   const match = String(duration).match(/(\d+(?:\.\d+)?)/);
   return match ? Number(match[1]) : null;
@@ -153,7 +165,9 @@ export function chargedToday(yacht: Yacht, duration?: string, wooPayNow?: number
   if (wooLooksLikeFees) {
     return roundMoney(woo);
   }
-  if (suiteNow > 0 && suiteNow <= total + suiteNow) {
+  // Crew + fuel are never capped by the boat total. The 50% fallback only
+  // covers the degenerate case where they can't be computed (hours = 0).
+  if (suiteNow > 0) {
     return suiteNow;
   }
   return roundMoney(total * DEPOSIT_RATE);

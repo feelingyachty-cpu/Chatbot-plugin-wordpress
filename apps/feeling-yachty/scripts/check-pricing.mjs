@@ -16,6 +16,10 @@ const CHARTER_DEPOSIT_PCT = 20;
 const roundMoney = (n) => Math.round(n * 100) / 100;
 
 function hoursFromDuration(duration) {
+  // "Pay for 4 Hours Get 5 Hours Total" is a 5-hour charter — mirror the
+  // Suite's hours_from_label() "get N hours" precedence.
+  const bonus = String(duration || '').match(/get\s+(\d+(?:\.\d+)?)\s*hour/i);
+  if (bonus) return Number(bonus[1]);
   const m = String(duration || '').match(/(\d+(?:\.\d+)?)/);
   return m ? Number(m[1]) : null;
 }
@@ -113,6 +117,7 @@ assert.equal(ql.wooStale, false);
 
 assert.equal(hoursFromDuration('4 Hours + 1 Free Hour'), 4);
 assert.equal(hoursFromDuration('3.5 Hours'), 3.5);
+assert.equal(hoursFromDuration('Pay for 4 Hours Get 5 Hours Total'), 5); // Suite hours_from_label parity
 assert.equal(tripTotal(sundeck, 'price × 4 hours') ?? tripTotal(sundeck, '4 Hours'), 440);
 
 const coco = {
@@ -130,7 +135,11 @@ assert.equal(c4.dueAtDock, 940);
 const listed = (yacht, duration) => {
   const boat = tripTotal(yacht, duration);
   const hours = hoursFromDuration(duration) || 0;
-  const crewRate = boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE;
+  // Same crew resolution as pricing.ts crewRateForBoat: a per-yacht
+  // crew_rate override wins on both sides of the band.
+  const crewRate = yacht.crew_rate == null
+    ? (boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
+    : Number(yacht.crew_rate);
   return roundMoney(boat + crewRate * hours + hourlyDeposit(yacht, boat, hours) + boatPctDeposit(boat));
 };
 assert.equal(listed(coco, '3 Hours'), 1230); // 855 + 225 + 150
@@ -155,6 +164,11 @@ const barbie = {
   pricing: [{ type: 'price', duration: '3 Hours', price: 717 }],
 };
 assert.equal(listed(barbie, '3 Hours'), 1017); // 717 + 225 + 75
+
+// A per-yacht crew override wins on both sides of the $1,400 band.
+const crewOverride = { crew_rate: 150, pricing: [{ type: 'price', duration: '3 Hours', price: 717 }] };
+assert.equal(listed(crewOverride, '3 Hours'), 1242); // 717 + 450 crew + 75 fuel
+assert.equal(chargedToday(crewOverride, '3 Hours'), 525); // 150 crew + 25 fuel × 3
 assert.equal(chargedToday(barbie, '3 Hours', 717), 300); // $75 crew + $25 deposit × 3
 assert.equal(dockQuote(barbie, '3 Hours', 717).payNow, 300);
 assert.equal(dockQuote(barbie, '3 Hours', 717).dueAtDock, 642); // 717 − 75

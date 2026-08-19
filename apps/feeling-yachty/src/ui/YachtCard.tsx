@@ -1,5 +1,5 @@
 import { Image, Pressable, Text, View } from 'react-native';
-import { money, startingListed } from '../api';
+import { listedTotal, money, startingListed } from '../api';
 import type { Colors } from '../theme';
 import type { Yacht } from '../types';
 import { HighlightText } from './HighlightText';
@@ -150,7 +150,10 @@ export function YachtCard({
         {expanded && rows.length > 0 && (
           <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
             {rows.map((row, idx) => {
-              const amt = Number(row.price || 0);
+              // Same listed figure as the card header and YachtDetail —
+              // raw row.price is the boat-only cost and would contradict
+              // the "From" line right above these rows.
+              const amt = listedTotal(yacht, row.duration) ?? Number(row.price || 0);
               const best = lowest != null && amt === lowest;
               return (
                 <View

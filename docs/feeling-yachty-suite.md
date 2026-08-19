@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.13** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.14** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -256,6 +256,12 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — no leftover fuel-fee copy (3.73.14)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.14.zip` and hard-refresh. On first load, Suite rewrites the saved cancellation policy and any yacht FAQ that still says “crew and fuel fees.”
+
+Guest-facing leftovers removed: empty-cart “fuel / free to reschedule” lines, checkout cancellation (“deposit refunded minus crew”), help text that still said a 30% deposit, leftover Mobile API card FAQ if that plugin ever loads.
 
 ### 2026-08-19 — crew + boat deposit, not fuel (3.73.13)
 

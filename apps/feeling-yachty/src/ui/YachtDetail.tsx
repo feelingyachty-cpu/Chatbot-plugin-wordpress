@@ -147,6 +147,7 @@ export function YachtDetail({
                 <Text style={{ color: colors.pink, fontWeight: '800' }}>{money(quote.dueAtDock)}</Text>
               </View>
               <Text style={{ color: '#9CB2C1', marginTop: 10, fontSize: 12 }}>{t(lang, 'dockHint')}</Text>
+              <Text style={{ color: '#9CB2C1', marginTop: 8, fontSize: 12 }}>{t(lang, 'payRules')}</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>

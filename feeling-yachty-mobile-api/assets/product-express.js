@@ -382,7 +382,7 @@ jQuery( function ( $ ) {
 			chargedNow = Math.round( ( crewTotal + fuelTotal + resDep + addonsNow ) * 100 ) / 100;
 			// Today's payment (crew + fuel + reservation + extras now) comes
 			// off the boat. Coco 4h at $50/hr fuel: $1,140 − $600 = $540.
-			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - crewTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
+			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 
 			// The ground truth: whatever WooCommerce itself resolved this
 			// exact variation's price to is what checkout will actually
@@ -408,7 +408,7 @@ jQuery( function ( $ ) {
 					// or not, because it's derived from the real charge.
 					bookingTotal = Math.round( ( resDep / depPct * 100 ) * 100 ) / 100;
 				}
-				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - wooCharged ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
+				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 			}
 
 			// row's price is a flat total for the chosen duration, not a
@@ -422,10 +422,10 @@ jQuery( function ( $ ) {
 				html += '<div class="fy-pay-summary__line"><span>Crew (' + money( charges.crewRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( crewTotal ) + '</span></div>';
 			}
 			if ( charges.fuelRate > 0 ) {
-				html += '<div class="fy-pay-summary__line"><span>Fuel (' + money( charges.fuelRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( fuelTotal ) + '</span></div>';
+				html += '<div class="fy-pay-summary__line"><span>Boat deposit (' + money( charges.fuelRate ) + '/hr &times; ' + boatHours + ' hrs &mdash; credited at the dock)</span><span>' + money( fuelTotal ) + '</span></div>';
 			}
 			if ( resDep ) {
-				html += '<div class="fy-pay-summary__line"><span>Reservation deposit (' + depPct + '% of booking &mdash; credited at the dock)</span><span>' + money( resDep ) + '</span></div>';
+				html += '<div class="fy-pay-summary__line"><span>Boat deposit (' + depPct + '% of booking &mdash; credited at the dock)</span><span>' + money( resDep ) + '</span></div>';
 			}
 			// Each extra gets its own line, right under Fuel, so the customer
 			// can see exactly what they picked rather than one lump sum.
@@ -461,22 +461,10 @@ jQuery( function ( $ ) {
 			html += '<div class="fy-pay-summary__note">Plus ' + money( dueAtDock ) + ' paid in person at the dock' +
 				( addonsTotal > 0 ? ' (boat + the rest of your extras)' : ' for the boat' ) +
 				' — cash or Zelle. No hidden fees.' +
-				( ( typeof resDep !== 'undefined' && resDep )
-					? ' Your ' + depPct + '% reservation deposit is non-refundable, but every dollar of it is already credited to that balance.'
-					: '' ) +
-				'</div>';
+				' Crew reservation fees and deposits are non-refundable if you cancel. Any boat deposit is already credited to that balance.</div>';
 		} else if ( deposit ) {
 			html += '<div class="fy-pay-summary__due"><span>Due today</span><strong>' + money( deposit ) + '</strong></div>';
-			// Before a duration is chosen this figure is only crew + fuel —
-			// picking a longer charter can add the reservation deposit on
-			// top of it, so say so here too instead of leaving that only in
-			// the FAQ further down the page.
-			var preThr = Number( charges.depositThreshold ) || 0;
-			var prePct = Number( charges.depositPct ) || 0;
-			if ( preThr > 0 && prePct > 0 ) {
-				html += '<div class="fy-pay-summary__note">Charters over ' + money( preThr ) +
-					' also add a ' + prePct + '% reservation deposit once you pick your hours — non-refundable, but credited in full at the dock.</div>';
-			}
+			html += '<div class="fy-pay-summary__note">Only crew + deposit are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours. Remaining balance is due at the dock by cash or Zelle only.</div>';
 		} else if ( hasAny ) {
 			html += '<div class="fy-pay-summary__note">Pick a duration to see your total.</div>';
 		} else {
@@ -663,19 +651,17 @@ jQuery( function ( $ ) {
 		var fc = ( typeof fyCharges !== 'undefined' ) ? fyCharges : {};
 		var faqThr = Number( fc.depositThreshold ) || 0;
 		var faqPct = Number( fc.depositPct ) || 0;
-		var depositSentence = ( faqThr > 0 && faqPct > 0 )
-			? 'Charters over $' + faqThr.toLocaleString( 'en-US' ) + ' also take a ' + faqPct + '% reservation deposit online — non-refundable, but credited in full toward what you owe at the dock. Exclusive premium-tier yachts may require 50% — we arrange that with you directly after booking. '
-			: '';
 		var $faq = $(
-			// Closed by default — it's reference detail, and leaving it open
-			// pushed the booking fields down the page. The summary above it
-			// already states what's charged today.
 			'<details class="fy-deposit-faq">' +
 				'<summary>What am I paying today? <span class="fy-faq-caret" aria-hidden="true">▾</span></summary>' +
-				'<p>Only the crew and fuel fees for your chosen hours are charged online now, to confirm your booking and reserve your captain and crew\'s time exclusively for your date. ' +
-				depositSentence +
-				'If you add any extras, ' + addonPct + '% of those is charged now too. ' +
-				'The rest of the boat/charter cost — and the rest of any extras — is paid in person at the dock: cash or Zelle only, no credit card.</p>' +
+				'<p>Only crew + deposit are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours.</p>' +
+				'<p>Boat $800 or less: Crew $75/hr + Deposit $25/hr<br>' +
+				'Boat $801&ndash;$1,400: Crew $75/hr + Deposit $50/hr<br>' +
+				'Boat over $1,400: Crew $100/hr + Deposit $50/hr' +
+				( faqPct > 0 ? ' + ' + faqPct + '% boat deposit' : '' ) + '<br>' +
+				'Premium yachts may require a 50% boat deposit<br>' +
+				'Extras: ' + addonPct + '% due now</p>' +
+				'<p>Because the boat and crew are taken off the schedule and reserved specifically for you, crew reservation fees and deposits are non-refundable if you cancel. Any boat deposit is credited toward your boat price. Remaining balance is due at the dock by cash or Zelle only.</p>' +
 			'</details>'
 		);
 		$( '.fy-confirm-note' ).after( $faq );

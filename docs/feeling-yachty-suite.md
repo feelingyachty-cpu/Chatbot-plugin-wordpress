@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.7** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.8** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.7 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.8 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,22 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — $1,400 crew split (3.73.8)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.8.zip`, then re-sync yacht products.
+
+The **$1,400 line is the boat total for the hours picked** (Hours & Pricing), not crew or fuel.
+
+| Boat total | Crew | Fuel | Reservation deposit |
+| --- | --- | --- | --- |
+| At or under $1,400 | **$75/hr** | $50/hr | none |
+| Over $1,400 | **$100/hr** | $50/hr | 20% of the boat |
+
+Coco 4 hours ($1,140): crew $300 + fuel $200 = **$500 today**, **$640 at the dock**.  
+Coco 5 hours ($1,425): crew $500 + fuel $250 + 20% $285 = **$1,035 today**, **$390 at the dock**.
+
+Guest FAQ, Hours & Pricing note, deposit blurb, settings, and schema all use this same wording.
 
 ### 2026-08-19 — Miami phone is 9542463636 (3.73.7)
 

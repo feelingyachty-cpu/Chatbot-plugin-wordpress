@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 
 const DEPOSIT_RATE = 0.5;
 const FLEET_CREW_RATE = 100;
+const FLEET_CREW_RATE_UNDER = 75;
 const FLEET_FUEL_RATE = 50;
 const CHARTER_DEPOSIT_THRESHOLD = 1400;
 const CHARTER_DEPOSIT_PCT = 20;
@@ -28,7 +29,9 @@ function chargedToday(yacht, duration, wooPayNow) {
   const total = tripTotal(yacht, duration);
   if (total == null) return 0;
   const hours = hoursFromDuration(duration) || 0;
-  const crewRate = yacht.crew_rate == null ? FLEET_CREW_RATE : Number(yacht.crew_rate);
+  const crewRate = yacht.crew_rate == null
+    ? (total <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
+    : Number(yacht.crew_rate);
   const fuelRate = yacht.fuel_rate == null ? FLEET_FUEL_RATE : Number(yacht.fuel_rate);
   const crewFuel = roundMoney((crewRate + fuelRate) * hours);
   const resDep = total > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((total * CHARTER_DEPOSIT_PCT) / 100) : 0;
@@ -92,15 +95,15 @@ const coco = {
     { type: 'price', duration: '5 Hours', price: 1425 },
   ],
 };
-const c4 = dockQuote(coco, '4 Hours', 600);
+const c4 = dockQuote(coco, '4 Hours', 500);
 assert.equal(c4.tripTotal, 1140);
-assert.equal(c4.payNow, 600);
-assert.equal(c4.dueAtDock, 540);
+assert.equal(c4.payNow, 500);
+assert.equal(c4.dueAtDock, 640);
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');
-assert.equal(c4suite.payNow, 600);
-assert.equal(c4suite.dueAtDock, 540);
+assert.equal(c4suite.payNow, 500);
+assert.equal(c4suite.dueAtDock, 640);
 
 const c5 = dockQuote(coco, '5 Hours', 1035);
 assert.equal(c5.tripTotal, 1425);
@@ -110,7 +113,7 @@ assert.equal(c5.dueAtDock, 390);
 // Card formula: boat − (crew + fuel + resDep). Fuel is $50/hr fleet-wide.
 const suiteDock = (boat, crew, fuel, resDep, extrasLater) =>
   Math.round((Math.max(0, boat - crew - fuel - resDep) + extrasLater) * 100) / 100;
-assert.equal(suiteDock(1140, 400, 200, 0, 0), 540);
+assert.equal(suiteDock(1140, 300, 200, 0, 0), 640);
 assert.equal(suiteDock(1425, 500, 250, 285, 0), 390);
 
 console.log('pricing systems check ok');

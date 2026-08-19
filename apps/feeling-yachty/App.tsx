@@ -73,7 +73,7 @@ function AppShell() {
   const [query, setQuery] = useState('');
   const [size, setSize] = useState<SizeBand>('all');
   const [style, setStyle] = useState<StyleFilter>('all');
-  const [sort, setSort] = useState<SortKey>('featured');
+  const [sort, setSort] = useState<SortKey>('price_asc');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [recentIds, setRecentIds] = useState<number[]>([]);

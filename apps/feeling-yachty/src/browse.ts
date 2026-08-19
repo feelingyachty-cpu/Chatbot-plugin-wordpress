@@ -23,11 +23,11 @@ export const STYLE_CHIPS: { id: StyleFilter; label: string }[] = [
 ];
 
 export const SORT_CHIPS: { id: SortKey; label: string }[] = [
-  { id: 'featured', label: 'Featured' },
   { id: 'price_asc', label: 'Price ↑' },
   { id: 'price_desc', label: 'Price ↓' },
   { id: 'size_asc', label: 'Size ↑' },
   { id: 'size_desc', label: 'Size ↓' },
+  { id: 'featured', label: 'Featured' },
 ];
 
 function inSize(yacht: Yacht, band: SizeBand): boolean {

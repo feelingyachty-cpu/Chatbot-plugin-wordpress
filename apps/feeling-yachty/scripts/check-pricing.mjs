@@ -1,10 +1,14 @@
 /**
  * Systems check: hours must change trip total, deposit, and due-at-the-dock together.
- * Run: node apps/feeling-yachty/scripts/check-pricing.mjs
+ * Dock is boat − today’s payment. Run: node apps/feeling-yachty/scripts/check-pricing.mjs
  */
 import assert from 'node:assert/strict';
 
 const DEPOSIT_RATE = 0.5;
+const FLEET_CREW_RATE = 100;
+const FLEET_FUEL_RATE = 75;
+const CHARTER_DEPOSIT_THRESHOLD = 1400;
+const CHARTER_DEPOSIT_PCT = 20;
 const roundMoney = (n) => Math.round(n * 100) / 100;
 
 function hoursFromDuration(duration) {
@@ -20,13 +24,28 @@ function tripTotal(yacht, duration) {
   return null;
 }
 
+function chargedToday(yacht, duration, wooPayNow) {
+  const total = tripTotal(yacht, duration);
+  if (total == null) return 0;
+  const hours = hoursFromDuration(duration) || 0;
+  const crewRate = yacht.crew_rate == null ? FLEET_CREW_RATE : Number(yacht.crew_rate);
+  const fuelRate = yacht.fuel_rate == null ? FLEET_FUEL_RATE : Number(yacht.fuel_rate);
+  const crewFuel = roundMoney((crewRate + fuelRate) * hours);
+  const resDep = total > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((total * CHARTER_DEPOSIT_PCT) / 100) : 0;
+  const suiteNow = roundMoney(crewFuel + resDep);
+  const woo = wooPayNow != null ? Number(wooPayNow) : null;
+  const fits = (amount) => amount > 0 && amount <= total + 0.009;
+  if (woo != null && fits(woo)) return roundMoney(woo);
+  if (fits(suiteNow)) return suiteNow;
+  return roundMoney(total * DEPOSIT_RATE);
+}
+
 function dockQuote(yacht, duration, wooPayNow) {
   const total = tripTotal(yacht, duration);
   if (total == null) return null;
-  const half = roundMoney(total * DEPOSIT_RATE);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
   const wooOk = woo != null && woo > 0 && woo <= total + 0.009;
-  const payNow = wooOk ? roundMoney(woo) : half;
+  const payNow = chargedToday(yacht, duration, wooPayNow);
   return { tripTotal: roundMoney(total), payNow, dueAtDock: roundMoney(total - payNow), wooStale: woo != null && !wooOk };
 }
 
@@ -65,5 +84,27 @@ assert.equal(ql.wooStale, false);
 
 assert.equal(hoursFromDuration('4 Hours + 1 Free Hour'), 4);
 assert.equal(tripTotal(sundeck, 'price × 4 hours') ?? tripTotal(sundeck, '4 Hours'), 440);
+
+const coco = {
+  pricing: [
+    { type: 'price', duration: '3 Hours', price: 855 },
+    { type: 'price', duration: '4 Hours', price: 1140 },
+    { type: 'price', duration: '5 Hours', price: 1425 },
+  ],
+};
+const c4 = dockQuote(coco, '4 Hours', 700);
+assert.equal(c4.tripTotal, 1140);
+assert.equal(c4.payNow, 700);
+assert.equal(c4.dueAtDock, 440);
+assert.equal(c4.wooStale, false);
+
+const c4suite = dockQuote(coco, '4 Hours');
+assert.equal(c4suite.payNow, 700);
+assert.equal(c4suite.dueAtDock, 440);
+
+const c5 = dockQuote(coco, '5 Hours', 1160);
+assert.equal(c5.tripTotal, 1425);
+assert.equal(c5.payNow, 1160);
+assert.equal(c5.dueAtDock, 265);
 
 console.log('pricing systems check ok');

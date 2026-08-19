@@ -24,6 +24,8 @@ export type Yacht = {
   rating?: string | number;
   reviews?: { name?: string; rating?: number; date?: string; text?: string }[];
   captain_included?: boolean;
+  crew_rate?: number | null;
+  fuel_rate?: number | null;
 };
 
 export type CatalogYacht = Yacht;

@@ -253,6 +253,8 @@ class FY_App_REST {
 			$split = FY_App_Quote::for_duration( $yacht_id, isset( $params['duration'] ) ? $params['duration'] : '' );
 			if ( $split ) {
 				$quote = is_array( $suite_quote ) ? array_merge( $suite_quote, $split ) : $split;
+				$quote['deposit'] = $split['pay_now'];
+				$quote['balance'] = $split['due_at_dock'];
 			}
 		}
 

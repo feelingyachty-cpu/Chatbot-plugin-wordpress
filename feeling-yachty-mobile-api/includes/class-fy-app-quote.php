@@ -4,7 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Trip total → deposit → due at the dock.
+ * Trip total → today’s payment → due at the dock.
+ * Dock is always boat − charged today (plus any unpaid extras).
  * Totals come from Suite pricing rows. Never hourly × hours when a row exists.
  */
 class FY_App_Quote {
@@ -12,8 +13,28 @@ class FY_App_Quote {
 	const DEPOSIT_RATE = 0.5;
 
 	public static function init() {
-		add_action( 'woocommerce_before_add_to_cart_button', array( __CLASS__, 'product_breakdown' ), 5 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 30 );
 		add_action( 'save_post_fy_yacht', array( __CLASS__, 'sync_product' ), 40, 1 );
+		add_filter( 'woocommerce_add_cart_item_data', array( __CLASS__, 'credit_cart_booking' ), 30, 3 );
+		add_action( 'woocommerce_checkout_create_order_line_item', array( __CLASS__, 'credit_order_balance' ), 30, 4 );
+		add_action( 'wp_loaded', array( __CLASS__, 'replace_cart_rows' ), 100 );
+	}
+
+	public static function enqueue() {
+		if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+			return;
+		}
+		$deps = array( 'jquery' );
+		if ( wp_script_is( 'fy-admin-theme-product-express', 'registered' ) ) {
+			$deps[] = 'fy-admin-theme-product-express';
+		}
+		wp_enqueue_script(
+			'fy-app-dock-math',
+			plugins_url( 'assets/dock-math.js', FY_APP_FILE ),
+			$deps,
+			FY_APP_VERSION,
+			true
+		);
 	}
 
 	public static function hours( $duration ) {
@@ -50,15 +71,76 @@ class FY_App_Quote {
 		return $out;
 	}
 
-	public static function split( $trip ) {
-		$trip    = round( (float) $trip, 2 );
-		$deposit = round( $trip * self::DEPOSIT_RATE, 2 );
+	/**
+	 * due_at_dock = trip − pay_now.
+	 * pay_now is today’s Woo / crew+fuel charge when it fits inside the boat total.
+	 */
+	public static function split( $trip, $paid_today = null ) {
+		$trip = round( (float) $trip, 2 );
+		$paid = null === $paid_today ? null : round( (float) $paid_today, 2 );
+		if ( null !== $paid && $paid > 0 && $paid <= $trip + 0.05 ) {
+			$deposit = $paid;
+		} else {
+			$deposit = round( $trip * self::DEPOSIT_RATE, 2 );
+		}
 		return array(
 			'trip_total'   => $trip,
 			'pay_now'      => $deposit,
-			'due_at_dock'  => round( $trip - $deposit, 2 ),
+			'due_at_dock'  => round( max( 0, $trip - $deposit ), 2 ),
 			'deposit_rate' => self::DEPOSIT_RATE,
 		);
+	}
+
+	public static function product_id_for_yacht( $yacht_id ) {
+		$product_id = (int) get_post_meta( $yacht_id, '_fy_product_id', true );
+		if ( $product_id ) {
+			return $product_id;
+		}
+		if ( ! function_exists( 'get_posts' ) ) {
+			return 0;
+		}
+		$linked = get_posts(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => '_fy_yacht_id',
+				'meta_value'     => $yacht_id,
+			)
+		);
+		return $linked ? (int) $linked[0] : 0;
+	}
+
+	public static function woo_pay_now( $yacht_id, $hours ) {
+		if ( $hours < 1 || ! function_exists( 'wc_get_product' ) ) {
+			return null;
+		}
+		$product_id = self::product_id_for_yacht( $yacht_id );
+		if ( ! $product_id ) {
+			return null;
+		}
+		$product = wc_get_product( $product_id );
+		if ( ! $product || ! $product->is_type( 'variable' ) ) {
+			return null;
+		}
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation ) {
+				continue;
+			}
+			$slug = $variation->get_attribute( 'pa_charter-duration' );
+			if ( ! $slug ) {
+				$attrs = $variation->get_attributes();
+				$slug  = isset( $attrs['pa_charter-duration'] ) ? $attrs['pa_charter-duration'] : '';
+			}
+			if ( self::hours( $slug ) !== (int) $hours ) {
+				continue;
+			}
+			$price = (float) $variation->get_regular_price();
+			return $price > 0 ? $price : null;
+		}
+		return null;
 	}
 
 	public static function for_duration( $yacht_id, $duration = '' ) {
@@ -81,17 +163,17 @@ class FY_App_Quote {
 				}
 			}
 		}
-		$money               = self::split( $pick['price'] );
-		$money['duration']   = $pick['duration'];
-		$money['hours']      = $pick['hours'];
-		$money['yacht_id']   = (int) $yacht_id;
+		$money             = self::split( $pick['price'], self::woo_pay_now( $yacht_id, $pick['hours'] ) );
+		$money['duration'] = $pick['duration'];
+		$money['hours']    = $pick['hours'];
+		$money['yacht_id'] = (int) $yacht_id;
 		return $money;
 	}
 
 	public static function table( $yacht_id ) {
 		$table = array();
 		foreach ( self::rows( $yacht_id ) as $row ) {
-			$money = self::split( $row['price'] );
+			$money                           = self::split( $row['price'], self::woo_pay_now( $yacht_id, $row['hours'] ) );
 			$table[ (string) $row['hours'] ] = array(
 				'duration'    => $row['duration'],
 				'trip_total'  => $money['trip_total'],
@@ -102,96 +184,151 @@ class FY_App_Quote {
 		return $table;
 	}
 
-	public static function product_breakdown() {
-		if ( ! function_exists( 'wc_get_product' ) ) {
-			return;
-		}
-		$product_id = get_the_ID();
-		$yacht_id   = (int) get_post_meta( $product_id, '_fy_yacht_id', true );
-		if ( ! $yacht_id ) {
-			$linked = get_posts(
-				array(
-					'post_type'      => 'fy_yacht',
-					'post_status'    => 'publish',
-					'posts_per_page' => 1,
-					'fields'         => 'ids',
-					'meta_key'       => '_fy_product_id',
-					'meta_value'     => $product_id,
-				)
-			);
-			$yacht_id = $linked ? (int) $linked[0] : 0;
-		}
-		if ( ! $yacht_id ) {
-			return;
-		}
-		$table = self::table( $yacht_id );
-		if ( ! $table ) {
-			return;
-		}
-		$first = reset( $table );
-		echo '<div class="fy-dock-math" data-fy-quotes="' . esc_attr( wp_json_encode( $table ) ) . '">';
-		echo '<p class="fy-dock-trip"><strong>' . esc_html__( 'Trip total', 'fy-app' ) . '</strong> <span data-fy-trip>' . esc_html( self::money( $first['trip_total'] ) ) . '</span></p>';
-		echo '<p class="fy-dock-now"><strong>' . esc_html__( 'Pay now to book', 'fy-app' ) . '</strong> <span data-fy-now>' . esc_html( self::money( $first['pay_now'] ) ) . '</span></p>';
-		echo '<p class="fy-dock-dock"><strong>' . esc_html__( 'Due at the dock', 'fy-app' ) . '</strong> <span data-fy-dock>' . esc_html( self::money( $first['due_at_dock'] ) ) . '</span></p>';
-		echo '<p class="fy-dock-note">' . esc_html__( 'Hours change the trip total. Half is charged today, half is due at the dock. Add-ons use the same split.', 'fy-app' ) . '</p>';
-		echo '</div>';
-		echo '<style>.fy-dock-math{margin:16px 0;padding:14px 16px;border-radius:16px;background:#12263a;color:#fff}.fy-dock-math p{margin:0 0 6px}.fy-dock-note{opacity:.8;font-size:13px}</style>';
-		echo '<script>(function(){var box=document.querySelector(".fy-dock-math");if(!box)return;var quotes=JSON.parse(box.getAttribute("data-fy-quotes")||"{}");function hoursFrom(v){var m=String(v||"").match(/(\\d+)/);return m?m[1]:"";}function money(n){return "$"+Math.round(Number(n)).toLocaleString("en-US");}function paint(h){var q=quotes[h];if(!q)return;var t=box.querySelector("[data-fy-trip]");var n=box.querySelector("[data-fy-now]");var d=box.querySelector("[data-fy-dock]");if(t)t.textContent=money(q.trip_total);if(n)n.textContent=money(q.pay_now);if(d)d.textContent=money(q.due_at_dock);}function read(){var sel=document.querySelector("select[name=attribute_pa_charter-duration],select#pa_charter-duration");paint(hoursFrom(sel&&sel.value));}document.addEventListener("change",function(e){if(e.target&&/charter-duration/.test(e.target.name||e.target.id||""))read();});if(window.jQuery){jQuery(document.body).on("found_variation show_variation",function(ev,v){if(!v||!v.attributes)return;paint(hoursFrom(v.attributes["attribute_pa_charter-duration"]||""));});}read();})();</script>';
-	}
-
 	public static function money( $amount ) {
 		return '$' . number_format( (float) $amount, 0 );
 	}
 
 	/**
-	 * Repair Woo variations that still use the cloned $175/hr table ($525 for 3 hours).
+	 * Suite already prices variations as crew + fuel (+ reservation deposit).
+	 * Do not rewrite those to a 50% guess — Coco 4h $700 is the real today charge.
 	 */
 	public static function sync_product( $yacht_id ) {
-		if ( ! function_exists( 'wc_get_product' ) ) {
-			return 0;
+		return 0;
+	}
+
+	public static function credit_cart_booking( $cart_item_data, $product_id = 0, $variation_id = 0 ) {
+		if ( empty( $cart_item_data['fy_booking'] ) || ! is_array( $cart_item_data['fy_booking'] ) ) {
+			return $cart_item_data;
 		}
-		$product_id = (int) get_post_meta( $yacht_id, '_fy_product_id', true );
-		if ( ! $product_id ) {
-			return 0;
+		$booking = $cart_item_data['fy_booking'];
+		$boat    = isset( $booking['charter'] ) ? (float) $booking['charter'] : 0;
+		$deposit = isset( $booking['deposit'] ) ? (float) $booking['deposit'] : 0;
+		$addons  = isset( $booking['addons_total'] ) ? (float) $booking['addons_total'] : 0;
+		if ( $boat <= 0 ) {
+			return $cart_item_data;
 		}
-		$product = wc_get_product( $product_id );
-		if ( ! $product || ! $product->is_type( 'variable' ) ) {
-			return 0;
+		$booking['total']                 = round( $boat + $addons, 2 );
+		$booking['balance']               = round( max( 0, $boat - $deposit ) + $addons, 2 );
+		$cart_item_data['fy_booking']     = $booking;
+		return $cart_item_data;
+	}
+
+	public static function credit_order_balance( $item, $cart_item_key, $values, $order ) {
+		$boat = (float) $item->get_meta( '_fy_booking_charge' );
+		if ( $boat <= 0 ) {
+			return;
 		}
-		$table = self::table( $yacht_id );
-		if ( ! $table ) {
-			return 0;
+		$deposit      = (float) $item->get_meta( '_fy_deposit' );
+		$addons_total = 0.0;
+		$addons_now   = 0.0;
+		if ( ! empty( $values['fy_addons'] ) && is_array( $values['fy_addons'] ) ) {
+			$addons_total = isset( $values['fy_addons']['total'] ) ? (float) $values['fy_addons']['total'] : 0;
+			if ( isset( $values['fy_addons']['now'] ) ) {
+				$addons_now = (float) $values['fy_addons']['now'];
+			} elseif ( class_exists( 'FY_Fleet_Settings' ) ) {
+				$addons_now = round( $addons_total * FY_Fleet_Settings::get_addon_deposit_ratio(), 2 );
+			} else {
+				$addons_now = round( $addons_total * 0.5, 2 );
+			}
 		}
-		$changed = 0;
-		foreach ( $product->get_children() as $variation_id ) {
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation ) {
+		$toward_boat = max( 0, $deposit - $addons_now );
+		$balance     = round( max( 0, $boat - $toward_boat ) + max( 0, $addons_total - $addons_now ), 2 );
+		$item->update_meta_data( '_fy_balance', $balance );
+		$item->update_meta_data( '_fy_charter_total', round( $boat + $addons_total, 2 ) );
+		if ( function_exists( 'wc_price' ) ) {
+			$item->update_meta_data( __( 'Balance due at the dock', 'fy-fleet' ), wp_strip_all_tags( wc_price( $balance ) ) );
+		}
+	}
+
+	public static function replace_cart_rows() {
+		if ( ! class_exists( 'FY_Fleet_Woo' ) ) {
+			return;
+		}
+		remove_action( 'woocommerce_cart_totals_after_order_total', array( 'FY_Fleet_Woo', 'balance_row' ) );
+		remove_action( 'woocommerce_review_order_after_order_total', array( 'FY_Fleet_Woo', 'balance_row' ) );
+		add_action( 'woocommerce_cart_totals_after_order_total', array( __CLASS__, 'balance_row' ) );
+		add_action( 'woocommerce_review_order_after_order_total', array( __CLASS__, 'balance_row' ) );
+	}
+
+	public static function cart_split() {
+		$totals = array(
+			'charter' => 0.0,
+			'deposit' => 0.0,
+			'balance' => 0.0,
+			'count'   => 0,
+		);
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return $totals;
+		}
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( ! empty( $item['fy_booking'] ) && is_array( $item['fy_booking'] ) ) {
+				$booking            = $item['fy_booking'];
+				$totals['charter'] += isset( $booking['total'] ) ? (float) $booking['total'] : 0;
+				$totals['deposit'] += isset( $booking['deposit'] ) ? (float) $booking['deposit'] : 0;
+				$totals['balance'] += isset( $booking['balance'] ) ? (float) $booking['balance'] : 0;
+				$totals['count']++;
 				continue;
 			}
-			$slug = $variation->get_attribute( 'pa_charter-duration' );
-			if ( ! $slug ) {
-				$attrs = $variation->get_attributes();
-				$slug  = isset( $attrs['pa_charter-duration'] ) ? $attrs['pa_charter-duration'] : '';
-			}
-			$hours = self::hours( $slug );
-			if ( ! $hours || empty( $table[ (string) $hours ] ) ) {
+			$product_id = ! empty( $item['product_id'] ) ? (int) $item['product_id'] : 0;
+			$yacht_id   = $product_id ? (int) get_post_meta( $product_id, '_fy_yacht_id', true ) : 0;
+			if ( ! $yacht_id ) {
 				continue;
 			}
-			$current = (float) $variation->get_regular_price();
-			$target  = (float) $table[ (string) $hours ]['pay_now'];
-			$cloned  = ( 3 === $hours && abs( $current - 525 ) < 0.05 ) || ( 4 === $hours && abs( $current - 700 ) < 0.05 );
-			$stale   = $current > ( (float) $table[ (string) $hours ]['trip_total'] ) + 0.05;
-			if ( ! $cloned && ! $stale && abs( $current - $target ) < 0.05 ) {
+			$deposit = isset( $item['line_total'] ) ? (float) $item['line_total'] : 0;
+			$slug    = '';
+			if ( ! empty( $item['variation'] ) && is_array( $item['variation'] ) ) {
+				foreach ( $item['variation'] as $key => $value ) {
+					if ( false !== stripos( (string) $key, 'charter-duration' ) && '' !== (string) $value ) {
+						$slug = (string) $value;
+						break;
+					}
+				}
+			}
+			$boat = 0.0;
+			if ( $slug && class_exists( 'FY_Fleet_Pricing' ) ) {
+				$row  = FY_Fleet_Pricing::row_for_duration_slug( $yacht_id, $slug );
+				$boat = $row && isset( $row['price'] ) ? (float) $row['price'] : 0;
+			}
+			if ( $boat <= 0 ) {
 				continue;
 			}
-			if ( ! $cloned && ! $stale ) {
-				continue;
+			$addons_total = ! empty( $item['fy_addons']['total'] ) ? (float) $item['fy_addons']['total'] : 0.0;
+			$addons_now   = 0.0;
+			if ( $addons_total > 0 ) {
+				$addons_now = class_exists( 'FY_Fleet_Settings' )
+					? round( $addons_total * FY_Fleet_Settings::get_addon_deposit_ratio(), 2 )
+					: round( $addons_total * 0.5, 2 );
 			}
-			$variation->set_regular_price( wc_format_decimal( $target, 2 ) );
-			$variation->set_price( wc_format_decimal( $target, 2 ) );
-			$variation->save();
-			$changed++;
+			$toward_boat        = max( 0, $deposit - $addons_now );
+			$totals['charter'] += $boat + $addons_total;
+			$totals['deposit'] += $deposit;
+			$totals['balance'] += max( 0, $boat - $toward_boat ) + max( 0, $addons_total - $addons_now );
+			$totals['count']++;
 		}
-		return $changed;
+		return $totals;
+	}
+
+	public static function balance_row() {
+		$totals = self::cart_split();
+		if ( $totals['count'] < 1 ) {
+			return;
+		}
+		?>
+		<tr class="fy-charter-total-row">
+			<th><?php esc_html_e( 'Full charter price', 'fy-app' ); ?></th>
+			<td data-title="<?php esc_attr_e( 'Full charter price', 'fy-app' ); ?>">
+				<?php echo wp_kses_post( wc_price( $totals['charter'] ) ); ?>
+			</td>
+		</tr>
+		<?php if ( $totals['balance'] > 0 ) : ?>
+		<tr class="fy-balance-row">
+			<th><?php esc_html_e( 'Balance due at the dock', 'fy-app' ); ?></th>
+			<td data-title="<?php esc_attr_e( 'Balance due at the dock', 'fy-app' ); ?>">
+				<strong><?php echo wp_kses_post( wc_price( $totals['balance'] ) ); ?></strong>
+				<small style="display:block;opacity:.75"><?php esc_html_e( 'Today’s payment is already subtracted from this boat balance.', 'fy-app' ); ?></small>
+			</td>
+		</tr>
+		<?php endif; ?>
+		<?php
 	}
 }

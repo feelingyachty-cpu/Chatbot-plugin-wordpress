@@ -263,7 +263,7 @@ jQuery( function ( $ ) {
 		var m = /([\d,]+(\.\d+)?)/.exec( text || '' );
 		return m ? parseFloat( m[ 1 ].replace( /,/g, '' ) ) : 0;
 	}
-	var defaultDeposit = parsePrice( $( '.elementor-widget-woocommerce-product-price .price' ).first().text() );
+	var defaultDeposit = ( typeof fyCharges !== 'undefined' && fyCharges.defaultDue ) ? Number( fyCharges.defaultDue ) : 0;
 
 	// Per-hour pricing model: Booking = this yacht's own hourly rate × hours
 	// (the same math as the 3-8 Hour Price columns in the fleet spreadsheet),
@@ -304,7 +304,15 @@ jQuery( function ( $ ) {
 		var timeText = $( '#charter_start_time option:selected' ).text();
 		var hours = $( '#pa_charter-duration option:selected' ).text();
 		var guests = $( '#pa_passenger-count' ).val();
-		var deposit = lastVariation && lastVariation.display_price ? Number( lastVariation.display_price ) : defaultDeposit;
+		// Suite defaultDue is crew + deposit. Woo leftovers still store the
+		// boat (Barbie 3h $717) — do not show that leftover as Due today.
+		var deposit = defaultDeposit;
+		if ( lastVariation && lastVariation.display_price !== undefined ) {
+			var wooShown = Number( lastVariation.display_price );
+			if ( defaultDeposit > 0 && Math.abs( wooShown - defaultDeposit ) <= 1.05 ) {
+				deposit = wooShown;
+			}
+		}
 
 		var hasDate = !! dateVal;
 		var hasTime = !! ( timeText && timeText.indexOf( 'Choose' ) === -1 );
@@ -376,9 +384,10 @@ jQuery( function ( $ ) {
 			// Mirrors FY_Fleet_Woo::sync_variations(), which actually charges it.
 			var depThr = Number( charges.depositThreshold ) || 0;
 			var depPct = Number( charges.depositPct ) || 0;
-			var resDep = ( depThr > 0 && depPct > 0 && bookingTotal > depThr )
+			var expectedResDep = ( depThr > 0 && depPct > 0 && bookingTotal > depThr )
 				? Math.round( bookingTotal * depPct ) / 100
 				: 0;
+			var resDep = expectedResDep;
 			chargedNow = Math.round( ( crewTotal + fuelTotal + resDep + addonsNow ) * 100 ) / 100;
 			// Today's payment (crew + fuel + reservation + extras now) comes
 			// off the boat. Coco 4h at $50/hr fuel: $1,140 − $600 = $540.
@@ -393,20 +402,16 @@ jQuery( function ( $ ) {
 			// disagree with the real charge, even on an ambiguous yacht.
 			if ( freshVariation && freshVariation.display_price !== undefined ) {
 				var wooCharged = Number( freshVariation.display_price );
-				resDep         = Math.max( 0, Math.round( ( wooCharged - crewTotal - fuelTotal ) * 100 ) / 100 );
-				chargedNow     = Math.round( ( wooCharged + addonsNow ) * 100 ) / 100;
-				// bookingTotal/dueAtDock must be rebuilt from THIS resDep,
-				// not just when there was no row estimate at all — a row
-				// guess that picked the wrong duplicate-slug duration (see
-				// FY_Fleet_Pricing::rows_by_duration_slug()) is exactly as
-				// stale as no guess, and leaving it in place printed
-				// "Booking / Crew / Fuel / deposit" lines that no longer
-				// summed to "Charged today" once resDep was corrected above.
-				if ( resDep > 0 && depPct > 0 ) {
-					// Invert the deposit back to the boat cost that produced
-					// it — more authoritative than any estimate, row-based
-					// or not, because it's derived from the real charge.
-					bookingTotal = Math.round( ( resDep / depPct * 100 ) * 100 ) / 100;
+				var suiteNow   = Math.round( ( crewTotal + fuelTotal + expectedResDep ) * 100 ) / 100;
+				var wooIsBoat  = bookingTotal > 0 && Math.abs( wooCharged - bookingTotal ) <= 1.05 && Math.abs( wooCharged - suiteNow ) > 1.05;
+				if ( wooIsBoat ) {
+					resDep = expectedResDep;
+				} else {
+					resDep     = Math.max( 0, Math.round( ( wooCharged - crewTotal - fuelTotal ) * 100 ) / 100 );
+					chargedNow = Math.round( ( wooCharged + addonsNow ) * 100 ) / 100;
+					if ( resDep > 0 && depPct > 0 ) {
+						bookingTotal = Math.round( ( resDep / depPct * 100 ) * 100 ) / 100;
+					}
 				}
 				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 			}

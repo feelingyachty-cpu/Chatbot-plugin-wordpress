@@ -54,9 +54,10 @@ function chargedToday(yacht, duration, wooPayNow) {
   const resDep = boatPctDeposit(total);
   const suiteNow = roundMoney(crewFuel + resDep);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
-  const fits = (amount) => amount > 0 && amount <= total + 0.009;
-  if (woo != null && fits(woo)) return roundMoney(woo);
-  if (fits(suiteNow)) return suiteNow;
+  const wooIsBoat = woo != null && Math.abs(woo - total) <= 1.05 && Math.abs(woo - suiteNow) > 1.05;
+  const wooLooksLikeFees = woo != null && woo > 0 && !wooIsBoat && woo <= total + 0.009;
+  if (wooLooksLikeFees) return roundMoney(woo);
+  if (suiteNow > 0) return suiteNow;
   return roundMoney(total * DEPOSIT_RATE);
 }
 
@@ -64,7 +65,9 @@ function dockQuote(yacht, duration, wooPayNow) {
   const total = tripTotal(yacht, duration);
   if (total == null) return null;
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
-  const wooOk = woo != null && woo > 0 && woo <= total + 0.009;
+  const suiteNow = chargedToday(yacht, duration);
+  const wooIsBoat = woo != null && Math.abs(woo - total) <= 1.05 && Math.abs(woo - suiteNow) > 1.05;
+  const wooOk = woo != null && woo > 0 && !wooIsBoat && woo <= total + 0.009;
   const payNow = chargedToday(yacht, duration, wooPayNow);
   const hours = hoursFromDuration(duration) || 0;
   return {
@@ -96,7 +99,7 @@ assert.equal(q4.dueAtDock, 340); // 440 − 100
 
 const q8 = dockQuote(sundeck, '8 Hours');
 assert.equal(q8.tripTotal, 880);
-assert.equal(q8.payNow, 440); // crew+deposit $1000 does not fit; 50% fallback
+assert.equal(q8.payNow, 1000); // $75 crew + $50 deposit × 8; crew is not capped by the boat
 assert.equal(q8.dueAtDock, 480); // 880 − $50/hr × 8
 
 const lime = {
@@ -145,6 +148,16 @@ const cocoLive = {
 assert.equal(listed(cocoLive, '3 Hours'), 1325); // 1100 + 225
 assert.equal(listed(cocoLive, '4 Hours'), 1650); // 1350 + 300
 assert.equal(listed(cocoLive, '5 Hours'), 2200); // 1700 + 500
+
+// Barbie (live From $717) — Woo leftover is the boat, not fees.
+const barbie = {
+  pricing: [{ type: 'price', duration: '3 Hours', price: 717 }],
+};
+assert.equal(listed(barbie, '3 Hours'), 942); // 717 + 225
+assert.equal(chargedToday(barbie, '3 Hours', 717), 300); // $75 crew + $25 deposit × 3
+assert.equal(dockQuote(barbie, '3 Hours', 717).payNow, 300);
+assert.equal(dockQuote(barbie, '3 Hours', 717).dueAtDock, 642); // 717 − 75
+assert.equal(dockQuote(barbie, '3 Hours', 717).wooStale, true);
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');

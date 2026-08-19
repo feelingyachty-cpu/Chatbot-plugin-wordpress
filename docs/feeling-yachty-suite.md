@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.17** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.18** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.12 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.18 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — Due today is crew + deposit, not the boat (3.73.18)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.18.zip` and hard-refresh a product page. No product re-sync.
+
+Barbie (40ft Silverton) listed the 3-hour **boat** at **$717** and showed that same number as Due today — the product page was scraping Woo’s leftover boat price before hours were picked. Boat $717 is under $800, so today is crew $75/hr + deposit $25/hr = **$300**. Listed From is boat + crew = **$942**. Dock is **$642**.
+
+Woo leftovers that still store the boat as the variation price are ignored for Due today and for cart totals. Checkout uses the Suite fee formula.
 
 ### 2026-08-19 — Plugins page no longer dumps you on the homepage (3.73.17)
 

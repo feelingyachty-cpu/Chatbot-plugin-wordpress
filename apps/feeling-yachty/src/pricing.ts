@@ -143,11 +143,12 @@ export function chargedToday(yacht: Yacht, duration?: string, wooPayNow?: number
   const resDep = boatPctDeposit(total);
   const suiteNow = roundMoney(crewFuel + resDep);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
-  const fits = (amount: number) => amount > 0 && amount <= total + 0.009;
-  if (woo != null && fits(woo)) {
+  const wooIsBoat = woo != null && Math.abs(woo - total) <= 1.05 && Math.abs(woo - suiteNow) > 1.05;
+  const wooLooksLikeFees = woo != null && woo > 0 && !wooIsBoat && woo <= total + 0.009;
+  if (wooLooksLikeFees) {
     return roundMoney(woo);
   }
-  if (fits(suiteNow)) {
+  if (suiteNow > 0 && suiteNow <= total + suiteNow) {
     return suiteNow;
   }
   return roundMoney(total * DEPOSIT_RATE);
@@ -161,7 +162,9 @@ export function dockQuote(yacht: Yacht, duration?: string, wooPayNow?: number | 
     return null;
   }
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
-  const wooOk = woo != null && woo > 0 && woo <= total + 0.009;
+  const suiteNow = chargedToday(yacht, label);
+  const wooIsBoat = woo != null && Math.abs(woo - total) <= 1.05 && Math.abs(woo - suiteNow) > 1.05;
+  const wooOk = woo != null && woo > 0 && !wooIsBoat && woo <= total + 0.009;
   const payNow = chargedToday(yacht, label, wooPayNow);
   const hours = hoursFromDuration(label) || 0;
   return {

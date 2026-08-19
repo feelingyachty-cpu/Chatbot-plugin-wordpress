@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.15** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.16** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -66,6 +66,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 | `capacity_max` | Guest cap (Miami private boats are often 13) |
 | `special_desc` | Marketing blurb |
 | `price` | Starting **hourly** number (not always the charter total) |
+| `listed_from` | Guest From total: shortest row **boat + crew** |
 | `duration_label` | Label for the starting price (e.g. `3 Hours`) |
 | `price_note` | Human note (`4-hour weekday charter`, `5 hours total (pay for 4)`) |
 | `pricing[]` | Duration table. Row `type` is `price`, `heading`, or `note` |
@@ -92,7 +93,8 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 
 ### `pricing[]` rows
 
-- `type: price` — `{duration, price, free}`  
+- `type: price` — `{duration, price, listed, free}`  
+  `price` is the boat trip total. `listed` is boat + crew (what From / Hours show).  
   Durations seen: `2 Hours` … `8 Hours`, `4 Hours + 1 Free Hour`, `Pay for 4 Hours Get 5 Hours Total`, etc.
 - `type: heading` — weekday vs weekend blocks (e.g. Monday–Thursday)
 - `type: note` — e.g. `Weekend surcharge — $150`
@@ -256,6 +258,21 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — add crew to every listed price (3.73.16)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.16.zip` and hard-refresh the fleet and a product page. No product re-sync.
+
+Live browse on 2026-08-19 still showed boat-only Hours labeled “Total charter price” (Coco From **$1,100**, Hours 3h **$1,100** / 4h **$1,350** / 5h **$1,700**) and “Crew and fuel are additional.” The product-page Hours table in 3.73.15 still printed the boat row and skipped crew.
+
+3.73.16 adds crew on every guest listed number:
+
+- Fleet From / Hours
+- Product card Hours (`card_header`)
+- Woo catalog / product price HTML (was the $500 due-today variation)
+- REST `listed_from` plus `listed` on each `pricing[]` row (`price` stays the boat total)
+
+Live Coco after upload: From **$1,325** for 3 hours ($1,100 boat + $225 crew). 4h **$1,650**. 5h **$2,200**. Today / dock dollars do not change (Coco 4h still $500 today / $1,150 dock on the $1,350 boat).
 
 ### 2026-08-19 — listed price is boat + crew (3.73.15)
 

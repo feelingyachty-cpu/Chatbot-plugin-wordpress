@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { money } from '../api';
-import { dockQuote, priceRows, startingTotal } from '../pricing';
+import { dockQuote, listedTotal, priceRows, startingTotal } from '../pricing';
 import { t } from '../i18n';
 import type { Colors } from '../theme';
 import type { Yacht } from '../types';
@@ -194,7 +194,7 @@ export function YachtDetail({
               >
                 <Text style={{ color: colors.ink, fontWeight: on ? '800' : '600' }}>{row.duration}</Text>
                 <Text style={{ color: on ? colors.pink : colors.navy, fontWeight: '800' }}>
-                  {money(Number(row.price || 0))}
+                  {money(listedTotal(yacht, row.duration) ?? Number(row.price || 0))}
                 </Text>
               </Pressable>
             );
@@ -220,7 +220,7 @@ export function YachtDetail({
             {selected?.duration || t(lang, 'tripTotals')}
           </Text>
           <Text style={{ color: colors.white, fontWeight: '800', fontSize: 20 }}>
-            {quote ? money(quote.tripTotal) : selected ? money(Number(selected.price || 0)) : '—'}
+            {quote ? money(quote.listedTotal) : selected ? money(listedTotal(yacht, selected.duration) ?? Number(selected.price || 0)) : '—'}
           </Text>
           {quote ? (
             <Text style={{ color: colors.cream, fontSize: 11, fontWeight: '700' }}>

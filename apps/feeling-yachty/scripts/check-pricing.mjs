@@ -133,6 +133,18 @@ const listed = (yacht, duration) => {
 assert.equal(listed(coco, '3 Hours'), 1080); // 855 + 225
 assert.equal(listed(coco, '4 Hours'), 1440); // 1140 + 300
 assert.equal(listed(sundeck, '3 Hours'), 555); // 330 + 225
+
+// Live Coco Hours on 2026-08-19 (boat rows, not the older $855/$1140 set).
+const cocoLive = {
+  pricing: [
+    { type: 'price', duration: '3 Hours', price: 1100 },
+    { type: 'price', duration: '4 Hours', price: 1350 },
+    { type: 'price', duration: '5 Hours', price: 1700 },
+  ],
+};
+assert.equal(listed(cocoLive, '3 Hours'), 1325); // 1100 + 225
+assert.equal(listed(cocoLive, '4 Hours'), 1650); // 1350 + 300
+assert.equal(listed(cocoLive, '5 Hours'), 2200); // 1700 + 500
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');

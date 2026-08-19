@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.8** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.9** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.8 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.9 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,22 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — $800 fuel split (3.73.9)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.9.zip`, then re-sync yacht products.
+
+Boat cost is still the Hours & Pricing total for the hours picked.
+
+| Boat total | Crew | Fuel | Reservation deposit |
+| --- | --- | --- | --- |
+| At or under $800 | **$75/hr** | **$25.00/hr** | none |
+| Over $800 and at or under $1,400 | **$75/hr** | $50/hr | none |
+| Over $1,400 | **$100/hr** | $50/hr | 20% of the boat |
+
+Same wording on the product FAQ, Hours & Pricing note, deposit blurb, Checkout settings, and schema.
+
+Coco 4 hours ($1,140) is unchanged: **$500 today**, **$640 at the dock**.
 
 ### 2026-08-19 — $1,400 crew split (3.73.8)
 

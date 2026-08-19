@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { money } from '../api';
+import { dockQuote, priceRows, startingTotal } from '../pricing';
 import { t } from '../i18n';
 import type { Colors } from '../theme';
 import type { Yacht } from '../types';
@@ -21,12 +22,18 @@ export function YachtDetail({
   onBook: (duration?: string) => void;
   onTalk: () => void;
 }) {
-  const rows = useMemo(
-    () => (yacht.pricing || []).filter((row) => (row.type || 'price') === 'price' && row.price != null),
-    [yacht.pricing]
-  );
-  const [picked, setPicked] = useState(0);
+  const rows = useMemo(() => priceRows(yacht), [yacht]);
+  const cheapest = useMemo(() => {
+    const start = startingTotal(yacht);
+    const idx = rows.findIndex((row) => row.duration === start?.duration && Number(row.price) === start?.amount);
+    return idx >= 0 ? idx : 0;
+  }, [rows, yacht]);
+  const [picked, setPicked] = useState(cheapest);
+  useEffect(() => {
+    setPicked(cheapest);
+  }, [yacht.id, cheapest]);
   const selected = rows[picked] || rows[0];
+  const quote = dockQuote(yacht, selected?.duration);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.paper }}>
@@ -124,6 +131,24 @@ export function YachtDetail({
             {t(lang, 'tripTotals')}
           </Text>
           <Text style={{ color: colors.muted, marginBottom: 12 }}>{t(lang, 'hoursHint')}</Text>
+          {quote && (
+            <View style={{ backgroundColor: colors.navyDeep, borderRadius: 18, padding: 14, marginBottom: 14 }}>
+              <Text style={{ color: colors.cream, fontWeight: '800', marginBottom: 8 }}>{quote.duration}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                <Text style={{ color: '#9CB2C1' }}>{t(lang, 'tripTotal')}</Text>
+                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.tripTotal)}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                <Text style={{ color: '#9CB2C1' }}>{t(lang, 'payNow')}</Text>
+                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.payNow)}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ color: colors.pink, fontWeight: '800' }}>{t(lang, 'dueAtDock')}</Text>
+                <Text style={{ color: colors.pink, fontWeight: '800' }}>{money(quote.dueAtDock)}</Text>
+              </View>
+              <Text style={{ color: '#9CB2C1', marginTop: 10, fontSize: 12 }}>{t(lang, 'dockHint')}</Text>
+            </View>
+          )}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             {rows.map((row, idx) => {
               const on = idx === picked;
@@ -194,8 +219,13 @@ export function YachtDetail({
             {selected?.duration || t(lang, 'tripTotals')}
           </Text>
           <Text style={{ color: colors.white, fontWeight: '800', fontSize: 20 }}>
-            {selected ? money(Number(selected.price || 0)) : '—'}
+            {quote ? money(quote.tripTotal) : selected ? money(Number(selected.price || 0)) : '—'}
           </Text>
+          {quote ? (
+            <Text style={{ color: colors.cream, fontSize: 11, fontWeight: '700' }}>
+              {t(lang, 'payNow')} {money(quote.payNow)} · {t(lang, 'dueAtDock')} {money(quote.dueAtDock)}
+            </Text>
+          ) : null}
         </View>
         <PressScale onPress={onTalk}>
           <View style={{ backgroundColor: colors.navy, paddingHorizontal: 14, paddingVertical: 14, borderRadius: 14 }}>

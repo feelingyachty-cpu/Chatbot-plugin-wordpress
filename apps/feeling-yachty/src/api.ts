@@ -1,5 +1,7 @@
 import { API_BASE, APP_KEY, TALK_WEBHOOK } from './config';
-import type { CatalogYacht, PricingRow, Yacht } from './types';
+import { durationSlug } from './pricing';
+import type { CatalogYacht, Yacht } from './types';
+export { durationSlug, money, startingTotal } from './pricing';
 
 let appApiMissing = false;
 
@@ -99,34 +101,6 @@ export async function fetchYacht(id: number): Promise<Yacht> {
   return normalizeYacht(await getJson<Yacht>(`/wp-json/fy/v1/yachts/${id}`));
 }
 
-function priceRows(yacht: Yacht): PricingRow[] {
-  return (yacht.pricing || []).filter((r) => (r.type || 'price') === 'price' && r.price != null);
-}
-
-/** Cheapest trip total. Never hourly `price` × hours. */
-export function startingTotal(yacht: Yacht): { amount: number; duration: string } | null {
-  const rows = priceRows(yacht);
-  if (rows.length) {
-    const best = rows.reduce((a, b) => (Number(a.price) <= Number(b.price) ? a : b));
-    return { amount: Number(best.price), duration: best.duration || '' };
-  }
-  if (yacht.starting && yacht.starting.amount != null) {
-    return yacht.starting;
-  }
-  return null;
-}
-
-export function durationSlug(duration?: string): string {
-  if (!duration) {
-    return '';
-  }
-  const match = String(duration).toLowerCase().match(/(\d+)\s*hour/);
-  if (match) {
-    return match[1] === '1' ? '1-hour' : `${match[1]}-hours`;
-  }
-  return String(duration).toLowerCase().trim().replace(/\s+/g, '-');
-}
-
 /** Same Woo product page the website uses. Duration/guests preselect the variable product. */
 export function checkoutUrl(
   yacht: Yacht,
@@ -146,10 +120,6 @@ export function checkoutUrl(
     return base;
   }
   return `${base}${base.includes('?') ? '&' : '?'}${parts.join('&')}`;
-}
-
-export function money(amount: number): string {
-  return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
 
 export async function sendTalkMessage(payload: {

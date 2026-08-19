@@ -244,9 +244,16 @@ class FY_App_REST {
 		$params   = $request->get_json_params();
 		$params   = is_array( $params ) ? $params : $request->get_params();
 		$yacht_id = isset( $params['yacht_id'] ) ? intval( $params['yacht_id'] ) : 0;
-		$quote    = FY_Fleet_Pricing::quote( $yacht_id, $params );
-		if ( is_wp_error( $quote ) ) {
-			return $quote;
+		$suite_quote = FY_Fleet_Pricing::quote( $yacht_id, $params );
+		if ( is_wp_error( $suite_quote ) ) {
+			return $suite_quote;
+		}
+		$quote = $suite_quote;
+		if ( class_exists( 'FY_App_Quote' ) ) {
+			$split = FY_App_Quote::for_duration( $yacht_id, isset( $params['duration'] ) ? $params['duration'] : '' );
+			if ( $split ) {
+				$quote = is_array( $suite_quote ) ? array_merge( $suite_quote, $split ) : $split;
+			}
 		}
 
 		$product_id  = (int) get_post_meta( $yacht_id, '_fy_product_id', true );
@@ -305,6 +312,7 @@ class FY_App_REST {
 			'product_url'      => ( $product_id && 'product' === get_post_type( $product_id ) ) ? get_permalink( $product_id ) : '',
 			'pricing'          => $pricing,
 			'starting'         => $starting,
+			'quote'            => class_exists( 'FY_App_Quote' ) ? FY_App_Quote::for_duration( $yacht_id ) : null,
 			'marina'           => array(
 				'title' => (string) get_post_meta( $yacht_id, '_fy_marina_title', true ),
 			),

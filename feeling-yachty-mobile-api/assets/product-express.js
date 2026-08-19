@@ -427,7 +427,7 @@ jQuery( function ( $ ) {
 				html += '<div class="fy-pay-summary__line"><span>Crew (' + money( charges.crewRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( crewTotal ) + '</span></div>';
 			}
 			if ( charges.fuelRate > 0 ) {
-				html += '<div class="fy-pay-summary__line"><span>Boat deposit (' + money( charges.fuelRate ) + '/hr &times; ' + boatHours + ' hrs &mdash; credited at the dock)</span><span>' + money( fuelTotal ) + '</span></div>';
+				html += '<div class="fy-pay-summary__line"><span>Fuel (' + money( charges.fuelRate ) + '/hr &times; ' + boatHours + ' hrs)</span><span>' + money( fuelTotal ) + '</span></div>';
 			}
 			if ( resDep ) {
 				html += '<div class="fy-pay-summary__line"><span>Boat deposit (' + depPct + '% of booking &mdash; credited at the dock)</span><span>' + money( resDep ) + '</span></div>';
@@ -466,10 +466,10 @@ jQuery( function ( $ ) {
 			html += '<div class="fy-pay-summary__note">Plus ' + money( dueAtDock ) + ' paid in person at the dock' +
 				( addonsTotal > 0 ? ' (boat + the rest of your extras)' : ' for the boat' ) +
 				' — cash or Zelle. No hidden fees.' +
-				' Crew reservation fees and deposits are non-refundable if you cancel. Any boat deposit is already credited to that balance.</div>';
+				' Crew reservation fees are non-refundable if you cancel. If you cancel, the fuel charge is taken as a deposit and is not refunded.</div>';
 		} else if ( deposit ) {
 			html += '<div class="fy-pay-summary__due"><span>Due today</span><strong>' + money( deposit ) + '</strong></div>';
-			html += '<div class="fy-pay-summary__note">Only crew + deposit are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours. Remaining balance is due at the dock by cash or Zelle only.</div>';
+			html += '<div class="fy-pay-summary__note">Only crew + fuel are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours. If you cancel, the fuel charge is taken as a deposit. Remaining balance is due at the dock by cash or Zelle only.</div>';
 		} else if ( hasAny ) {
 			html += '<div class="fy-pay-summary__note">Pick a duration to see your total.</div>';
 		} else {
@@ -659,14 +659,14 @@ jQuery( function ( $ ) {
 		var $faq = $(
 			'<details class="fy-deposit-faq">' +
 				'<summary>What am I paying today? <span class="fy-faq-caret" aria-hidden="true">▾</span></summary>' +
-				'<p>Only crew + deposit are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours.</p>' +
-				'<p>Boat $800 or less: Crew $75/hr + Deposit $25/hr<br>' +
-				'Boat $801&ndash;$1,400: Crew $75/hr + Deposit $50/hr<br>' +
-				'Boat over $1,400: Crew $100/hr + Deposit $50/hr' +
+				'<p>Only crew + fuel are charged online now to confirm your booking. This reserves both the boat and your crew exclusively for your selected date and hours.</p>' +
+				'<p>Boat $800 or less: Crew $75/hr + Fuel $25/hr<br>' +
+				'Boat $801&ndash;$1,400: Crew $75/hr + Fuel $50/hr<br>' +
+				'Boat over $1,400: Crew $100/hr + Fuel $50/hr' +
 				( faqPct > 0 ? ' + ' + faqPct + '% boat deposit' : '' ) + '<br>' +
 				'Premium yachts may require a 50% boat deposit<br>' +
 				'Extras: ' + addonPct + '% due now</p>' +
-				'<p>Because the boat and crew are taken off the schedule and reserved specifically for you, crew reservation fees and deposits are non-refundable if you cancel. Any boat deposit is credited toward your boat price. Remaining balance is due at the dock by cash or Zelle only.</p>' +
+				'<p>Because the boat and crew are taken off the schedule and reserved specifically for you, crew reservation fees are non-refundable if you cancel. If you cancel, the fuel charge is taken as a deposit and is not refunded. Any extra boat deposit is credited toward your boat price. Remaining balance is due at the dock by cash or Zelle only.</p>' +
 			'</details>'
 		);
 		$( '.fy-confirm-note' ).after( $faq );

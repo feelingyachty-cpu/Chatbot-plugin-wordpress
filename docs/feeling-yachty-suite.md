@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.19** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.20** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -66,7 +66,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 | `capacity_max` | Guest cap (Miami private boats are often 13) |
 | `special_desc` | Marketing blurb |
 | `price` | Starting **hourly** number (not always the charter total) |
-| `listed_from` | Guest From total: shortest row **boat + crew + deposit** |
+| `listed_from` | Guest From total: shortest row **boat + crew + fuel** |
 | `duration_label` | Label for the starting price (e.g. `3 Hours`) |
 | `price_note` | Human note (`4-hour weekday charter`, `5 hours total (pay for 4)`) |
 | `pricing[]` | Duration table. Row `type` is `price`, `heading`, or `note` |
@@ -94,7 +94,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 ### `pricing[]` rows
 
 - `type: price` — `{duration, price, listed, free}`  
-  `price` is the boat trip total. `listed` is boat + crew + deposit (what From / Hours show).  
+  `price` is the boat trip total. `listed` is boat + crew + fuel (what From / Hours show).  
   Durations seen: `2 Hours` … `8 Hours`, `4 Hours + 1 Free Hour`, `Pay for 4 Hours Get 5 Hours Total`, etc.
 - `type: heading` — weekday vs weekend blocks (e.g. Monday–Thursday)
 - `type: note` — e.g. `Weekend surcharge — $150`
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.19 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.20 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — hourly charge is fuel again; cancel keeps it as a deposit (3.73.20)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.20.zip` and hard-refresh. No product re-sync.
+
+The $25 / $50 hourly line is **fuel** again (not “boat deposit”). If a guest cancels, that fuel charge is taken as a deposit and is not refunded. Crew stays a non-refundable reservation fee. The 20% over $1,400 is still a boat deposit.
+
+On first load, Suite rewrites the fleet blurb, the cancellation policy, and **every yacht FAQ**.
+
+Listed From stays boat + crew + fuel. Barbie 3h listed **$1,017**. Today still **$300**.
 
 ### 2026-08-19 — listed price is boat + crew + deposit (3.73.19)
 

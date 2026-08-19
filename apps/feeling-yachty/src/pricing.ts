@@ -77,7 +77,7 @@ function crewRateForBoat(yacht: Yacht, boat: number): number {
     : Number(yacht.crew_rate);
 }
 
-/** Guest-facing listed total: boat + crew + deposit. */
+/** Guest-facing listed total: boat + crew + fuel. */
 export function listedTotal(yacht: Yacht, duration?: string): number | null {
   const label = duration || startingTotal(yacht)?.duration || '';
   const boat = tripTotal(yacht, label);

@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against uploaded **feeling-yachty-suite 3.73.4** (zip) and live **feelingyachty.com** (still running the previous Suite until this zip is installed).
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.5** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -257,9 +257,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 ## Changelog (docs + product)
 
-### 2026-08-19 — fleet fuel $50/hr
+### 2026-08-19 — Suite is the source of truth (3.73.5)
 
-Global Checkout fuel rate is **$50.00 / hour** (Suite 3.73.4 had migrated saved $50 up to $75). Coco 4 hours: crew $400 + fuel $200 = **$600 today**, dock **$540** ($1,140 − $600). After upload, re-sync yacht products so Woo variations match.
+Dock math and fleet fuel live in Suite, not the mobile API. Upload **only** `dist/feeling-yachty-suite-3.73.5.zip`.
+
+- Fuel **$50/hr** fleet-wide (3.73.4 had migrated saved $50 up to $75).
+- Card / quote / cart / order: **due at dock = boat − charged today**.
+- Coco 4 hours: $1,140 boat, $600 today (crew $400 + fuel $200), **$540 at the dock**.
+- Re-sync yacht products after upload so Woo variations use $50 fuel.
 
 ### 2026-08-19 — Suite 3.73.4 zip scanned
 

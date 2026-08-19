@@ -1,13 +1,13 @@
 import type { PricingRow, Yacht } from './types';
 
-/** Fallback only when today’s Woo / crew+fuel charge does not fit the boat total. */
+/** Fallback only when today’s Woo / crew+deposit charge does not fit the boat total. */
 export const DEPOSIT_RATE = 0.5;
 /** Fleet defaults from Suite Checkout settings — blank yacht fields use these. */
 export const FLEET_CREW_RATE = 100;
-/** Crew $/hr when the boat total is at or under $1,400. Fuel follows the $800 line. */
+/** Crew $/hr when the boat total is at or under $1,400. Hourly deposit follows the $800 line. */
 export const FLEET_CREW_RATE_UNDER = 75;
 export const FLEET_FUEL_RATE = 50;
-/** Fuel $/hr when the boat total is at or under $800. Crew stays $75. */
+/** Hourly boat deposit when the boat total is at or under $800. Crew stays $75. */
 export const FLEET_FUEL_RATE_UNDER = 25;
 export const FUEL_THRESHOLD = 800;
 export const CHARTER_DEPOSIT_THRESHOLD = 1400;
@@ -80,13 +80,27 @@ export type DockQuote = {
   wooStale: boolean;
 };
 
+export function hourlyDeposit(yacht: Yacht, boat: number, hours: number): number {
+  const fuelRate = yacht.fuel_rate == null
+    ? (boat <= FUEL_THRESHOLD ? FLEET_FUEL_RATE_UNDER : FLEET_FUEL_RATE)
+    : Number(yacht.fuel_rate);
+  return roundMoney(fuelRate * hours);
+}
+
+export function boatPctDeposit(boat: number): number {
+  return boat > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((boat * CHARTER_DEPOSIT_PCT) / 100) : 0;
+}
+
+/** Dock = boat − hourly deposit − % boat deposit. Crew is not credited. */
+export function dockBalance(boat: number, hourlyDep: number, pctDep: number, extrasLater = 0): number {
+  return roundMoney(Math.max(0, boat - hourlyDep - pctDep) + extrasLater);
+}
+
 /**
- * due_at_dock = trip_total − pay_now.
- * pay_now is what Woo charges today (crew + fuel, plus a 20% boat deposit
- * over $1,400). Crew is $75/hr at or under $1,400 and $100/hr over.
- * Fuel is $25/hr at or under $800 and $50/hr over.
- * That amount is subtracted from the boat. A cloned Woo
- * table that is larger than the boat is ignored.
+ * pay_now is what Woo charges today (crew + hourly boat deposit, plus a 20%
+ * boat deposit over $1,400). Crew is $75/hr at or under $1,400 and $100/hr over.
+ * Hourly deposit is $25/hr at or under $800 and $50/hr over.
+ * Dock credits deposits only — crew is a reservation fee.
  */
 export function chargedToday(yacht: Yacht, duration?: string, wooPayNow?: number | null): number {
   const label = duration || startingTotal(yacht)?.duration || '';
@@ -98,11 +112,8 @@ export function chargedToday(yacht: Yacht, duration?: string, wooPayNow?: number
   const crewRate = yacht.crew_rate == null
     ? (total <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
     : Number(yacht.crew_rate);
-  const fuelRate = yacht.fuel_rate == null
-    ? (total <= FUEL_THRESHOLD ? FLEET_FUEL_RATE_UNDER : FLEET_FUEL_RATE)
-    : Number(yacht.fuel_rate);
-  const crewFuel = roundMoney((crewRate + fuelRate) * hours);
-  const resDep = total > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((total * CHARTER_DEPOSIT_PCT) / 100) : 0;
+  const crewFuel = roundMoney((crewRate * hours) + hourlyDeposit(yacht, total, hours));
+  const resDep = boatPctDeposit(total);
   const suiteNow = roundMoney(crewFuel + resDep);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
   const fits = (amount: number) => amount > 0 && amount <= total + 0.009;
@@ -125,11 +136,12 @@ export function dockQuote(yacht: Yacht, duration?: string, wooPayNow?: number | 
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
   const wooOk = woo != null && woo > 0 && woo <= total + 0.009;
   const payNow = chargedToday(yacht, label, wooPayNow);
+  const hours = hoursFromDuration(label) || 0;
   return {
     duration: label,
     tripTotal: roundMoney(total),
     payNow,
-    dueAtDock: roundMoney(total - payNow),
+    dueAtDock: dockBalance(total, hourlyDeposit(yacht, total, hours), boatPctDeposit(total)),
     depositRate: DEPOSIT_RATE,
     wooStale: woo != null && !wooOk,
   };

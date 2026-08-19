@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Trip total → today’s payment → due at the dock.
- * Dock is always boat − charged today (plus any unpaid extras).
+ * Dock is boat − hourly deposit − % boat deposit. Crew is not credited.
  * Totals come from Suite pricing rows. Never hourly × hours when a row exists.
  */
 class FY_App_Quote {
@@ -70,8 +70,8 @@ class FY_App_Quote {
 	}
 
 	/**
-	 * due_at_dock = trip − pay_now.
-	 * pay_now is today’s Woo / crew+fuel charge when it fits inside the boat total.
+	 * pay_now is today’s Woo / crew+deposit charge when it fits inside the boat total.
+	 * Dock credits deposits only.
 	 */
 	public static function suite_pay_now( $trip, $hours, $yacht_id = 0 ) {
 		$trip  = (float) $trip;
@@ -101,6 +101,29 @@ class FY_App_Quote {
 		return $now;
 	}
 
+	/** Hourly boat deposit + percent boat deposit credited against the boat. */
+	public static function dock_credit( $trip, $hours, $yacht_id = 0 ) {
+		$trip  = (float) $trip;
+		$hours = (float) $hours;
+		if ( $trip <= 0 || $hours <= 0 ) {
+			return 0.0;
+		}
+		$fuel_over  = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_rate() : 50;
+		$fuel_under = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_rate_under() : 25;
+		$fuel_thr   = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_threshold() : 800;
+		$dep_thr    = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_charter_deposit_threshold() : 1400;
+		$dep_pct    = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_charter_deposit_pct() : 20;
+		$fuel_lock  = $yacht_id ? get_post_meta( $yacht_id, '_fy_fuel_rate', true ) : '';
+		$hourly     = ( '' !== $fuel_lock && null !== $fuel_lock )
+			? max( 0, (float) $fuel_lock )
+			: ( $fuel_thr > 0 && $trip <= $fuel_thr ? $fuel_under : $fuel_over );
+		$hourly_total = round( $hourly * $hours, 2 );
+		$pct_total    = ( $dep_thr > 0 && $dep_pct > 0 && $trip > $dep_thr )
+			? round( $trip * $dep_pct / 100, 2 )
+			: 0.0;
+		return round( max( 0, $trip - $hourly_total - $pct_total ), 2 );
+	}
+
 	public static function split( $trip, $paid_today = null, $hours = 0, $yacht_id = 0 ) {
 		$trip  = round( (float) $trip, 2 );
 		$paid  = null === $paid_today ? null : round( (float) $paid_today, 2 );
@@ -115,10 +138,13 @@ class FY_App_Quote {
 		} else {
 			$deposit = round( $trip * self::DEPOSIT_RATE, 2 );
 		}
+		$dock = $hours > 0
+			? self::dock_credit( $trip, $hours, $yacht_id )
+			: round( max( 0, $trip - $deposit ), 2 );
 		return array(
 			'trip_total'   => $trip,
 			'pay_now'      => $deposit,
-			'due_at_dock'  => round( max( 0, $trip - $deposit ), 2 ),
+			'due_at_dock'  => $dock,
 			'deposit_rate' => self::DEPOSIT_RATE,
 		);
 	}

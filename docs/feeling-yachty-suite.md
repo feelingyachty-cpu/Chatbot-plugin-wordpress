@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.12** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.13** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -256,6 +256,30 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — crew + boat deposit, not fuel (3.73.13)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.13.zip` and hard-refresh product pages. **No product re-sync needed** — Woo variation totals are unchanged. Only labels and dock math change.
+
+Only **crew + deposit** are charged online to confirm the booking. That reserves the boat and crew for the selected date and hours.
+
+| Boat total | Crew | Hourly boat deposit | Extra boat deposit |
+| --- | --- | --- | --- |
+| $800 or less | $75/hr | $25/hr | none |
+| $801–$1,400 | $75/hr | $50/hr | none |
+| Over $1,400 | $100/hr | $50/hr | 20% of the boat |
+| Premium yachts | — | — | may require 50% |
+| Extras | — | — | 50% due now |
+
+Crew reservation fees and deposits are **non-refundable** if the guest cancels. Any boat deposit is credited toward the boat price. Crew is **not** credited against the boat.
+
+**Dock = boat − hourly deposit − % boat deposit + unpaid extras.** Remaining balance is cash or Zelle only.
+
+Coco 4 hours ($1,140): crew $300 + deposit $200 = **$500 today**, **$940 at the dock**.  
+Coco 5 hours ($1,425): crew $500 + deposit $250 + 20% $285 = **$1,035 today**, **$890 at the dock**.  
+Sundeck 3 hours ($330): crew $225 + deposit $75 = **$300 today**, **$255 at the dock**.
+
+Guest FAQ, Hours & Pricing note, settings, metabox, cart, schema, and checkout copy all use this wording. Internal setting keys stay `_fy_fuel_rate` / `fuel_rate` so the database does not migrate.
 
 ### 2026-08-19 — cheapest first (3.73.12)
 

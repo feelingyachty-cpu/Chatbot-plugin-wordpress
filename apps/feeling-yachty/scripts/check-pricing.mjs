@@ -1,6 +1,7 @@
 /**
  * Systems check: hours must change trip total, deposit, and due-at-the-dock together.
- * Dock is boat − today’s payment. Run: node apps/feeling-yachty/scripts/check-pricing.mjs
+ * Dock is boat − hourly deposit − % boat deposit. Crew is not credited.
+ * Run: node apps/feeling-yachty/scripts/check-pricing.mjs
  */
 import assert from 'node:assert/strict';
 
@@ -27,6 +28,21 @@ function tripTotal(yacht, duration) {
   return null;
 }
 
+function hourlyDeposit(yacht, boat, hours) {
+  const fuelRate = yacht.fuel_rate == null
+    ? (boat <= FUEL_THRESHOLD ? FLEET_FUEL_RATE_UNDER : FLEET_FUEL_RATE)
+    : Number(yacht.fuel_rate);
+  return roundMoney(fuelRate * hours);
+}
+
+function boatPctDeposit(boat) {
+  return boat > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((boat * CHARTER_DEPOSIT_PCT) / 100) : 0;
+}
+
+function dockBalance(boat, hourlyDep, pctDep, extrasLater = 0) {
+  return roundMoney(Math.max(0, boat - hourlyDep - pctDep) + extrasLater);
+}
+
 function chargedToday(yacht, duration, wooPayNow) {
   const total = tripTotal(yacht, duration);
   if (total == null) return 0;
@@ -34,11 +50,8 @@ function chargedToday(yacht, duration, wooPayNow) {
   const crewRate = yacht.crew_rate == null
     ? (total <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
     : Number(yacht.crew_rate);
-  const fuelRate = yacht.fuel_rate == null
-    ? (total <= FUEL_THRESHOLD ? FLEET_FUEL_RATE_UNDER : FLEET_FUEL_RATE)
-    : Number(yacht.fuel_rate);
-  const crewFuel = roundMoney((crewRate + fuelRate) * hours);
-  const resDep = total > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((total * CHARTER_DEPOSIT_PCT) / 100) : 0;
+  const crewFuel = roundMoney((crewRate * hours) + hourlyDeposit(yacht, total, hours));
+  const resDep = boatPctDeposit(total);
   const suiteNow = roundMoney(crewFuel + resDep);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
   const fits = (amount) => amount > 0 && amount <= total + 0.009;
@@ -53,7 +66,13 @@ function dockQuote(yacht, duration, wooPayNow) {
   const woo = wooPayNow != null ? Number(wooPayNow) : null;
   const wooOk = woo != null && woo > 0 && woo <= total + 0.009;
   const payNow = chargedToday(yacht, duration, wooPayNow);
-  return { tripTotal: roundMoney(total), payNow, dueAtDock: roundMoney(total - payNow), wooStale: woo != null && !wooOk };
+  const hours = hoursFromDuration(duration) || 0;
+  return {
+    tripTotal: roundMoney(total),
+    payNow,
+    dueAtDock: dockBalance(total, hourlyDeposit(yacht, total, hours), boatPctDeposit(total)),
+    wooStale: woo != null && !wooOk,
+  };
 }
 
 const sundeck = {
@@ -66,19 +85,19 @@ const sundeck = {
 
 const q3 = dockQuote(sundeck, '3 Hours', 525); // cloned Woo $525 is stale
 assert.equal(q3.tripTotal, 330);
-assert.equal(q3.payNow, 300); // $75 crew + $25 fuel × 3
-assert.equal(q3.dueAtDock, 30);
+assert.equal(q3.payNow, 300); // $75 crew + $25 deposit × 3
+assert.equal(q3.dueAtDock, 255); // 330 − 75
 assert.equal(q3.wooStale, true);
 
 const q4 = dockQuote(sundeck, '4 Hours');
 assert.equal(q4.tripTotal, 440);
 assert.equal(q4.payNow, 400); // $75 + $25 × 4
-assert.equal(q4.dueAtDock, 40);
+assert.equal(q4.dueAtDock, 340); // 440 − 100
 
 const q8 = dockQuote(sundeck, '8 Hours');
 assert.equal(q8.tripTotal, 880);
-assert.equal(q8.payNow, 440);
-assert.equal(q8.dueAtDock, 440);
+assert.equal(q8.payNow, 440); // crew+deposit $1000 does not fit; 50% fallback
+assert.equal(q8.dueAtDock, 480); // 880 − $50/hr × 8
 
 const lime = {
   pricing: [{ type: 'price', duration: '3 Hours', price: 10749.99 }],
@@ -86,7 +105,7 @@ const lime = {
 const ql = dockQuote(lime, '3 Hours', 2675);
 assert.equal(ql.tripTotal, 10749.99);
 assert.equal(ql.payNow, 2675);
-assert.equal(ql.dueAtDock, 8074.99);
+assert.equal(ql.dueAtDock, 8449.99); // 10749.99 − 150 − 2150
 assert.equal(ql.wooStale, false);
 
 assert.equal(hoursFromDuration('4 Hours + 1 Free Hour'), 4);
@@ -103,23 +122,23 @@ const coco = {
 const c4 = dockQuote(coco, '4 Hours', 500);
 assert.equal(c4.tripTotal, 1140);
 assert.equal(c4.payNow, 500);
-assert.equal(c4.dueAtDock, 640);
+assert.equal(c4.dueAtDock, 940);
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');
 assert.equal(c4suite.payNow, 500);
-assert.equal(c4suite.dueAtDock, 640);
+assert.equal(c4suite.dueAtDock, 940);
 
 const c5 = dockQuote(coco, '5 Hours', 1035);
 assert.equal(c5.tripTotal, 1425);
 assert.equal(c5.payNow, 1035);
-assert.equal(c5.dueAtDock, 390);
+assert.equal(c5.dueAtDock, 890);
 
-// Card formula: boat − (crew + fuel + resDep). Fuel is $25 under $800, else $50.
-const suiteDock = (boat, crew, fuel, resDep, extrasLater) =>
-  Math.round((Math.max(0, boat - crew - fuel - resDep) + extrasLater) * 100) / 100;
-assert.equal(suiteDock(1140, 300, 200, 0, 0), 640);
-assert.equal(suiteDock(1425, 500, 250, 285, 0), 390);
-assert.equal(suiteDock(330, 225, 75, 0, 0), 30);
+// Card formula: boat − hourly deposit − % boat deposit. Deposit is $25 under $800, else $50.
+const suiteDock = (boat, hourlyDep, resDep, extrasLater) =>
+  Math.round((Math.max(0, boat - hourlyDep - resDep) + extrasLater) * 100) / 100;
+assert.equal(suiteDock(1140, 200, 0, 0), 940);
+assert.equal(suiteDock(1425, 250, 285, 0), 890);
+assert.equal(suiteDock(330, 75, 0, 0), 255);
 
 console.log('pricing systems check ok');

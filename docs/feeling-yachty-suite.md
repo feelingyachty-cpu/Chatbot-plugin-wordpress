@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.16** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.17** (this repo’s patched zip). Suite is the source of truth for yacht prices, boat deposit, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — Plugins page no longer dumps you on the homepage (3.73.17)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.17.zip`. If Plugins still will not open, log in at `https://feelingyachty.com/wp-login.php` (WordPress admin), not the website My Account form.
+
+Suite was running fleet migrations on Plugins / Updates. A timeout there can show the host homepage. WooCommerce also sends customer logins away from wp-admin — if My Account is the front page, that looks like “I clicked Plugins and landed on home.”
+
+3.73.17 skips every one-time fleet job on Plugins / Updates, never claims `wp-admin` / `plugins` as a yacht URL, and keeps users who can manage plugins or the fleet inside wp-admin after login.
 
 ### 2026-08-19 — add crew to every listed price (3.73.16)
 

@@ -4,7 +4,7 @@ import type { PricingRow, Yacht } from './types';
 export const DEPOSIT_RATE = 0.5;
 /** Fleet defaults from Suite Checkout settings — blank yacht fields use these. */
 export const FLEET_CREW_RATE = 100;
-/** Crew $/hr when the boat total is at or under $1,400. Fuel stays $50. */
+/** Crew $/hr when the boat total is at or under $1,400. Fuel follows the $800 line. */
 export const FLEET_CREW_RATE_UNDER = 75;
 export const FLEET_FUEL_RATE = 50;
 /** Fuel $/hr when the boat total is at or under $800. Crew stays $75. */

@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.9** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.10** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.9 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.10 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,17 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — bug pass (3.73.10)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.10.zip`, then re-sync yacht products.
+
+- Hours & Pricing notes now use the live $800 / $1,400 settings instead of hardcoded copy. A yacht with its own crew/fuel override says so instead of advertising the fleet bands.
+- SEO schema default phone is **+1 954-246-3636**. Leftover `754-325-3827` in Yacht Fleet → SEO is rewritten on upload.
+- Yacht fields that still hold the old fleet defaults ($50/$75 fuel, $75/$100 crew) are cleared so the $800 / $1,400 bands apply. A real override (2-person crew, etc.) is left alone.
+- Yacht metabox placeholders no longer show $100 / $50 (typing those locked the yacht out of the bands). Leave blank for fleet bands.
+- Product card treats a real `0` crew/fuel rate as off, not as a missing $50.
+- Invalid `deposit_type` falls back to crew + fuel online, not the old percent deposit.
 
 ### 2026-08-19 — $800 fuel split (3.73.9)
 

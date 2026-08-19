@@ -114,7 +114,7 @@ assert.equal(c5.tripTotal, 1425);
 assert.equal(c5.payNow, 1035);
 assert.equal(c5.dueAtDock, 390);
 
-// Card formula: boat − (crew + fuel + resDep). Fuel is $50/hr fleet-wide.
+// Card formula: boat − (crew + fuel + resDep). Fuel is $25 under $800, else $50.
 const suiteDock = (boat, crew, fuel, resDep, extrasLater) =>
   Math.round((Math.max(0, boat - crew - fuel - resDep) + extrasLater) * 100) / 100;
 assert.equal(suiteDock(1140, 300, 200, 0, 0), 640);

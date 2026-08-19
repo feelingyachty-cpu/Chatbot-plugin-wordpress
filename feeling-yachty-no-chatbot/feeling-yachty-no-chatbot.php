@@ -2,12 +2,16 @@
 /**
  * Plugin Name: Feeling Yachty — No Chatbot
  * Description: Hides the Suite Support Bot. GoHighLevel owns SMS, WhatsApp, email, and calls. Safe to keep installed.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Feeling Yachty
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( ! defined( 'FEELING_YACHTY_NO_CHATBOT' ) ) {
+	define( 'FEELING_YACHTY_NO_CHATBOT', true );
 }
 
 add_action(

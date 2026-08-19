@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.5** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.6** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.4 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.6 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -257,9 +257,19 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 ## Changelog (docs + product)
 
+### 2026-08-19 — bug pass (3.73.6)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.6.zip`. Then re-sync yacht products and hard-refresh Coco.
+
+- Stale Woo variation (still $75 fuel) no longer invents a reservation deposit or rewrites the boat total on the card. Dock stays `boat − charged today`.
+- Plugin date/time fields post as `fy_booking_date` / `fy_charter_start_time` so an empty hidden copy cannot wipe the theme’s start time (PHP last-wins).
+- `quote()` accepts storefront times (`9:00 am`, half-hour slots) instead of requiring an exact settings-list match (`9:00 AM`). Extra share is included in today’s deposit.
+- Settings copy / schema FAQ now say today’s payment is credited against the boat. WhatsApp/phone leftovers `17543253827` migrate to Miami `19542463636`. Missing `deposit_type` sanitizes to `crew_fuel`.
+- Support Bot does not boot when `feeling-yachty-no-chatbot` is installed (defines `FEELING_YACHTY_NO_CHATBOT`).
+
 ### 2026-08-19 — Suite is the source of truth (3.73.5)
 
-Dock math and fleet fuel live in Suite, not the mobile API. Upload **only** `dist/feeling-yachty-suite-3.73.5.zip`.
+Dock math and fleet fuel live in Suite, not the mobile API.
 
 - Fuel **$50/hr** fleet-wide (3.73.4 had migrated saved $50 up to $75).
 - Card / quote / cart / order: **due at dock = boat − charged today**.

@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.21** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.22** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.21 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.22 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — fuel is no longer credited at the dock (3.73.22)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.22.zip` and hard-refresh. No product re-sync.
+
+Fuel is a real charge added on top of the boat for every price tier — it is **not** deducted from the dock balance anymore. Due at the dock is the **full boat price** (minus only the 20% / premium boat deposit when one was paid).
+
+$770 boat, 4 hours: crew $300 + fuel $100 = charged today **$400** · due at the dock **$770** (was wrongly $670) · charter total **$1,170**. Charged today + dock now always equals boat + crew + fuel (+ extras).
+
+Cancellation stays the same: crew is non-refundable, and the fuel charge is taken as a deposit if the guest cancels. The 20% boat deposit is still credited toward the boat.
 
 ### 2026-08-19 — deep-dive bug-fix release (3.73.21)
 

@@ -1,6 +1,6 @@
 /* Patched copy of the Suite's product-express.js.
- * Dock = boat − fuel − % boat deposit. Crew is a reservation fee and is
- * NOT credited. Coco 4 hours: $1,140 − $200 fuel = $940 at the dock.
+ * Dock = boat − % boat deposit. Crew and fuel are real charges on top
+ * of the boat — neither is credited. Coco 4 hours: dock $1,140.
  * Retire this plugin when the Suite is active — the Suite ships the same
  * summary and both running at once injects two conflicting cards. */
 /* Feeling Yachty — show express checkout on product pages only after the
@@ -409,9 +409,9 @@ jQuery( function ( $ ) {
 				: 0;
 			var resDep = expectedResDep;
 			chargedNow = Math.round( ( crewTotal + fuelTotal + resDep + addonsNow ) * 100 ) / 100;
-			// Dock = boat − fuel − % deposit. Crew is NOT credited.
-			// Coco 4h: $1,140 − $200 fuel = $940.
-			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
+			// Dock = boat − % deposit. Neither crew nor fuel is credited.
+			// Coco 4h: dock $1,140.
+			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 
 			// When the Suite has a pricing row the server recomputes the
 			// charge at cart time, so a stale Woo variation price is never
@@ -434,7 +434,7 @@ jQuery( function ( $ ) {
 						resDep = expectedResDep;
 					}
 				}
-				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
+				dueAtDock = Math.round( ( Math.max( 0, bookingTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 			}
 
 			// row's price is a flat total for the chosen duration, not a

@@ -1,6 +1,8 @@
 /**
  * Systems check: hours must change trip total, deposit, and due-at-the-dock together.
- * Dock is boat − hourly deposit − % boat deposit. Crew is not credited.
+ * Dock is boat − % boat deposit. Crew and fuel are real charges on top of the
+ * boat — neither is credited, so payNow + dueAtDock = boat + crew + fuel
+ * (the 20% boat deposit over $1,400 is still credited toward the boat).
  * Run: node apps/feeling-yachty/scripts/check-pricing.mjs
  */
 import assert from 'node:assert/strict';
@@ -43,8 +45,8 @@ function boatPctDeposit(boat) {
   return boat > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((boat * CHARTER_DEPOSIT_PCT) / 100) : 0;
 }
 
-function dockBalance(boat, hourlyDep, pctDep, extrasLater = 0) {
-  return roundMoney(Math.max(0, boat - hourlyDep - pctDep) + extrasLater);
+function dockBalance(boat, pctDep, extrasLater = 0) {
+  return roundMoney(Math.max(0, boat - pctDep) + extrasLater);
 }
 
 function chargedToday(yacht, duration, wooPayNow) {
@@ -77,7 +79,7 @@ function dockQuote(yacht, duration, wooPayNow) {
   return {
     tripTotal: roundMoney(total),
     payNow,
-    dueAtDock: dockBalance(total, hourlyDeposit(yacht, total, hours), boatPctDeposit(total)),
+    dueAtDock: dockBalance(total, boatPctDeposit(total)),
     wooStale: woo != null && !wooOk,
   };
 }
@@ -93,18 +95,18 @@ const sundeck = {
 const q3 = dockQuote(sundeck, '3 Hours', 525); // cloned Woo $525 is stale
 assert.equal(q3.tripTotal, 330);
 assert.equal(q3.payNow, 300); // $75 crew + $25 deposit × 3
-assert.equal(q3.dueAtDock, 255); // 330 − 75
+assert.equal(q3.dueAtDock, 330); // full boat — fuel is not credited
 assert.equal(q3.wooStale, true);
 
 const q4 = dockQuote(sundeck, '4 Hours');
 assert.equal(q4.tripTotal, 440);
 assert.equal(q4.payNow, 400); // $75 + $25 × 4
-assert.equal(q4.dueAtDock, 340); // 440 − 100
+assert.equal(q4.dueAtDock, 440); // full boat — fuel is not credited
 
 const q8 = dockQuote(sundeck, '8 Hours');
 assert.equal(q8.tripTotal, 880);
 assert.equal(q8.payNow, 1000); // $75 crew + $50 deposit × 8; crew is not capped by the boat
-assert.equal(q8.dueAtDock, 480); // 880 − $50/hr × 8
+assert.equal(q8.dueAtDock, 880); // full boat — fuel is not credited
 
 const lime = {
   pricing: [{ type: 'price', duration: '3 Hours', price: 10749.99 }],
@@ -112,7 +114,7 @@ const lime = {
 const ql = dockQuote(lime, '3 Hours', 2675);
 assert.equal(ql.tripTotal, 10749.99);
 assert.equal(ql.payNow, 2675);
-assert.equal(ql.dueAtDock, 8449.99); // 10749.99 − 150 − 2150
+assert.equal(ql.dueAtDock, 8599.99); // 10749.99 − 2150 pct deposit only
 assert.equal(ql.wooStale, false);
 
 assert.equal(hoursFromDuration('4 Hours + 1 Free Hour'), 4);
@@ -130,7 +132,7 @@ const coco = {
 const c4 = dockQuote(coco, '4 Hours', 500);
 assert.equal(c4.tripTotal, 1140);
 assert.equal(c4.payNow, 500);
-assert.equal(c4.dueAtDock, 940);
+assert.equal(c4.dueAtDock, 1140); // full boat — fuel is not credited
 
 const listed = (yacht, duration) => {
   const boat = tripTotal(yacht, duration);
@@ -171,24 +173,24 @@ assert.equal(listed(crewOverride, '3 Hours'), 1242); // 717 + 450 crew + 75 fuel
 assert.equal(chargedToday(crewOverride, '3 Hours'), 525); // 150 crew + 25 fuel × 3
 assert.equal(chargedToday(barbie, '3 Hours', 717), 300); // $75 crew + $25 deposit × 3
 assert.equal(dockQuote(barbie, '3 Hours', 717).payNow, 300);
-assert.equal(dockQuote(barbie, '3 Hours', 717).dueAtDock, 642); // 717 − 75
+assert.equal(dockQuote(barbie, '3 Hours', 717).dueAtDock, 717); // full boat — fuel is not credited
 assert.equal(dockQuote(barbie, '3 Hours', 717).wooStale, true);
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');
 assert.equal(c4suite.payNow, 500);
-assert.equal(c4suite.dueAtDock, 940);
+assert.equal(c4suite.dueAtDock, 1140);
 
 const c5 = dockQuote(coco, '5 Hours', 1035);
 assert.equal(c5.tripTotal, 1425);
 assert.equal(c5.payNow, 1035);
-assert.equal(c5.dueAtDock, 890);
+assert.equal(c5.dueAtDock, 1140); // 1425 − 285 pct deposit
 
-// Card formula: boat − hourly deposit − % boat deposit. Deposit is $25 under $800, else $50.
-const suiteDock = (boat, hourlyDep, resDep, extrasLater) =>
-  Math.round((Math.max(0, boat - hourlyDep - resDep) + extrasLater) * 100) / 100;
-assert.equal(suiteDock(1140, 200, 0, 0), 940);
-assert.equal(suiteDock(1425, 250, 285, 0), 890);
-assert.equal(suiteDock(330, 75, 0, 0), 255);
+// Card formula: boat − % boat deposit. Fuel and crew are never credited.
+const suiteDock = (boat, resDep, extrasLater) =>
+  Math.round((Math.max(0, boat - resDep) + extrasLater) * 100) / 100;
+assert.equal(suiteDock(1140, 0, 0), 1140);
+assert.equal(suiteDock(1425, 285, 0), 1140);
+assert.equal(suiteDock(330, 0, 0), 330);
 
 console.log('pricing systems check ok');

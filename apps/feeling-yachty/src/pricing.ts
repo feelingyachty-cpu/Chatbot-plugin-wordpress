@@ -135,9 +135,13 @@ export function boatPctDeposit(boat: number): number {
   return boat > CHARTER_DEPOSIT_THRESHOLD ? roundMoney((boat * CHARTER_DEPOSIT_PCT) / 100) : 0;
 }
 
-/** Dock = boat − hourly deposit − % boat deposit. Crew is not credited. */
-export function dockBalance(boat: number, hourlyDep: number, pctDep: number, extrasLater = 0): number {
-  return roundMoney(Math.max(0, boat - hourlyDep - pctDep) + extrasLater);
+/**
+ * Dock = boat − % boat deposit. Crew and fuel are real charges on top of
+ * the boat — neither is credited. Only the 20% / premium boat deposit
+ * comes off the boat at the dock.
+ */
+export function dockBalance(boat: number, pctDep: number, extrasLater = 0): number {
+  return roundMoney(Math.max(0, boat - pctDep) + extrasLater);
 }
 
 /**
@@ -185,13 +189,12 @@ export function dockQuote(yacht: Yacht, duration?: string, wooPayNow?: number | 
   const wooIsBoat = woo != null && Math.abs(woo - total) <= 1.05 && Math.abs(woo - suiteNow) > 1.05;
   const wooOk = woo != null && woo > 0 && !wooIsBoat && woo <= total + 0.009;
   const payNow = chargedToday(yacht, label, wooPayNow);
-  const hours = hoursFromDuration(label) || 0;
   return {
     duration: label,
     tripTotal: roundMoney(total),
     listedTotal: listedTotal(yacht, label) ?? roundMoney(total),
     payNow,
-    dueAtDock: dockBalance(total, hourlyDeposit(yacht, total, hours), boatPctDeposit(total)),
+    dueAtDock: dockBalance(total, boatPctDeposit(total)),
     depositRate: DEPOSIT_RATE,
     wooStale: woo != null && !wooOk,
   };

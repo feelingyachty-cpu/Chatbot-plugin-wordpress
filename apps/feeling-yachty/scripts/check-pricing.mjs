@@ -15,7 +15,7 @@ const CHARTER_DEPOSIT_PCT = 20;
 const roundMoney = (n) => Math.round(n * 100) / 100;
 
 function hoursFromDuration(duration) {
-  const m = String(duration || '').match(/(\d+)/);
+  const m = String(duration || '').match(/(\d+(?:\.\d+)?)/);
   return m ? Number(m[1]) : null;
 }
 
@@ -90,6 +90,7 @@ assert.equal(ql.dueAtDock, 8074.99);
 assert.equal(ql.wooStale, false);
 
 assert.equal(hoursFromDuration('4 Hours + 1 Free Hour'), 4);
+assert.equal(hoursFromDuration('3.5 Hours'), 3.5);
 assert.equal(tripTotal(sundeck, 'price × 4 hours') ?? tripTotal(sundeck, '4 Hours'), 440);
 
 const coco = {

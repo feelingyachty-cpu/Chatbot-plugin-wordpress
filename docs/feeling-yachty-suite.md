@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.10** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.11** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.10 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.11 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,19 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — full systems check (3.73.11)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.11.zip`, then re-sync yacht products and hard-refresh.
+
+- Native orders no longer invent boat cost as `_fy_price × hours` when that field is a package total (the $17,480 dock case). Row first, then same-hours row, then hourly only if it really is hourly.
+- Native Woo orders now write `_fy_duration` / Charter length so emails and GHL see the hours picked.
+- Product card also reads `fy_booking_date` / `fy_charter_start_time` if the theme field has no id.
+- Saving Checkout settings cannot put the store back on the old percent/flat deposit. Leftover `754` phones are rejected on save.
+- Schema FAQ uses the live extras split, not hardcoded 50%. Email WhatsApp links add the US `1` for 10-digit Miami numbers.
+- If the leftover Mobile API plugin is still installed, 1.1.7 no longer replaces Suite’s card or rewrites fuel. Do not upload it unless you need `fy-app/v1`.
+
+Known leftover (not changed): yachts with two “3 Hours” rows (Mon–Thu vs Fri–Sun) still share one Woo variation slug. Woo picks the first. Weekend-priced boats need separate labels until that is redesigned.
 
 ### 2026-08-19 — bug pass (3.73.10)
 

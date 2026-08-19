@@ -13,8 +13,8 @@ class FY_App_Quote {
 	const DEPOSIT_RATE = 0.5;
 
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'apply_fleet_fuel_rate' ), 30 );
-		add_filter( 'script_loader_src', array( __CLASS__, 'swap_product_express' ), 20, 2 );
+		// Suite 3.73.5+ is the source of truth for fuel, dock math, and the
+		// product card. Do not rewrite Suite settings or replace its JS.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 30 );
 		add_action( 'save_post_fy_yacht', array( __CLASS__, 'sync_product' ), 40, 1 );
 		add_filter( 'woocommerce_add_cart_item_data', array( __CLASS__, 'credit_cart_booking' ), 30, 3 );
@@ -22,52 +22,17 @@ class FY_App_Quote {
 		add_action( 'wp_loaded', array( __CLASS__, 'replace_cart_rows' ), 100 );
 	}
 
-	/**
-	 * Fleet-wide fuel is $50/hr. Suite 3.73.4 migrates a saved $50 up to $75;
-	 * put it back. Custom rates other than $75 are left alone.
-	 */
-	public static function apply_fleet_fuel_rate() {
-		if ( ! function_exists( 'get_option' ) || ! function_exists( 'update_option' ) ) {
-			return;
-		}
-		$saved = get_option( 'fy_fleet_booking_settings', array() );
-		if ( ! is_array( $saved ) ) {
-			$saved = array();
-		}
-		$current = isset( $saved['fuel_rate'] ) ? (float) $saved['fuel_rate'] : -1;
-		if ( abs( $current - 50 ) < 0.009 ) {
-			return;
-		}
-		if ( $current > 0 && abs( $current - 75 ) > 0.009 ) {
-			return;
-		}
-		$saved['fuel_rate'] = 50;
-		update_option( 'fy_fleet_booking_settings', $saved );
-		update_option( 'fy_fleet_rates_need_resync', '1' );
-	}
+	/** No-op. Suite owns fleet fuel. Kept so leftover hooks do not fatal. */
+	public static function apply_fleet_fuel_rate() {}
 
-	/**
-	 * Replace Suite's product-express.js so the live card subtracts today.
-	 * 3.73.4 still ships boat − reservation only (Coco 4h stays $1,140).
-	 */
+	/** No-op. Suite owns the product card. Kept so leftover filters do not swap JS. */
 	public static function swap_product_express( $src, $handle ) {
-		if ( 'fy-admin-theme-product-express' !== $handle ) {
-			return $src;
-		}
-		return plugins_url( 'assets/product-express.js', FY_APP_FILE );
+		return $src;
 	}
 
 	public static function enqueue() {
-		if ( ! function_exists( 'is_product' ) || ! is_product() ) {
-			return;
-		}
-		wp_enqueue_script(
-			'fy-app-dock-math',
-			plugins_url( 'assets/dock-math.js', FY_APP_FILE ),
-			array( 'jquery' ),
-			FY_APP_VERSION,
-			true
-		);
+		// Do not load dock-math.js. It reads "Due at the dock" as today's
+		// charge and rewrites a correct Suite card.
 	}
 
 	public static function hours( $duration ) {
@@ -108,11 +73,45 @@ class FY_App_Quote {
 	 * due_at_dock = trip − pay_now.
 	 * pay_now is today’s Woo / crew+fuel charge when it fits inside the boat total.
 	 */
-	public static function split( $trip, $paid_today = null ) {
-		$trip = round( (float) $trip, 2 );
-		$paid = null === $paid_today ? null : round( (float) $paid_today, 2 );
-		if ( null !== $paid && $paid > 0 && $paid <= $trip + 0.05 ) {
+	public static function suite_pay_now( $trip, $hours, $yacht_id = 0 ) {
+		$trip  = (float) $trip;
+		$hours = (float) $hours;
+		if ( $trip <= 0 || $hours <= 0 ) {
+			return 0.0;
+		}
+		$crew_over  = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_crew_rate() : 100;
+		$crew_under = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_crew_rate_under() : 75;
+		$fuel_over  = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_rate() : 50;
+		$fuel_under = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_rate_under() : 25;
+		$fuel_thr   = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_fuel_threshold() : 800;
+		$dep_thr    = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_charter_deposit_threshold() : 1400;
+		$dep_pct    = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_charter_deposit_pct() : 20;
+		$crew_lock  = $yacht_id ? get_post_meta( $yacht_id, '_fy_crew_rate', true ) : '';
+		$fuel_lock  = $yacht_id ? get_post_meta( $yacht_id, '_fy_fuel_rate', true ) : '';
+		$crew       = ( '' !== $crew_lock && null !== $crew_lock )
+			? max( 0, (float) $crew_lock )
+			: ( $dep_thr > 0 && $trip <= $dep_thr ? $crew_under : $crew_over );
+		$fuel       = ( '' !== $fuel_lock && null !== $fuel_lock )
+			? max( 0, (float) $fuel_lock )
+			: ( $fuel_thr > 0 && $trip <= $fuel_thr ? $fuel_under : $fuel_over );
+		$now        = round( ( $crew + $fuel ) * $hours, 2 );
+		if ( $dep_thr > 0 && $dep_pct > 0 && $trip > $dep_thr ) {
+			$now = round( $now + ( $trip * $dep_pct / 100 ), 2 );
+		}
+		return $now;
+	}
+
+	public static function split( $trip, $paid_today = null, $hours = 0, $yacht_id = 0 ) {
+		$trip  = round( (float) $trip, 2 );
+		$paid  = null === $paid_today ? null : round( (float) $paid_today, 2 );
+		$suite = $hours > 0 ? self::suite_pay_now( $trip, $hours, $yacht_id ) : 0.0;
+		$fits  = static function ( $amount ) use ( $trip ) {
+			return $amount > 0 && $amount <= $trip + 0.05;
+		};
+		if ( null !== $paid && $fits( $paid ) ) {
 			$deposit = $paid;
+		} elseif ( $fits( $suite ) ) {
+			$deposit = $suite;
 		} else {
 			$deposit = round( $trip * self::DEPOSIT_RATE, 2 );
 		}
@@ -196,7 +195,7 @@ class FY_App_Quote {
 				}
 			}
 		}
-		$money             = self::split( $pick['price'], self::woo_pay_now( $yacht_id, $pick['hours'] ) );
+		$money             = self::split( $pick['price'], self::woo_pay_now( $yacht_id, $pick['hours'] ), $pick['hours'], $yacht_id );
 		$money['duration'] = $pick['duration'];
 		$money['hours']    = $pick['hours'];
 		$money['yacht_id'] = (int) $yacht_id;
@@ -206,7 +205,7 @@ class FY_App_Quote {
 	public static function table( $yacht_id ) {
 		$table = array();
 		foreach ( self::rows( $yacht_id ) as $row ) {
-			$money                           = self::split( $row['price'], self::woo_pay_now( $yacht_id, $row['hours'] ) );
+			$money                           = self::split( $row['price'], self::woo_pay_now( $yacht_id, $row['hours'] ), $row['hours'], $yacht_id );
 			$table[ (string) $row['hours'] ] = array(
 				'duration'    => $row['duration'],
 				'trip_total'  => $money['trip_total'],
@@ -240,9 +239,12 @@ class FY_App_Quote {
 		if ( $boat <= 0 ) {
 			return $cart_item_data;
 		}
-		$booking['total']                 = round( $boat + $addons, 2 );
-		$booking['balance']               = round( max( 0, $boat - $deposit ) + $addons, 2 );
-		$cart_item_data['fy_booking']     = $booking;
+		$ratio      = class_exists( 'FY_Fleet_Settings' ) ? FY_Fleet_Settings::get_addon_deposit_ratio() : 0.5;
+		$addons_now = round( $addons * $ratio, 2 );
+		$toward     = max( 0, $deposit - $addons_now );
+		$booking['total']             = round( $boat + $addons, 2 );
+		$booking['balance']           = round( max( 0, $boat - $toward ) + max( 0, $addons - $addons_now ), 2 );
+		$cart_item_data['fy_booking'] = $booking;
 		return $cart_item_data;
 	}
 
@@ -274,13 +276,7 @@ class FY_App_Quote {
 	}
 
 	public static function replace_cart_rows() {
-		if ( ! class_exists( 'FY_Fleet_Woo' ) ) {
-			return;
-		}
-		remove_action( 'woocommerce_cart_totals_after_order_total', array( 'FY_Fleet_Woo', 'balance_row' ) );
-		remove_action( 'woocommerce_review_order_after_order_total', array( 'FY_Fleet_Woo', 'balance_row' ) );
-		add_action( 'woocommerce_cart_totals_after_order_total', array( __CLASS__, 'balance_row' ) );
-		add_action( 'woocommerce_review_order_after_order_total', array( __CLASS__, 'balance_row' ) );
+		// Suite prints boat − today. Do not steal those rows.
 	}
 
 	public static function cart_split() {

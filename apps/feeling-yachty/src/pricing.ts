@@ -21,7 +21,7 @@ export function hoursFromDuration(duration?: string): number | null {
   if (!duration) {
     return null;
   }
-  const match = String(duration).match(/(\d+)/);
+  const match = String(duration).match(/(\d+(?:\.\d+)?)/);
   return match ? Number(match[1]) : null;
 }
 

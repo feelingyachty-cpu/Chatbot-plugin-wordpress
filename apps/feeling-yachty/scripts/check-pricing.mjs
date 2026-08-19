@@ -131,11 +131,12 @@ const listed = (yacht, duration) => {
   const boat = tripTotal(yacht, duration);
   const hours = hoursFromDuration(duration) || 0;
   const crewRate = boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE;
-  return roundMoney(boat + crewRate * hours);
+  return roundMoney(boat + crewRate * hours + hourlyDeposit(yacht, boat, hours) + boatPctDeposit(boat));
 };
-assert.equal(listed(coco, '3 Hours'), 1080); // 855 + 225
-assert.equal(listed(coco, '4 Hours'), 1440); // 1140 + 300
-assert.equal(listed(sundeck, '3 Hours'), 555); // 330 + 225
+assert.equal(listed(coco, '3 Hours'), 1230); // 855 + 225 + 150
+assert.equal(listed(coco, '4 Hours'), 1640); // 1140 + 300 + 200
+assert.equal(listed(coco, '5 Hours'), 2460); // 1425 + 500 + 250 + 285
+assert.equal(listed(sundeck, '3 Hours'), 630); // 330 + 225 + 75
 
 // Live Coco Hours on 2026-08-19 (boat rows, not the older $855/$1140 set).
 const cocoLive = {
@@ -145,15 +146,15 @@ const cocoLive = {
     { type: 'price', duration: '5 Hours', price: 1700 },
   ],
 };
-assert.equal(listed(cocoLive, '3 Hours'), 1325); // 1100 + 225
-assert.equal(listed(cocoLive, '4 Hours'), 1650); // 1350 + 300
-assert.equal(listed(cocoLive, '5 Hours'), 2200); // 1700 + 500
+assert.equal(listed(cocoLive, '3 Hours'), 1475); // 1100 + 225 + 150
+assert.equal(listed(cocoLive, '4 Hours'), 1850); // 1350 + 300 + 200
+assert.equal(listed(cocoLive, '5 Hours'), 2790); // 1700 + 500 + 250 + 340
 
 // Barbie (live From $717) — Woo leftover is the boat, not fees.
 const barbie = {
   pricing: [{ type: 'price', duration: '3 Hours', price: 717 }],
 };
-assert.equal(listed(barbie, '3 Hours'), 942); // 717 + 225
+assert.equal(listed(barbie, '3 Hours'), 1017); // 717 + 225 + 75
 assert.equal(chargedToday(barbie, '3 Hours', 717), 300); // $75 crew + $25 deposit × 3
 assert.equal(dockQuote(barbie, '3 Hours', 717).payNow, 300);
 assert.equal(dockQuote(barbie, '3 Hours', 717).dueAtDock, 642); // 717 − 75

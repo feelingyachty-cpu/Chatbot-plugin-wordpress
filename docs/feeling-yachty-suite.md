@@ -1,12 +1,12 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-16** against production **feeling-yachty-suite 3.65.0** on feelingyachty.com (zip + live API).
+Last reviewed: **2026-08-19** against uploaded **feeling-yachty-suite 3.73.4** (zip) and live **feelingyachty.com** (still running the previous Suite until this zip is installed).
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
 
-Suite **3.65.0 zip was read on 2026-08-16**. Source map and shortcodes below are from that zip. Production is still the live site; this repo does not replace the uploaded plugin until you install a new zip.
+Suite **3.73.4 zip was read on 2026-08-19**. Pricing/quote PHP and `product-express.js` are **byte-identical** to 3.65.0. New in 3.73.4: booking-ui skin, gallery slider, empty-cart scene, native date/time fields, `%fleet%` permalinks. This repo does not replace the uploaded plugin until you install the zip.
 
 ---
 
@@ -190,7 +190,7 @@ If an upgrade changes class names, data attributes, or schema `@id`s, list the d
 
 ## Shortcodes (PHP names)
 
-From Suite 3.65.0 source:
+From Suite 3.73.4 source (same shortcode names as 3.65.0):
 
 | Shortcode | File |
 | --- | --- |
@@ -234,11 +234,11 @@ n8n **My Database - WordPress Price Push** can PATCH `price` weekly from the Goo
 
 ## Source map
 
-From the 3.65.0 zip (not copied into git — production stays the uploaded plugin).
+From the 3.73.4 zip (not copied into git — production stays the uploaded plugin).
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.65.0 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.4 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,29 @@ From the 3.65.0 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — Suite 3.73.4 zip scanned
+
+Read `feeling-yachty-suite-3.73.4.zip`. Diff vs 3.65.0:
+
+**Still broken — Coco dock math (same files as 3.65.0)**
+
+- `assets/theme/product-express.js` is unchanged. Dock is `boat − reservationDeposit`, not `boat − charged today`.
+- Coco 4 hours: boat $1,140, charged today $700 (crew+fuel), reservation deposit $0 because $1,140 is under the $1,400 threshold. Card still prints **Plus $1,140 at the dock**.
+- `includes/class-fy-pricing.php` is unchanged. `quote()` balance is `(boat + crew + fuel + extras) − (crew + fuel + reservation)` = full boat, so emails/orders agree with the wrong card.
+- Cart `cart_totals()` still does `(hourly + crew + fuel) × hours` for native add-to-cart. Order meta uses the pricing row (safer). Package-price yachts can still show an inflated cart dock line.
+- Upload **mobile-api 1.1.4** with 3.73.4. The overlay still matches these class names (`.fy-pay-summary`). 3.73.4 alone does not fix Coco.
+
+**Fixed in 3.73.4 (worth installing)**
+
+- `%fleet%` URL base: saving Display Settings no longer strips the placeholder into `/fleet/` and 301-loops yacht ↔ product pages. Panama no longer inherits a Miami-only base.
+- Product page now posts `booking_date` / `charter_start_time` into the cart (`fy_date` / `fy_time`). Native Woo checkout used to throw the date away (“Scheduled with our team after checkout”).
+- App-style booking skin (`booking-ui.js` / `.css`), swipe gallery (`gallery-slider.js`), branded empty cart (`cart-empty.js`). Skin only — it writes back to the same fields. Does not change money math.
+
+**Still present, not Coco**
+
+- `class-fy-support-bot.php` is still bootstrapped. Keep `feeling-yachty-no-chatbot` installed. GHL owns guest comms.
+- Settings defaults still ship WhatsApp `17543253827` (live Miami is `19542463636`). Defaults only apply on a fresh settings save.
 
 ### 2026-08-16 — mobile + GHL plan, Suite zip read
 

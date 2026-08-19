@@ -13,6 +13,7 @@ class FY_App_Quote {
 	const DEPOSIT_RATE = 0.5;
 
 	public static function init() {
+		add_filter( 'script_loader_src', array( __CLASS__, 'swap_product_express' ), 20, 2 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 30 );
 		add_action( 'save_post_fy_yacht', array( __CLASS__, 'sync_product' ), 40, 1 );
 		add_filter( 'woocommerce_add_cart_item_data', array( __CLASS__, 'credit_cart_booking' ), 30, 3 );
@@ -20,18 +21,25 @@ class FY_App_Quote {
 		add_action( 'wp_loaded', array( __CLASS__, 'replace_cart_rows' ), 100 );
 	}
 
+	/**
+	 * Replace Suite's product-express.js so the live card subtracts today.
+	 * 3.73.4 still ships boat − reservation only (Coco 4h stays $1,140).
+	 */
+	public static function swap_product_express( $src, $handle ) {
+		if ( 'fy-admin-theme-product-express' !== $handle ) {
+			return $src;
+		}
+		return plugins_url( 'assets/product-express.js', FY_APP_FILE );
+	}
+
 	public static function enqueue() {
 		if ( ! function_exists( 'is_product' ) || ! is_product() ) {
 			return;
 		}
-		$deps = array( 'jquery' );
-		if ( wp_script_is( 'fy-admin-theme-product-express', 'registered' ) ) {
-			$deps[] = 'fy-admin-theme-product-express';
-		}
 		wp_enqueue_script(
 			'fy-app-dock-math',
 			plugins_url( 'assets/dock-math.js', FY_APP_FILE ),
-			$deps,
+			array( 'jquery' ),
 			FY_APP_VERSION,
 			true
 		);

@@ -107,4 +107,10 @@ assert.equal(c5.tripTotal, 1425);
 assert.equal(c5.payNow, 1160);
 assert.equal(c5.dueAtDock, 265);
 
+// Suite 3.73.4 card formula after our patch: boat − (crew + fuel + resDep).
+const suiteDock = (boat, crew, fuel, resDep, extrasLater) =>
+  Math.round((Math.max(0, boat - crew - fuel - resDep) + extrasLater) * 100) / 100;
+assert.equal(suiteDock(1140, 400, 300, 0, 0), 440);
+assert.equal(suiteDock(1425, 500, 375, 285, 0), 265);
+
 console.log('pricing systems check ok');

@@ -381,7 +381,7 @@ jQuery( function ( $ ) {
 				: 0;
 			chargedNow = Math.round( ( crewTotal + fuelTotal + resDep + addonsNow ) * 100 ) / 100;
 			// Today's payment (crew + fuel + reservation + extras now) comes
-			// off the boat. Coco 4h: $1,140 − $700 = $440 at the dock.
+			// off the boat. Coco 4h at $50/hr fuel: $1,140 − $600 = $540.
 			dueAtDock  = Math.round( ( Math.max( 0, bookingTotal - crewTotal - fuelTotal - resDep ) + ( addonsTotal - addonsNow ) ) * 100 ) / 100;
 
 			// The ground truth: whatever WooCommerce itself resolved this

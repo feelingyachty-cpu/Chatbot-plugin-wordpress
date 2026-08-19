@@ -13,12 +13,37 @@ class FY_App_Quote {
 	const DEPOSIT_RATE = 0.5;
 
 	public static function init() {
+		add_action( 'init', array( __CLASS__, 'apply_fleet_fuel_rate' ), 30 );
 		add_filter( 'script_loader_src', array( __CLASS__, 'swap_product_express' ), 20, 2 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 30 );
 		add_action( 'save_post_fy_yacht', array( __CLASS__, 'sync_product' ), 40, 1 );
 		add_filter( 'woocommerce_add_cart_item_data', array( __CLASS__, 'credit_cart_booking' ), 30, 3 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( __CLASS__, 'credit_order_balance' ), 30, 4 );
 		add_action( 'wp_loaded', array( __CLASS__, 'replace_cart_rows' ), 100 );
+	}
+
+	/**
+	 * Fleet-wide fuel is $50/hr. Suite 3.73.4 migrates a saved $50 up to $75;
+	 * put it back. Custom rates other than $75 are left alone.
+	 */
+	public static function apply_fleet_fuel_rate() {
+		if ( ! function_exists( 'get_option' ) || ! function_exists( 'update_option' ) ) {
+			return;
+		}
+		$saved = get_option( 'fy_fleet_booking_settings', array() );
+		if ( ! is_array( $saved ) ) {
+			$saved = array();
+		}
+		$current = isset( $saved['fuel_rate'] ) ? (float) $saved['fuel_rate'] : -1;
+		if ( abs( $current - 50 ) < 0.009 ) {
+			return;
+		}
+		if ( $current > 0 && abs( $current - 75 ) > 0.009 ) {
+			return;
+		}
+		$saved['fuel_rate'] = 50;
+		update_option( 'fy_fleet_booking_settings', $saved );
+		update_option( 'fy_fleet_rates_need_resync', '1' );
 	}
 
 	/**

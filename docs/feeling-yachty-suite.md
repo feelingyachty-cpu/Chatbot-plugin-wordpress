@@ -257,6 +257,10 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 ## Changelog (docs + product)
 
+### 2026-08-19 — fleet fuel $50/hr
+
+Global Checkout fuel rate is **$50.00 / hour** (Suite 3.73.4 had migrated saved $50 up to $75). Coco 4 hours: crew $400 + fuel $200 = **$600 today**, dock **$540** ($1,140 − $600). After upload, re-sync yacht products so Woo variations match.
+
 ### 2026-08-19 — Suite 3.73.4 zip scanned
 
 Read `feeling-yachty-suite-3.73.4.zip`. Diff vs 3.65.0:

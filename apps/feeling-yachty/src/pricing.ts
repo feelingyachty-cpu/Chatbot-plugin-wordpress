@@ -4,7 +4,7 @@ import type { PricingRow, Yacht } from './types';
 export const DEPOSIT_RATE = 0.5;
 /** Fleet defaults from Suite Checkout settings — blank yacht fields use these. */
 export const FLEET_CREW_RATE = 100;
-export const FLEET_FUEL_RATE = 75;
+export const FLEET_FUEL_RATE = 50;
 export const CHARTER_DEPOSIT_THRESHOLD = 1400;
 export const CHARTER_DEPOSIT_PCT = 20;
 

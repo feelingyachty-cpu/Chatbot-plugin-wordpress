@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 
 const DEPOSIT_RATE = 0.5;
 const FLEET_CREW_RATE = 100;
-const FLEET_FUEL_RATE = 75;
+const FLEET_FUEL_RATE = 50;
 const CHARTER_DEPOSIT_THRESHOLD = 1400;
 const CHARTER_DEPOSIT_PCT = 20;
 const roundMoney = (n) => Math.round(n * 100) / 100;
@@ -92,25 +92,25 @@ const coco = {
     { type: 'price', duration: '5 Hours', price: 1425 },
   ],
 };
-const c4 = dockQuote(coco, '4 Hours', 700);
+const c4 = dockQuote(coco, '4 Hours', 600);
 assert.equal(c4.tripTotal, 1140);
-assert.equal(c4.payNow, 700);
-assert.equal(c4.dueAtDock, 440);
+assert.equal(c4.payNow, 600);
+assert.equal(c4.dueAtDock, 540);
 assert.equal(c4.wooStale, false);
 
 const c4suite = dockQuote(coco, '4 Hours');
-assert.equal(c4suite.payNow, 700);
-assert.equal(c4suite.dueAtDock, 440);
+assert.equal(c4suite.payNow, 600);
+assert.equal(c4suite.dueAtDock, 540);
 
-const c5 = dockQuote(coco, '5 Hours', 1160);
+const c5 = dockQuote(coco, '5 Hours', 1035);
 assert.equal(c5.tripTotal, 1425);
-assert.equal(c5.payNow, 1160);
-assert.equal(c5.dueAtDock, 265);
+assert.equal(c5.payNow, 1035);
+assert.equal(c5.dueAtDock, 390);
 
-// Suite 3.73.4 card formula after our patch: boat − (crew + fuel + resDep).
+// Card formula: boat − (crew + fuel + resDep). Fuel is $50/hr fleet-wide.
 const suiteDock = (boat, crew, fuel, resDep, extrasLater) =>
   Math.round((Math.max(0, boat - crew - fuel - resDep) + extrasLater) * 100) / 100;
-assert.equal(suiteDock(1140, 400, 300, 0, 0), 440);
-assert.equal(suiteDock(1425, 500, 375, 285, 0), 265);
+assert.equal(suiteDock(1140, 400, 200, 0, 0), 540);
+assert.equal(suiteDock(1425, 500, 250, 285, 0), 390);
 
 console.log('pricing systems check ok');

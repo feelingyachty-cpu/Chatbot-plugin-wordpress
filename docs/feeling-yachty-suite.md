@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.6** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.7** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -238,7 +238,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.6 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.7 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -256,6 +256,10 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-19 — Miami phone is 9542463636 (3.73.7)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.7.zip`. Call/SMS phone is **9542463636**. WhatsApp stays `19542463636` (country code + that same line) so `wa.me` works. Leftover `17543253827` / `754-325-3827` is rewritten on upload.
 
 ### 2026-08-19 — bug pass (3.73.6)
 
@@ -297,7 +301,7 @@ Read `feeling-yachty-suite-3.73.4.zip`. Diff vs 3.65.0:
 **Still present, not Coco**
 
 - `class-fy-support-bot.php` is still bootstrapped. Keep `feeling-yachty-no-chatbot` installed. GHL owns guest comms.
-- Settings defaults still ship WhatsApp `17543253827` (live Miami is `19542463636`). Defaults only apply on a fresh settings save.
+- Settings defaults still ship WhatsApp `17543253827` (live Miami phone is `9542463636`). Defaults only apply on a fresh settings save. Fixed in 3.73.7.
 
 ### 2026-08-16 — mobile + GHL plan, Suite zip read
 

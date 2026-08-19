@@ -145,7 +145,7 @@ class FY_App_REST {
 						'slug'       => 'miami',
 						'label'      => 'Miami',
 						'fleet'      => 'miami-yacht-rental',
-						'phone'      => isset( $booking['phone_miami'] ) ? $booking['phone_miami'] : '+1 954-246-3636',
+						'phone'      => isset( $booking['phone_miami'] ) ? $booking['phone_miami'] : '9542463636',
 						'whatsapp'   => isset( $display['whatsapp_number'] ) ? $display['whatsapp_number'] : '19542463636',
 					),
 					array(

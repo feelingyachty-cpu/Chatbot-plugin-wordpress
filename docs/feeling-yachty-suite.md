@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.38** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.39** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.38 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.39 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — clear the corner for the chat widget; spreadsheet parity verified (3.73.39)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.39.zip`, purge Cloudflare.
+
+- **Desktop spacing:** the floating checkout pill sat right on top of the GHL chat bubble's corner. On desktop the pill now rides well above the bubble zone (124px; 188px on product pages, clearing the Book bar too), and the Book bar's content gets right-side padding so the bubble never covers the price or button.
+- **Spreadsheet parity (owner's original Excel):** validated all 151 catalog yachts against the uploaded fleet sheet — every duration row equals the sheet's Price/Hour × hours exactly, and every starting rate matches. Zero differences. With 3.73.38's boat-only listing, the site now shows precisely the original spreadsheet prices.
+
 
 ### 2026-08-20 — listed prices are the original spreadsheet boat prices again (3.73.38)
 

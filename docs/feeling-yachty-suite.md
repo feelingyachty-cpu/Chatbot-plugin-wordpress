@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.32** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.33** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.32 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.33 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — clean layering in the sticky filter panel (3.73.33)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.33.zip`, hard-refresh, purge Cloudflare.
+
+Three layering bugs made the pinned filter panel look like everything was bleeding together (screenshot-verified):
+
+1. The app shell was making `.fy-search-row` sticky + frosted **inside** the already-sticky, already-translucent `.fy-inventory-panel` — translucency stacked on translucency, so buttons scrolling underneath ghosted through. The app-shell rule is removed; the panel alone owns sticky.
+2. On phones the panel goes **fully opaque white** while pinned (was `rgba(255,255,255,.95)` + blur) — the "Clear filters" pill and the WhatsApp/call buttons scrolling underneath can no longer show through.
+3. The "more chips this way" fade was 40px wide and sat on top of a chip's text right next to the Saved pill. On mobile it's narrowed to 22px, and a hairline divider now separates the scrolling chips from the pinned Saved pill, with breathing room between the three rows.
 
 ### 2026-08-20 — compact filter chips on mobile (3.73.32)
 

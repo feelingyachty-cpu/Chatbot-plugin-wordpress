@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.25** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.26** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.25 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.26 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — fleet filter bar in brand pink (3.73.26)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.26.zip` and hard-refresh the fleet page.
+
+- **Sort / size dropdowns**: pink bold text, a drawn-in pink chevron (native grey arrows can't be recolored, so the native widget look is replaced), blush gradient fill, and a pink glow on hover/focus. Open-menu options stay ink-on-white for readability.
+- **Filter chips**: idle text was the grey "muted" tone and read as disabled — now full-contrast ink on a blush border; hover fills blush; the **active** chip becomes the brand pink→purple gradient with white text (same family as the Saved Yachts pill), so the chosen filter is obvious at a glance.
+- **POPULAR FILTERS label** now pink with wider letter-spacing.
 
 ### 2026-08-20 — app shell: the site feels like the app (3.73.25)
 

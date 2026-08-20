@@ -158,9 +158,9 @@ const EN: Record<string, string> = {
 
 const ES: Record<string, string> = {
   yachts: 'Yates',
-  promos: 'Promos',
+  promos: 'Ofertas',
   talk: 'Hablar',
-  profile: 'Perfil',
+  profile: 'Cuenta',
   brand: 'FEELING YACHTY',
   tagline: 'Charters de yate en Miami y Panamá',
   browseKicker: 'NAVEGA DIFERENTE',

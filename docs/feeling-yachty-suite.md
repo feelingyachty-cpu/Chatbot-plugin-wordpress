@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.35** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.36** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.35 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.36 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — bottom-edge cleanup: empty pill, contact bar, branding (3.73.36)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.36.zip`, hard-refresh, purge Cloudflare.
+
+- **"$0.00 due today · 0 items" pill showed with an empty cart.** The pill renders with the `hidden` attribute when empty, but `.fy-cart-pill{display:flex}` beat the browser's `[hidden]{display:none}` rule. Fixed with `.fy-cart-pill[hidden]{display:none!important}`.
+- **Mobile bottom-edge stacking.** The site's fixed contact bar (`#fy-mobile-contact-bar`, 92px, z-index 9999999) owns the bottom edge on phones, with a round chat bubble at the corner. The checkout pill now stacks ABOVE the bar and clear of the bubble (right: 76px), the sticky Book bar sits on top of the bar instead of covering it, and on mobile product pages the pill is hidden entirely (the Book bar + booking popup own that journey — three floating layers was clutter).
+- **Contact bar rebrand.** The blush bar now wears the app shell's navy glass (same gradient as the checkout pill) with a pink accent border; the CALL / WhatsApp buttons keep their brand gradients.
+- Live UI scan of product + cart endpoints: no NaN/undefined/price anomalies found.
+
 
 ### 2026-08-20 — menu submenus: beat SmartMenus with a capture-phase toggle (3.73.35)
 

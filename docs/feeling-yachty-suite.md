@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.36** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.37** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.36 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.37 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,20 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — fleet-wide charge audit: 2 stale yachts found, self-heal shipped (3.73.37)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.37.zip`, then open any wp-admin page once (the self-heal runs there).
+
+Audited **all 200 yachts one by one** against what WooCommerce actually charges online (live Store API). **198 conform exactly** to the rule — row price is boat-only; online charge = crew+fuel by tier ($75+$25 at ≤$800, $75+$50 at $801–$1,400, $100+$50 + 20% deposit over $1,400); per-yacht overrides honored. **2 were stale:**
+
+| Yacht | Wrong charge | Correct | Cause |
+| --- | --- | --- | --- |
+| 45ft Pink “Barbie II” (2 Hours) | $200 | **$250** | fuel still at the ≤$800 rate after the boat price moved up a band |
+| 60ft “Blessed Gold” (3 Hours) | $740 | **$760** | 20% deposit still computed on the old $1,450 boat price (now $1,550) |
+
+New self-heal (`maybe_resync_stale_variations`, admin_init, one-time): recomputes every yacht's expected charges from its CURRENT rows and rebuilds only products whose stored variation prices drifted. Cheap for the healthy fleet (one cached price read per yacht); logs how many it rebuilt.
+
 
 ### 2026-08-20 — bottom-edge cleanup: empty pill, contact bar, branding (3.73.36)
 

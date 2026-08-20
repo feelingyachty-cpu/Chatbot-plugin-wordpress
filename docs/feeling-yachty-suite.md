@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.34** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.35** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.34 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.35 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,15 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — menu submenus: beat SmartMenus with a capture-phase toggle (3.73.35)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.35.zip`, hard-refresh, purge Cloudflare.
+
+Deep-dive result (verified live): the popup menu is an **Elementor Pro nav-menu widget**, and its anchors are wired to the **SmartMenus** jQuery library (`jquery.smartmenus.min.js` loads on every page). SmartMenus' element-level click handlers run BEFORE any document-level bubble listener — so the 3.73.28/31 toggles never saw the tap; SmartMenus swallowed it (its desktop/hover mode does nothing for a touch inside the popup). That is why Miami / Panama stayed shut regardless of menu configuration.
+
+Fix: the submenu toggle now runs in the **capture phase** (fires before SmartMenus can touch the event) and stops propagation inside the popup so SmartMenus cannot fight the toggle. The reveal CSS also neutralises SmartMenus' inline absolute positioning (top/left/width/clip) so the submenu lays out inline under its parent. Dual-tap for real-link parents and untouched desktop hover menus stay as designed.
+
 
 ### 2026-08-20 — checkout bounce diagnosed: Cloudflare caching cart/checkout (3.73.34)
 

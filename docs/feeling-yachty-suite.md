@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.33** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.34** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.33 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.34 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,17 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — checkout bounce diagnosed: Cloudflare caching cart/checkout (3.73.34)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.34.zip` — then fix Cloudflare (below), which is the actual cause.
+
+**Symptom:** after booking, the popup's Checkout button lands on a broken/empty cart instead of checkout. **Cause:** Cloudflare is caching full HTML including `/checkout/` — every guest receives the same stored response (including a cached "empty cart → /cart/" redirect) regardless of their own cart. The site's HTML cache is provably aggressive (home page served weeks-old 3.73.3 assets before purge).
+
+**Cloudflare fix (owner action):** Rules → Cache Rules → new rule: Bypass cache when URI Path contains `/cart` OR `/checkout` OR `/my-account` OR Cookie contains `woocommerce_` — then Purge Everything. Long-term: use the official Cloudflare WP plugin/APO instead of Cache Everything.
+
+**Plugin hardening in 3.73.34:** the `?fy_added=1` booking-confirmation page variant now sends `DONOTCACHEPAGE` + no-cache headers so page caches can never store or replay it.
+
 
 ### 2026-08-20 — clean layering in the sticky filter panel (3.73.33)
 

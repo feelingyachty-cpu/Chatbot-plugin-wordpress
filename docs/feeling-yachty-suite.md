@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.26** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.27** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.26 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.27 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — stop forcing the old plum header; kill the purple flash (3.73.27)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.27.zip`, hard-refresh, and purge Cloudflare / host cache.
+
+The Suite was forcing the site header **dark plum (#1B1033 !important)** on every WooCommerce page — a leftover from when the theme header was pale and the cream logo invisible. With the site's own modern header in place, the forced plum painted on first render and flashed purple until the real header styles took over (an extra style-fight repaint on every load). Both blocks are removed — the header now belongs entirely to the theme/Elementor. The dark plum stays only where it's intentional: the branded order-email header.
+
+If a flash remains on non-Woo pages after the cache purge, it's the theme/Elementor sticky-header effect, not the Suite.
 
 ### 2026-08-20 — fleet filter bar in brand pink (3.73.26)
 

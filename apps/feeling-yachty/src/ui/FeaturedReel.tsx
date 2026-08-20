@@ -40,9 +40,11 @@ export function FeaturedReel({
           const start = startingListed(item);
           return (
             <PressScale onPress={() => onPress(item)} style={{ width: CARD_W, marginRight: 12 }}>
-              <View style={{ height: 222, borderRadius: 26, overflow: 'hidden', backgroundColor: colors.navy }}>
-                {!!item.image_url && <Image source={{ uri: item.image_url }} style={{ width: '100%', height: '100%' }} />}
-                <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 112, backgroundColor: 'rgba(6,24,36,0.72)' }} />
+              <View style={{ height: 222, borderRadius: 26, overflow: 'hidden', backgroundColor: colors.line }}>
+                {!!item.image_url && (
+                  <Image source={{ uri: item.image_url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                )}
+                <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 112, backgroundColor: 'rgba(18,10,34,0.55)' }} />
                 <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
                   <Text style={{ color: colors.white, fontWeight: '900', fontSize: 21, letterSpacing: -0.2 }}>{item.title}</Text>
                   <Text style={{ color: colors.cream, marginTop: 6, fontWeight: '800', fontSize: 13 }}>

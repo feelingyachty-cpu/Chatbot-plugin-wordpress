@@ -127,6 +127,7 @@ const EN: Record<string, string> = {
   shareYacht: 'Share this yacht',
   captainIncluded: 'Captain included',
   reviewsTitle: 'Guest reviews',
+  back: 'Back',
   addOnsTitle: 'Add your extras',
   addOnsHint: 'Date, time and guests are filled in — add extras below.',
   addOnsLead:
@@ -279,6 +280,7 @@ const ES: Record<string, string> = {
   shareYacht: 'Compartir este yate',
   captainIncluded: 'Capitán incluido',
   reviewsTitle: 'Reseñas',
+  back: 'Atrás',
   addOnsTitle: 'Agrega tus extras',
   addOnsHint: 'Fecha, hora e invitados ya están puestos — agrega extras abajo.',
   addOnsLead:

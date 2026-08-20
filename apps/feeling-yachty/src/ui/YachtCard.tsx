@@ -67,10 +67,10 @@ export function YachtCard({
       }}
     >
         {!!yacht.image_url && !compact && (
-          <View style={{ height: imageH, backgroundColor: colors.navy }}>
+          <View style={{ height: imageH, backgroundColor: colors.line }}>
             <PressScale onPress={onPress}>
               <View style={{ height: imageH }}>
-                <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: '100%' }} />
+                <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                 <View style={{ position: 'absolute', top: 14, left: 14, flexDirection: 'row', gap: 6 }}>
                   {promo && <Chip colors={colors} text={promoLabel} hot />}
                   {!!yacht.size_ft && <Chip colors={colors} text={`${yacht.size_ft} ft`} />}

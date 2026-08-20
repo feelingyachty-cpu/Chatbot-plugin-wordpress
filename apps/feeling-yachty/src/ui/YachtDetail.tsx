@@ -38,22 +38,26 @@ export function YachtDetail({
   return (
     <View style={{ flex: 1, backgroundColor: colors.paper }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={{ height: 280, backgroundColor: colors.navy }}>
-          {!!yacht.image_url && <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: '100%' }} />}
-          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 120, backgroundColor: 'rgba(8,16,24,0.55)' }} />
+        <View style={{ height: 280, backgroundColor: colors.line }}>
+          {!!yacht.image_url && (
+            <Image source={{ uri: yacht.image_url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          )}
+          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 120, backgroundColor: 'rgba(8,16,24,0.45)' }} />
           <Pressable
             onPress={onBack}
             style={{
               position: 'absolute',
               top: 14,
               left: 14,
-              backgroundColor: 'rgba(8,16,24,0.65)',
+              backgroundColor: 'rgba(255,255,255,0.92)',
               paddingHorizontal: 12,
               paddingVertical: 8,
               borderRadius: 999,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.55)',
             }}
           >
-            <Text style={{ color: colors.white, fontWeight: '800' }}>‹ {t(lang, 'yachts')}</Text>
+            <Text style={{ color: colors.ink, fontWeight: '800' }}>‹ {t(lang, 'yachts')}</Text>
           </Pressable>
           <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
             {yacht.is_pink && (
@@ -132,22 +136,22 @@ export function YachtDetail({
           </Text>
           <Text style={{ color: colors.muted, marginBottom: 12 }}>{t(lang, 'hoursHint')}</Text>
           {quote && (
-            <View style={{ backgroundColor: colors.navyDeep, borderRadius: 18, padding: 14, marginBottom: 14 }}>
-              <Text style={{ color: colors.cream, fontWeight: '800', marginBottom: 8 }}>{quote.duration}</Text>
+            <View style={{ backgroundColor: colors.tint, borderRadius: 18, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: colors.line }}>
+              <Text style={{ color: colors.ink, fontWeight: '800', marginBottom: 8 }}>{quote.duration}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                <Text style={{ color: '#9CB2C1' }}>{t(lang, 'tripTotal')}</Text>
-                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.listedTotal)}</Text>
+                <Text style={{ color: colors.muted }}>{t(lang, 'tripTotal')}</Text>
+                <Text style={{ color: colors.ink, fontWeight: '800' }}>{money(quote.listedTotal)}</Text>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                <Text style={{ color: '#9CB2C1' }}>{t(lang, 'payNow')}</Text>
-                <Text style={{ color: colors.white, fontWeight: '800' }}>{money(quote.payNow)}</Text>
+                <Text style={{ color: colors.muted }}>{t(lang, 'payNow')}</Text>
+                <Text style={{ color: colors.ink, fontWeight: '800' }}>{money(quote.payNow)}</Text>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={{ color: colors.pink, fontWeight: '800' }}>{t(lang, 'dueAtDock')}</Text>
                 <Text style={{ color: colors.pink, fontWeight: '800' }}>{money(quote.dueAtDock)}</Text>
               </View>
-              <Text style={{ color: '#9CB2C1', marginTop: 10, fontSize: 12 }}>{t(lang, 'dockHint')}</Text>
-              <Text style={{ color: '#9CB2C1', marginTop: 8, fontSize: 12 }}>{t(lang, 'payRules')}</Text>
+              <Text style={{ color: colors.muted, marginTop: 10, fontSize: 12 }}>{t(lang, 'dockHint')}</Text>
+              <Text style={{ color: colors.muted, marginTop: 8, fontSize: 12 }}>{t(lang, 'payRules')}</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
@@ -208,29 +212,36 @@ export function YachtDetail({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: colors.navyDeep,
+          backgroundColor: colors.white,
+          borderTopWidth: 1,
+          borderTopColor: colors.line,
           padding: 12,
           flexDirection: 'row',
           alignItems: 'center',
           gap: 10,
+          shadowColor: colors.navyDeep,
+          shadowOpacity: 0.08,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: -4 },
+          elevation: 10,
         }}
       >
         <View style={{ flex: 1 }}>
           <Text style={{ color: colors.muted, fontSize: 11, fontWeight: '700' }}>
             {selected?.duration || t(lang, 'tripTotals')}
           </Text>
-          <Text style={{ color: colors.white, fontWeight: '800', fontSize: 20 }}>
+          <Text style={{ color: colors.ink, fontWeight: '800', fontSize: 20 }}>
             {quote ? money(quote.listedTotal) : selected ? money(listedTotal(yacht, selected.duration) ?? Number(selected.price || 0)) : '—'}
           </Text>
           {quote ? (
-            <Text style={{ color: colors.cream, fontSize: 11, fontWeight: '700' }}>
+            <Text style={{ color: colors.muted, fontSize: 11, fontWeight: '700' }}>
               {t(lang, 'payNow')} {money(quote.payNow)} · {t(lang, 'dueAtDock')} {money(quote.dueAtDock)}
             </Text>
           ) : null}
         </View>
         <PressScale onPress={onTalk}>
-          <View style={{ backgroundColor: colors.navy, paddingHorizontal: 14, paddingVertical: 14, borderRadius: 14 }}>
-            <Text style={{ color: colors.white, fontWeight: '800' }}>{t(lang, 'talk')}</Text>
+          <View style={{ backgroundColor: colors.tint, paddingHorizontal: 14, paddingVertical: 14, borderRadius: 14 }}>
+            <Text style={{ color: colors.ink, fontWeight: '800' }}>{t(lang, 'talk')}</Text>
           </View>
         </PressScale>
         <PressScale onPress={() => onBook(selected?.duration)}>

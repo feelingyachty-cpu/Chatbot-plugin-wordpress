@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { checkoutUrl, fetchFleet, fetchYacht, sendTalkMessage } from './src/api';
+import { fetchFleet, fetchYacht, sendTalkMessage } from './src/api';
 import { fetchMe, loadCachedUser, loadSettings, loadToken } from './src/auth';
 import { featuredYachts, filterAndSort, yachtsByIds, type SizeBand, type SortKey, type StyleFilter } from './src/browse';
 import { CITIES, GHL_FORM, type City } from './src/config';
@@ -27,7 +27,6 @@ import { loadRecentIds, loadSavedIds, pushRecentId, saveSavedIds } from './src/s
 import { ThemeProvider, useTheme } from './src/ThemeContext';
 import type { Colors } from './src/theme';
 import type { AppSettings, AppUser, Booking, Yacht } from './src/types';
-import { CheckoutWeb } from './src/ui/CheckoutWeb';
 import { FeaturedReel } from './src/ui/FeaturedReel';
 import { FilterBar } from './src/ui/FilterBar';
 import { PressScale } from './src/ui/PressScale';
@@ -35,6 +34,7 @@ import { FeedSkeleton } from './src/ui/Shimmer';
 import { TabBar } from './src/ui/TabBar';
 import { MiniCard, YachtCard } from './src/ui/YachtCard';
 import { YachtDetail } from './src/ui/YachtDetail';
+import { YachtWeb } from './src/ui/YachtWeb';
 
 type Tab = 'yachts' | 'promos' | 'talk' | 'profile';
 type Overlay = null | 'yacht' | 'checkout' | 'ghl-form';
@@ -331,15 +331,16 @@ function AppShell() {
       </View>
 
       {overlay === 'checkout' && selected && (
-        <CheckoutWeb
-          uri={checkoutUrl(selected, {
-            duration: bookDuration,
-            guests: user?.typical_guests || undefined,
-            cityPath: city.fleet,
-          })}
+        <YachtWeb
+          yacht={selected}
           colors={colors}
           lang={lang}
+          cityPath={city.fleet}
+          savedIds={savedIds}
+          duration={bookDuration}
+          guests={user?.typical_guests || undefined}
           onBack={() => setOverlay('yacht')}
+          onDone={() => setOverlay(null)}
         />
       )}
 
@@ -596,6 +597,10 @@ function AppShell() {
       )}
 
       {!overlay && (
+        <View style={{ height: 78 }} />
+      )}
+
+      {!overlay && (
         <TabBar
           tab={tab}
           onTab={setTab}
@@ -615,7 +620,7 @@ function AppShell() {
 
 function makeStyles(colors: Colors) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: colors.navyDeep },
+    safe: { flex: 1, backgroundColor: colors.paper },
     flex: { flex: 1, backgroundColor: colors.paper },
     header: {
       backgroundColor: colors.navyDeep,
@@ -740,7 +745,7 @@ function makeStyles(colors: Colors) {
     fab: {
       position: 'absolute',
       right: 14,
-      bottom: 86,
+      bottom: 96,
       backgroundColor: colors.pink,
       borderRadius: 999,
       paddingHorizontal: 14,

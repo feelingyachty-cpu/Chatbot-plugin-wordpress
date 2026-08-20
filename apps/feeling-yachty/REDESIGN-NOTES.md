@@ -12,6 +12,7 @@ This version keeps the existing fleet, booking, saved-yacht, promo, live-contact
 - Upgraded featured-yacht reels and recent-yacht cards.
 - Rebuilt the bottom navigation as a light, modern tab bar with clearer active states.
 - Added English and Spanish copy for the new discovery intro.
+- **1.3.3:** Removed the navy letterbox bars on “Add your extras” (image now `cover`s a light frame). Softened yacht detail / card photo placeholders and the sticky book bar. Floating tab bar stays white glass, not navyDeep.
 
 ## Verification
 

@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-19** against **feeling-yachty-suite 3.73.22** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.23** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.22 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.23 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — stop hijacking page URLs under fleet-category slugs (3.73.23)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.23.zip` and hard-refresh. No product re-sync. If URLs still misbehave after upload, do Settings → Permalinks → Save Changes once.
+
+**Symptom:** after uploading the previous zip, site URLs under the fleet-category bases bounced to the homepage.
+
+**Cause:** the pretty-URL rewrite claims `/{fleet-category-slug}/{anything}/` for WooCommerce products at top priority — for every `fy_yacht_cat` term, even empty ones (`miami-yacht-rental`, `miami-yacht-rentals`, `panama-yacht-rentals`). On the live site, other content lives under those same bases: the 49 legacy Miami listings at `/miami-yacht-rentals/…` and nested pages like `/panama-yacht-rentals/contadora-yacht-charter/`. The old safety net only rescued yachts, so everything else became a "product not found" 404 — and the site's 404 handling redirects 404s to the homepage. Uploading a zip reactivates the plugin, which re-flushes rewrite rules, which is why it appeared right after the update.
+
+**Fix:** when a claimed URL is not a product and not a yacht, the request is handed back to whatever actually owns it — a nested page by its full path first, then any public post type (blog post, legacy listing CPT) by slug. Product and yacht URLs behave exactly as before.
 
 ### 2026-08-19 — fuel is no longer credited at the dock (3.73.22)
 

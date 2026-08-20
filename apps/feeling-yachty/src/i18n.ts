@@ -128,6 +128,11 @@ const EN: Record<string, string> = {
   captainIncluded: 'Captain included',
   reviewsTitle: 'Guest reviews',
   back: 'Back',
+  backToAccount: 'Back to account',
+  accountSettings: 'Account settings',
+  accountWebErrorTitle: 'We could not open your account page',
+  accountWebErrorBody: 'Check your connection and try again, or open it in your browser.',
+  manageAccount: 'Email, password & addresses',
   addOnsTitle: 'Add your extras',
   addOnsHint: 'Date, time and guests are filled in — add extras below.',
   addOnsLead:
@@ -281,6 +286,11 @@ const ES: Record<string, string> = {
   captainIncluded: 'Capitán incluido',
   reviewsTitle: 'Reseñas',
   back: 'Atrás',
+  backToAccount: 'Volver a la cuenta',
+  accountSettings: 'Ajustes de cuenta',
+  accountWebErrorTitle: 'No pudimos abrir tu página de cuenta',
+  accountWebErrorBody: 'Revisa tu conexión e inténtalo de nuevo, o ábrela en el navegador.',
+  manageAccount: 'Email, contraseña y direcciones',
   addOnsTitle: 'Agrega tus extras',
   addOnsHint: 'Fecha, hora e invitados ya están puestos — agrega extras abajo.',
   addOnsLead:

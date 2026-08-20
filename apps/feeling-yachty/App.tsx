@@ -27,6 +27,7 @@ import { loadRecentIds, loadSavedIds, pushRecentId, saveSavedIds } from './src/s
 import { ThemeProvider, useTheme } from './src/ThemeContext';
 import type { Colors } from './src/theme';
 import type { AppSettings, AppUser, Booking, Yacht } from './src/types';
+import { AccountTab } from './src/ui/AccountTab';
 import { FeaturedReel } from './src/ui/FeaturedReel';
 import { FilterBar } from './src/ui/FilterBar';
 import { PressScale } from './src/ui/PressScale';
@@ -65,6 +66,7 @@ function AppShell() {
   const defaultCity = CITIES.find((c) => c.slug === settings.defaultCity) || CITIES[0];
 
   const [tab, setTab] = useState<Tab>('yachts');
+  const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
   const [city, setCity] = useState<City>(defaultCity);
   const [yachts, setYachts] = useState<Yacht[]>([]);
   const [loading, setLoading] = useState(true);
@@ -566,7 +568,18 @@ function AppShell() {
         </KeyboardAvoidingView>
       )}
 
-      {!overlay && tab === 'profile' && (
+      {!overlay && tab === 'profile' && !accountSettingsOpen && (
+        <View style={styles.flex}>
+          <AccountTab
+            colors={colors}
+            lang={lang}
+            url={user?.account_url}
+            onOpenSettings={() => setAccountSettingsOpen(true)}
+          />
+        </View>
+      )}
+
+      {!overlay && tab === 'profile' && accountSettingsOpen && (
         <View style={styles.flex}>
           <ProfileTab
             user={user}
@@ -586,6 +599,7 @@ function AppShell() {
               setUser(null);
               setBookings([]);
             }}
+            onBackToAccount={() => setAccountSettingsOpen(false)}
           />
         </View>
       )}
@@ -603,7 +617,12 @@ function AppShell() {
       {!overlay && (
         <TabBar
           tab={tab}
-          onTab={setTab}
+          onTab={(next) => {
+            setTab(next);
+            if (next !== 'profile') {
+              setAccountSettingsOpen(false);
+            }
+          }}
           colors={colors}
           promoCount={promos.length}
           labels={{

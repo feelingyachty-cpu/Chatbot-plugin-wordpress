@@ -32,12 +32,14 @@ export function ProfileTab({
   loading,
   onUser,
   onLogout,
+  onBackToAccount,
 }: {
   user: AppUser | null;
   bookings: Booking[];
   loading: boolean;
   onUser: (user: AppUser | null, bookings?: Booking[]) => void;
   onLogout: () => Promise<void>;
+  onBackToAccount?: () => void;
 }) {
   const { colors, settings, patchSettings } = useTheme();
   const lang = settings.language;
@@ -173,6 +175,11 @@ export function ProfileTab({
   if (!user) {
     return (
       <ScrollView contentContainerStyle={styles.pad}>
+        {!!onBackToAccount && (
+          <Pressable onPress={onBackToAccount} hitSlop={10} style={styles.backRow}>
+            <Text style={styles.backLink}>‹ {t(lang, 'backToAccount')}</Text>
+          </Pressable>
+        )}
         <Text style={styles.h1}>{t(lang, 'accountTitle')}</Text>
         <Text style={styles.lead}>{t(lang, 'accountLead')}</Text>
         <View style={styles.row}>
@@ -232,6 +239,11 @@ export function ProfileTab({
 
   return (
     <ScrollView contentContainerStyle={styles.pad}>
+      {!!onBackToAccount && (
+        <Pressable onPress={onBackToAccount} hitSlop={10} style={styles.backRow}>
+          <Text style={styles.backLink}>‹ {t(lang, 'backToAccount')}</Text>
+        </Pressable>
+      )}
       <View style={styles.heroCard}>
         <Pressable onPress={onPickPhoto}>
           {u.photo_url ? (
@@ -473,6 +485,8 @@ function Toggle({
 function makeStyles(colors: Colors) {
   return StyleSheet.create({
     pad: { padding: 16, paddingBottom: 40 },
+    backRow: { marginBottom: 10, alignSelf: 'flex-start' },
+    backLink: { color: colors.pink, fontWeight: '800', fontSize: 14 },
     h1: { fontSize: 24, fontWeight: '800', color: colors.ink },
     lead: { color: colors.muted, marginTop: 6, marginBottom: 12, lineHeight: 20 },
     hint: { color: colors.muted, marginTop: 16, lineHeight: 20 },

@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.39** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.40** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.39 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.40 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,15 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — master-sheet prices re-applied and enforced (3.73.40)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.40.zip`, open any wp-admin page once (enforcement runs there), purge Cloudflare.
+
+Full reconciliation against the owner's master Google Sheet (180 yachts with 3–8 hour price columns): **all 151 official fleet cards matched a sheet row via their BMB listing id, and every hourly rate and every 3/4/5/6/7/8-hour price already equals the sheet exactly — zero differences.** The remaining 29 sheet rows are yachts that were never imported to the site (list in the PR).
+
+Enforcement shipped anyway: the sheet is now bundled (`includes/data/sheet-prices-2026-08-20.csv`) and a one-time admin-side pass (`maybe_reapply_sheet_prices`, admin_init 28 — before the stale-variation self-heal at 30 so corrected boats get their charges rebuilt in the same request) force-rewrites any matched yacht whose hourly rate or 3–8h rows drift from the sheet, re-syncing only changed products. Rows the sheet doesn't cover (2-hour rentals, free-hour promos, headings, notes) are preserved untouched. On today's already-exact fleet it's a read-only confirmation that logs "0 corrected".
+
 
 ### 2026-08-20 — clear the corner for the chat widget; spreadsheet parity verified (3.73.39)
 

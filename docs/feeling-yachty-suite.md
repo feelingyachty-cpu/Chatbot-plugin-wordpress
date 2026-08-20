@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.30** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.31** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.30 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.31 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,16 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — Destinations → Miami / Panama City expand reliably (3.73.31)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.31.zip`, hard-refresh, purge Cloudflare.
+
+Nested menu parents (Destinations → Miami / Panama City) didn't expand: their links aren't literally `#` — WordPress "Custom Link" placeholders are often `https://site.com/#`, which the old check counted as a real URL, so the tap navigated (to the homepage) instead of opening the submenu. New rules at every nesting depth:
+
+- Placeholder links (``, `#`, `#anything`, `…/#`, `http://#`) → tap **toggles** the submenu, anywhere on the site.
+- Real links **inside the menu popup** → first tap **expands**, second tap on the open parent **navigates** (the standard mobile dual-tap pattern — children reachable, page too).
+- Real links in desktop hover menus stay untouched.
 
 ### 2026-08-20 — compact mobile filter bar (3.73.30)
 

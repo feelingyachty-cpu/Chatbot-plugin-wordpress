@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.29** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.30** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.29 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.30 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,18 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — compact mobile filter bar (3.73.30)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.30.zip`, hard-refresh, purge Cloudflare.
+
+On phones/tablets (≤860px) the sticky filter bar shrinks to three short rows:
+
+1. Search, full width.
+2. The two dropdowns (Price sort / Size) **side by side, half width each** with a tighter chevron inset.
+3. The popular-filter chips and the **Saved Yachts pill on one shared row** — chips scroll horizontally in the leftover space, Saved stays pinned on the right. The standalone "POPULAR FILTERS" heading is hidden on mobile (the chips speak for themselves).
+
+Desktop layout unchanged.
 
 ### 2026-08-20 — book-experience popup + mobile menu polish (3.73.29)
 

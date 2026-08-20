@@ -127,6 +127,27 @@ const EN: Record<string, string> = {
   shareYacht: 'Share this yacht',
   captainIncluded: 'Captain included',
   reviewsTitle: 'Guest reviews',
+  addOnsTitle: 'Add your extras',
+  addOnsHint: 'Date, time and guests are filled in — add extras below.',
+  addOnsLead:
+    'Private chef, catering, jet skis, decorations, photo & video, bartender, transport — pick anything you want on board, then tap Book Experience.',
+  viewCart: 'Cart',
+  yourCart: 'Your cart',
+  backToYacht: 'Yacht',
+  secureCheckout: 'Secure checkout',
+  continueToOptions: 'Continue to options',
+  continueToCheckout: 'Continue to checkout',
+  orderDoneTitle: 'Booking received',
+  orderDoneBody:
+    'Your payment is on hold while we confirm the date with the owner. We will keep you updated and text you the moment it is locked in, with marina details and boarding time.',
+  orderNumber: 'Order',
+  backToYachts: 'Back to yachts',
+  selectDate: 'Date',
+  startTime: 'Start time',
+  charterLength: 'Charter length',
+  guestCount: 'Guests',
+  receiptTotalsNote:
+    'Your emailed receipt has the exact amounts charged today and due at the dock, including any add-ons.',
 };
 
 const ES: Record<string, string> = {
@@ -258,6 +279,27 @@ const ES: Record<string, string> = {
   shareYacht: 'Compartir este yate',
   captainIncluded: 'Capitán incluido',
   reviewsTitle: 'Reseñas',
+  addOnsTitle: 'Agrega tus extras',
+  addOnsHint: 'Fecha, hora e invitados ya están puestos — agrega extras abajo.',
+  addOnsLead:
+    'Chef privado, catering, jet skis, decoración, foto y video, bartender, transporte — elige lo que quieras a bordo y toca Book Experience.',
+  viewCart: 'Carrito',
+  yourCart: 'Tu carrito',
+  backToYacht: 'Yate',
+  secureCheckout: 'Pago seguro',
+  continueToOptions: 'Continuar a opciones',
+  continueToCheckout: 'Continuar al pago',
+  orderDoneTitle: 'Reserva recibida',
+  orderDoneBody:
+    'Tu pago está en espera mientras confirmamos la fecha con el dueño. Te mantendremos informado y te escribiremos en cuanto quede confirmada, con la marina y la hora de abordaje.',
+  orderNumber: 'Orden',
+  backToYachts: 'Volver a los yates',
+  selectDate: 'Fecha',
+  startTime: 'Hora de inicio',
+  charterLength: 'Duración del charter',
+  guestCount: 'Invitados',
+  receiptTotalsNote:
+    'Tu recibo por correo tiene los montos exactos cobrados hoy y por pagar en el muelle, incluidos los extras.',
 };
 
 export function t(lang: string | undefined, key: string, vars?: Record<string, string | number>): string {

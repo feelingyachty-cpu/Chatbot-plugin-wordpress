@@ -1,5 +1,37 @@
 export const API_BASE = 'https://feelingyachty.com';
 
+export type AppEnv = 'production' | 'staging';
+
+function envString(value: string | undefined, fallback: string): string {
+  return (typeof value === 'string' ? value.trim() : '') || fallback;
+}
+
+const rawEnv = envString(process.env.EXPO_PUBLIC_APP_ENV, 'production');
+export const APP_ENV: AppEnv = rawEnv === 'staging' ? 'staging' : 'production';
+
+export const APP_URL = envString(
+  process.env.EXPO_PUBLIC_APP_URL,
+  APP_ENV === 'staging' ? 'https://staging.feelingyachty.com' : 'https://app.feelingyachty.com'
+);
+
+/** True when a postMessage / navigation origin is the live WooCommerce store. */
+export function isStoreOrigin(origin: string | undefined | null): boolean {
+  try {
+    if (!origin) {
+      return false;
+    }
+    const base = new URL(API_BASE);
+    if (origin === base.origin) {
+      return true;
+    }
+    const alt = new URL(API_BASE);
+    alt.hostname = base.hostname.startsWith('www.') ? base.hostname.slice(4) : `www.${base.hostname}`;
+    return origin === alt.origin;
+  } catch {
+    return false;
+  }
+}
+
 /** n8n production webhook — upserts a GHL contact and opens the inbox thread. */
 export const TALK_WEBHOOK = 'https://feelingyachty.app.n8n.cloud/webhook/fy-app-talk';
 

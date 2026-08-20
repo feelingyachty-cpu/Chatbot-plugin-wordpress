@@ -5,6 +5,26 @@ export { durationSlug, listedTotal, money, startingListed, startingTotal } from 
 
 let appApiMissing = false;
 
+/** WordPress thumbnail helper — 300px square variant when available. */
+export function smallImageUrl(url: string): string {
+  return url.replace(/-\d+x\d+(\.\w+)$/, '-300x300$1');
+}
+
+/** Downscale large WordPress media URLs to a max width (defaults to 768). */
+export function smallerImageUrl(url: string, maxWidth = 768): string {
+  const match = url.match(/-(\d+)x(\d+)(\.\w+)$/);
+  if (!match) {
+    return url;
+  }
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= maxWidth) {
+    return url;
+  }
+  const nextHeight = Math.max(1, Math.round(height * (maxWidth / width)));
+  return url.replace(/-\d+x\d+(\.\w+)$/, `-${maxWidth}x${nextHeight}$1`);
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
   if (!res.ok) {

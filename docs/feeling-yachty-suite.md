@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.24** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.25** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.24 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.25 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,18 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — app shell: the site feels like the app (3.73.25)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.25.zip` and hard-refresh. No product re-sync.
+
+Design ideas ported from the Feeling Yachty mobile app (`apps/feeling-yachty`), built as a tiny dependency-free site-wide layer (`assets/theme/app-shell.css/js`):
+
+- **Floating checkout pill** on every page once something is in the cart: live "due today" total + item count, one tap to checkout. Server-rendered and kept live by WooCommerce's own cart-fragments script — an AJAX add anywhere updates it without a reload. Hidden on cart/checkout; lifted above the Book bar on product pages.
+- **Live sticky Book bar** on product pages: the bar's generic "From $X" switches to the real **Due today** figure (with a price-pop animation) the moment the visitor picks date/duration/add-ons — mirrored straight from the on-page summary so there is exactly one source of pricing truth.
+- **App-instant navigation**: hover/touch prefetch (instant.page-style — the next page's HTML is fetched the moment the pointer settles on a link; skips cart/checkout/account/action URLs, respects data-saver), plus CSS cross-document view transitions for a native cross-fade between pages on Chrome/Edge/Safari.
+- **App polish**: press-scale feedback on cards/buttons (mirrors the app's PressScale), sticky frosted search + sort toolbar on the fleet page, shimmer placeholders while card photos stream in, smooth scrolling. All honors `prefers-reduced-motion`.
+- **Speed**: preconnect to the BookMyBoat image CDN on every page, app-shell JS loaded deferred, zero jQuery in the new layer; fleet images were already lazy-loaded with eager first-3.
 
 ### 2026-08-20 — product URLs survive uploads; yachts back on their own fleet slug (3.73.24)
 

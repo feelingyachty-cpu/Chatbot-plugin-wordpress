@@ -763,8 +763,10 @@ function makeStyles(colors: Colors) {
     },
     fab: {
       position: 'absolute',
-      right: 14,
+      left: 14,
+      right: undefined,
       bottom: 96,
+      zIndex: 30,
       backgroundColor: colors.pink,
       borderRadius: 999,
       paddingHorizontal: 14,

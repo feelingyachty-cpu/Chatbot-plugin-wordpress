@@ -2,7 +2,7 @@ const EN: Record<string, string> = {
   yachts: 'Yachts',
   promos: 'Promos',
   talk: 'Talk',
-  profile: 'Profile',
+  profile: 'Account',
   brand: 'FEELING YACHTY',
   tagline: 'Miami & Panama yacht charters',
   browseKicker: 'CHARTER DIFFERENTLY',

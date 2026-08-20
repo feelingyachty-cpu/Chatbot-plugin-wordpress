@@ -36,6 +36,8 @@ export function TabBar({
         bottom: 0,
         alignItems: 'center',
         paddingBottom: 10,
+        zIndex: 40,
+        elevation: 20,
       }}
     >
       <View

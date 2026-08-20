@@ -3,7 +3,7 @@ import { Linking, Pressable, Text, View } from 'react-native';
 import { API_BASE } from '../config';
 import { t } from '../i18n';
 import { useLayout } from '../layout';
-import { withAppMode } from '../store';
+import { accountBootstrap, accountChromeCss, withAppMode } from '../store';
 import type { Colors } from '../theme';
 import { Button } from './Button';
 import { WebFrame } from './WebFrame';
@@ -26,6 +26,7 @@ export function AccountTab({
   const layout = useLayout();
   const accountUrl = withAppMode(url || `${API_BASE}/my-account/`);
   const [blocked, setBlocked] = useState(false);
+  const injected = accountBootstrap(accountChromeCss(colors));
 
   useEffect(() => {
     setBlocked(false);
@@ -121,6 +122,7 @@ export function AccountTab({
               url={accountUrl}
               colors={colors}
               title={t(lang, 'accountTitle')}
+              injectedJavaScript={injected}
               onBlocked={() => setBlocked(true)}
             />
           </View>

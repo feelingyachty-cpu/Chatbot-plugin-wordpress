@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.40** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.41** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.40 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.41 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,13 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — grid cache keyed by plugin version (3.73.41)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.41.zip` — the stale fleet grid disappears the moment it's active. No other action needed for this fix.
+
+**Live-verified:** after the Cloudflare purge, Allegra still showed **$2,520** (the retired fees-included figure) while the REST API correctly said **$1,725** boat-only. Cause: the fleet grid HTML is cached in a WordPress transient for 12 hours, and the cache key (`fy_fleet_grid_{counter}_{md5}`) did not include the plugin version — so grids built by an older release kept being served by the origin itself after every upgrade, immune to CDN purges. The key now includes `FY_FLEET_VERSION`: every upload instantly starts fresh grids; old entries expire on their own.
+
 
 ### 2026-08-20 — master-sheet prices re-applied and enforced (3.73.40)
 

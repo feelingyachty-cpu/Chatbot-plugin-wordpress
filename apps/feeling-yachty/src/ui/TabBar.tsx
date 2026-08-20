@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import type { Colors } from '../theme';
 
 type Tab = 'yachts' | 'promos' | 'talk' | 'profile';
@@ -26,9 +26,9 @@ export function TabBar({
     { id: 'talk', icon: '◎' },
     { id: 'profile', icon: '○' },
   ];
+  const webPointer = Platform.OS === 'web' ? ({ cursor: 'pointer' } as const) : null;
   return (
     <View
-      pointerEvents="box-none"
       style={{
         position: 'absolute',
         left: 0,
@@ -36,8 +36,9 @@ export function TabBar({
         bottom: 0,
         alignItems: 'center',
         paddingBottom: 10,
-        zIndex: 40,
-        elevation: 20,
+        zIndex: 100,
+        elevation: 40,
+        ...(Platform.OS === 'web' ? { pointerEvents: 'box-none' as const } : null),
       }}
     >
       <View
@@ -57,6 +58,7 @@ export function TabBar({
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 8 },
           elevation: 12,
+          ...(Platform.OS === 'web' ? { pointerEvents: 'auto' as const } : null),
         }}
       >
         {items.map((item) => {
@@ -67,12 +69,14 @@ export function TabBar({
               onPress={() => onTab(item.id)}
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
+              hitSlop={6}
               style={{
                 flex: 1,
                 minHeight: 52,
                 paddingVertical: 3,
                 alignItems: 'center',
                 justifyContent: 'center',
+                ...webPointer,
               }}
             >
               <View

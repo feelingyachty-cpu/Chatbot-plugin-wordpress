@@ -574,6 +574,23 @@ function AppShell() {
             colors={colors}
             lang={lang}
             url={user?.account_url}
+            user={user}
+            bookings={bookings}
+            loading={profileLoading}
+            onUser={(next, nextBookings) => {
+              setUser(next);
+              if (nextBookings) setBookings(nextBookings);
+              if (next?.settings) applyRemote(next.settings);
+              if (next && settings.prefillTalk) {
+                setName(next.display_name || `${next.first_name || ''} ${next.last_name || ''}`.trim());
+                setPhone(next.phone || '');
+                setEmail(next.email || '');
+              }
+            }}
+            onLogout={async () => {
+              setUser(null);
+              setBookings([]);
+            }}
             onOpenSettings={() => setAccountSettingsOpen(true)}
           />
         </View>
@@ -582,6 +599,7 @@ function AppShell() {
       {!overlay && tab === 'profile' && accountSettingsOpen && (
         <View style={styles.flex}>
           <ProfileTab
+            pane="settings"
             user={user}
             bookings={bookings}
             loading={profileLoading}

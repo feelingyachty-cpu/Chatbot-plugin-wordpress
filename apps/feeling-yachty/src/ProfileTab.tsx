@@ -33,6 +33,8 @@ export function ProfileTab({
   onUser,
   onLogout,
   onBackToAccount,
+  onOpenSettings,
+  pane = 'account',
 }: {
   user: AppUser | null;
   bookings: Booking[];
@@ -40,8 +42,10 @@ export function ProfileTab({
   onUser: (user: AppUser | null, bookings?: Booking[]) => void;
   onLogout: () => Promise<void>;
   onBackToAccount?: () => void;
+  onOpenSettings?: () => void;
+  pane?: 'account' | 'settings';
 }) {
-  const { colors, settings, patchSettings } = useTheme();
+  const { colors, settings } = useTheme();
   const lang = settings.language;
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [mode, setMode] = useState<Mode>('login');
@@ -168,11 +172,23 @@ export function ProfileTab({
     }
   }
 
-  if (loading && !user) {
+  if (loading && !user && pane === 'account') {
     return <ActivityIndicator color={colors.pink} style={{ marginTop: 40 }} />;
   }
 
-  if (!user) {
+  const settingsButton = !!onOpenSettings && pane === 'account' && (
+    <Pressable
+      onPress={onOpenSettings}
+      accessibilityRole="button"
+      accessibilityLabel={t(lang, 'accountSettings')}
+      hitSlop={10}
+      style={styles.settingsChip}
+    >
+      <Text style={styles.settingsChipText}>{t(lang, 'accountSettings')}</Text>
+    </Pressable>
+  );
+
+  if (pane === 'settings') {
     return (
       <ScrollView contentContainerStyle={styles.pad}>
         {!!onBackToAccount && (
@@ -180,7 +196,20 @@ export function ProfileTab({
             <Text style={styles.backLink}>‹ {t(lang, 'backToAccount')}</Text>
           </Pressable>
         )}
-        <Text style={styles.h1}>{t(lang, 'accountTitle')}</Text>
+        <Text style={styles.h1}>{t(lang, 'accountSettings')}</Text>
+        <Text style={styles.lead}>{t(lang, 'settingsLead')}</Text>
+        <SettingsPane lang={lang} colors={colors} />
+      </ScrollView>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ScrollView contentContainerStyle={styles.pad}>
+        <View style={styles.titleRow}>
+          <Text style={[styles.h1, { flex: 1 }]}>{t(lang, 'accountTitle')}</Text>
+          {settingsButton}
+        </View>
         <Text style={styles.lead}>{t(lang, 'accountLead')}</Text>
         <View style={styles.row}>
           <Pressable style={[styles.pill, mode === 'login' && styles.pillOn]} onPress={() => setMode('login')}>
@@ -239,11 +268,10 @@ export function ProfileTab({
 
   return (
     <ScrollView contentContainerStyle={styles.pad}>
-      {!!onBackToAccount && (
-        <Pressable onPress={onBackToAccount} hitSlop={10} style={styles.backRow}>
-          <Text style={styles.backLink}>‹ {t(lang, 'backToAccount')}</Text>
-        </Pressable>
-      )}
+      <View style={styles.titleRow}>
+        <Text style={[styles.h1, { flex: 1 }]}>{t(lang, 'accountTitle')}</Text>
+        {settingsButton}
+      </View>
       <View style={styles.heroCard}>
         <Pressable onPress={onPickPhoto}>
           {u.photo_url ? (
@@ -367,6 +395,24 @@ export function ProfileTab({
         </Pressable>
       )}
 
+      <Pressable
+        style={styles.secondary}
+        onPress={async () => {
+          await logoutAccount();
+          await onLogout();
+        }}
+      >
+        <Text style={styles.secondaryText}>{t(lang, 'logOut')}</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+function SettingsPane({ lang, colors }: { lang: string; colors: Colors }) {
+  const { settings, patchSettings } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <>
       <Text style={styles.section}>{t(lang, 'experience')}</Text>
       <Toggle
         colors={colors}
@@ -414,14 +460,14 @@ export function ProfileTab({
       <Text style={styles.section}>{t(lang, 'appColors')}</Text>
       <Text style={styles.lead}>{t(lang, 'colorsLead')}</Text>
       <View style={styles.themeGrid}>
-        {THEME_LABELS.map((t) => (
+        {THEME_LABELS.map((theme) => (
           <Pressable
-            key={t.id}
-            style={[styles.themeCard, settings.themeId === t.id && styles.themeCardOn]}
-            onPress={() => patchSettings({ themeId: t.id }, true)}
+            key={theme.id}
+            style={[styles.themeCard, settings.themeId === theme.id && styles.themeCardOn]}
+            onPress={() => patchSettings({ themeId: theme.id }, true)}
           >
-            <Text style={styles.themeName}>{t.label}</Text>
-            <Text style={styles.themeHint}>{t.hint}</Text>
+            <Text style={styles.themeName}>{theme.label}</Text>
+            <Text style={styles.themeHint}>{theme.hint}</Text>
           </Pressable>
         ))}
       </View>
@@ -449,17 +495,7 @@ export function ProfileTab({
           </View>
         </>
       )}
-
-      <Pressable
-        style={styles.secondary}
-        onPress={async () => {
-          await logoutAccount();
-          await onLogout();
-        }}
-      >
-        <Text style={styles.secondaryText}>{t(lang, 'logOut')}</Text>
-      </Pressable>
-    </ScrollView>
+    </>
   );
 }
 
@@ -485,6 +521,18 @@ function Toggle({
 function makeStyles(colors: Colors) {
   return StyleSheet.create({
     pad: { padding: 16, paddingBottom: 40 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+    settingsChip: {
+      minHeight: 38,
+      paddingHorizontal: 12,
+      borderRadius: 999,
+      backgroundColor: colors.tint,
+      borderWidth: 1,
+      borderColor: colors.line,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    settingsChipText: { color: colors.ink, fontWeight: '800', fontSize: 12 },
     backRow: { marginBottom: 10, alignSelf: 'flex-start' },
     backLink: { color: colors.pink, fontWeight: '800', fontSize: 14 },
     h1: { fontSize: 24, fontWeight: '800', color: colors.ink },

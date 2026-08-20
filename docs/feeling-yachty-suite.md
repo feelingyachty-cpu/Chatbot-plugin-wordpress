@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.31** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.32** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.31 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.32 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,12 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — compact filter chips on mobile (3.73.32)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.32.zip`, hard-refresh, purge Cloudflare.
+
+The filter chips and the Saved pill were desktop-sized on phones (12.5–13px text, 36–40px tall) — too big to fit, forcing a scroll for even five chips. On mobile (≤860px) they now run 11px text, 30px tall, tighter padding and gaps, and a smaller count badge, so the whole row fits a typical phone screen at a glance. Desktop sizes unchanged. (The Saved-pill overrides carry a `.fy-filter-bar` ancestor for specificity — its base rules come later in the stylesheet.)
 
 ### 2026-08-20 — Destinations → Miami / Panama City expand reliably (3.73.31)
 

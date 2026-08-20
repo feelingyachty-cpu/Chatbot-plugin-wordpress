@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.23** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.24** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.23 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.24 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,17 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — product URLs survive uploads; yachts back on their own fleet slug (3.73.24)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.24.zip`, then load any page once. No Permalinks save needed — the plugin now re-flushes itself.
+
+Two live-site fixes, both verified against feelingyachty.com:
+
+1. **Every zip upload silently killed the /{city}/{yacht}/ URLs.** An activation-time rewrite flush runs before this plugin's own rules are registered in that request, so the saved ruleset lost every city rule — all product URLs 404ed, and the site's 404→homepage redirect bounced the whole catalog to the front page. Now: activation registers the taxonomy + city rules by hand before flushing, **and** a version-guarded re-flush runs once per plugin version on the first normal request (wp_loaded, when every rule exists), healing the ruleset no matter how the zip was installed.
+2. **All 178 current-catalog yachts canonicalised to the retired `/miami-yacht-rentals/` base.** The saved URL base was still the old literal default ("miami-yacht-rentals"), which pins every yacht in every fleet to that one base — while the fleet cards link to `/miami-yacht-rental/…`. A one-time migration restores the `%fleet%` default whenever the saved base is a literal matching an existing fleet slug, so each yacht lives under its own fleet's URL. Old plural links keep working (the per-city rule resolves the product and the canonical redirect moves it to the right base). A custom base that is NOT a fleet slug is left untouched.
+
+Also worth knowing: the site redirects **every** 404 to the homepage (verified with a nonsense URL). That hides real errors — consider turning that off in the SEO plugin so a 404 looks like a 404.
 
 ### 2026-08-20 — stop hijacking page URLs under fleet-category slugs (3.73.23)
 

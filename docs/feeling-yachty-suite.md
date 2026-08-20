@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.37** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.38** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -66,7 +66,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 | `capacity_max` | Guest cap (Miami private boats are often 13) |
 | `special_desc` | Marketing blurb |
 | `price` | Starting **hourly** number (not always the charter total) |
-| `listed_from` | Guest From total: shortest row **boat + crew + fuel, plus the 20% boat deposit when that row's boat tops $1,400** |
+| `listed_from` | Guest From price: shortest row **boat price only** (crew + fuel are checkout fees) |
 | `duration_label` | Label for the starting price (e.g. `3 Hours`) |
 | `price_note` | Human note (`4-hour weekday charter`, `5 hours total (pay for 4)`) |
 | `pricing[]` | Duration table. Row `type` is `price`, `heading`, or `note` |
@@ -94,7 +94,7 @@ Every published yacht in `GET /wp-json/fy/v1/yachts` has these fields. Treat thi
 ### `pricing[]` rows
 
 - `type: price` — `{duration, price, listed, free}`  
-  `price` is the boat trip total. `listed` is boat + crew + fuel — plus the 20% boat deposit on rows whose boat tops $1,400 (what From / Hours show).  
+  `price` is the boat trip total. `listed` equals the boat price (what From / Hours show) — crew + fuel and the 20% deposit are checkout fees, never in the listing.  
   Durations seen: `2 Hours` … `8 Hours`, `4 Hours + 1 Free Hour`, `Pay for 4 Hours Get 5 Hours Total`, etc.
 - `type: heading` — weekday vs weekend blocks (e.g. Monday–Thursday)
 - `type: note` — e.g. `Weekend surcharge — $150`
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.37 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.38 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,13 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — listed prices are the original spreadsheet boat prices again (3.73.38)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.38.zip`, load any page once, purge Cloudflare.
+
+Owner decision: the listed price on every card, Hours row, product header, sticky bar, schema, REST (`listed_from`, `pricing[].listed`) and the app is the **boat price only** — the original fleet-spreadsheet figure. Crew + fuel (and the 20% deposit over $1,400) are fees that appear **at checkout only**; the charge math is unchanged (crew + fuel online by tier, boat at the dock). One-time migration force-updates the saved fleet blurb + legend to the new wording; all "boat + crew + fuel" tags become "boat price" with "crew + fuel added at checkout" notes. App pricing/tests updated to match (all pass).
+
 
 ### 2026-08-20 — fleet-wide charge audit: 2 stale yachts found, self-heal shipped (3.73.37)
 

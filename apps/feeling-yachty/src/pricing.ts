@@ -89,20 +89,18 @@ function crewRateForBoat(yacht: Yacht, boat: number): number {
     : Number(yacht.crew_rate);
 }
 
-/** Guest-facing listed total: boat + crew + fuel. */
+/**
+ * Guest-facing listed price: the BOAT price only — the original
+ * spreadsheet figure. Crew + fuel (and the 20% deposit over $1,400) are
+ * fees that appear at checkout, never in the listed price.
+ */
 export function listedTotal(yacht: Yacht, duration?: string): number | null {
   const label = duration || startingTotal(yacht)?.duration || '';
   const boat = tripTotal(yacht, label);
   if (boat == null || boat <= 0) {
     return null;
   }
-  const hours = hoursFromDuration(label) || 0;
-  return roundMoney(
-    boat
-    + crewRateForBoat(yacht, boat) * hours
-    + hourlyDeposit(yacht, boat, hours)
-    + boatPctDeposit(boat)
-  );
+  return roundMoney(boat);
 }
 
 export function startingListed(yacht: Yacht): { amount: number; duration: string } | null {
@@ -157,10 +155,7 @@ export function chargedToday(yacht: Yacht, duration?: string, wooPayNow?: number
     return 0;
   }
   const hours = hoursFromDuration(label) || 0;
-  const crewRate = yacht.crew_rate == null
-    ? (total <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
-    : Number(yacht.crew_rate);
-  const crewFuel = roundMoney((crewRate * hours) + hourlyDeposit(yacht, total, hours));
+  const crewFuel = roundMoney((crewRateForBoat(yacht, total) * hours) + hourlyDeposit(yacht, total, hours));
   const resDep = boatPctDeposit(total);
   const suiteNow = roundMoney(crewFuel + resDep);
   const woo = wooPayNow != null ? Number(wooPayNow) : null;

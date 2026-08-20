@@ -134,20 +134,13 @@ assert.equal(c4.tripTotal, 1140);
 assert.equal(c4.payNow, 500);
 assert.equal(c4.dueAtDock, 1140); // full boat — fuel is not credited
 
-const listed = (yacht, duration) => {
-  const boat = tripTotal(yacht, duration);
-  const hours = hoursFromDuration(duration) || 0;
-  // Same crew resolution as pricing.ts crewRateForBoat: a per-yacht
-  // crew_rate override wins on both sides of the band.
-  const crewRate = yacht.crew_rate == null
-    ? (boat <= CHARTER_DEPOSIT_THRESHOLD ? FLEET_CREW_RATE_UNDER : FLEET_CREW_RATE)
-    : Number(yacht.crew_rate);
-  return roundMoney(boat + crewRate * hours + hourlyDeposit(yacht, boat, hours) + boatPctDeposit(boat));
-};
-assert.equal(listed(coco, '3 Hours'), 1230); // 855 + 225 + 150
-assert.equal(listed(coco, '4 Hours'), 1640); // 1140 + 300 + 200
-assert.equal(listed(coco, '5 Hours'), 2460); // 1425 + 500 + 250 + 285
-assert.equal(listed(sundeck, '3 Hours'), 630); // 330 + 225 + 75
+// Listed price = the BOAT price only (the original spreadsheet figure).
+// Crew + fuel and the 20% deposit are checkout fees, never in the listing.
+const listed = (yacht, duration) => roundMoney(tripTotal(yacht, duration));
+assert.equal(listed(coco, '3 Hours'), 855); // boat only
+assert.equal(listed(coco, '4 Hours'), 1140); // boat only
+assert.equal(listed(coco, '5 Hours'), 1425); // boat only
+assert.equal(listed(sundeck, '3 Hours'), 330); // boat only
 
 // Live Coco Hours on 2026-08-19 (boat rows, not the older $855/$1140 set).
 const cocoLive = {
@@ -157,19 +150,19 @@ const cocoLive = {
     { type: 'price', duration: '5 Hours', price: 1700 },
   ],
 };
-assert.equal(listed(cocoLive, '3 Hours'), 1475); // 1100 + 225 + 150
-assert.equal(listed(cocoLive, '4 Hours'), 1850); // 1350 + 300 + 200
-assert.equal(listed(cocoLive, '5 Hours'), 2790); // 1700 + 500 + 250 + 340
+assert.equal(listed(cocoLive, '3 Hours'), 1100); // boat only
+assert.equal(listed(cocoLive, '4 Hours'), 1350); // boat only
+assert.equal(listed(cocoLive, '5 Hours'), 1700); // boat only
 
 // Barbie (live From $717) — Woo leftover is the boat, not fees.
 const barbie = {
   pricing: [{ type: 'price', duration: '3 Hours', price: 717 }],
 };
-assert.equal(listed(barbie, '3 Hours'), 1017); // 717 + 225 + 75
+assert.equal(listed(barbie, '3 Hours'), 717); // boat only
 
 // A per-yacht crew override wins on both sides of the $1,400 band.
 const crewOverride = { crew_rate: 150, pricing: [{ type: 'price', duration: '3 Hours', price: 717 }] };
-assert.equal(listed(crewOverride, '3 Hours'), 1242); // 717 + 450 crew + 75 fuel
+assert.equal(listed(crewOverride, '3 Hours'), 717); // boat only — fees never in the listing
 assert.equal(chargedToday(crewOverride, '3 Hours'), 525); // 150 crew + 25 fuel × 3
 assert.equal(chargedToday(barbie, '3 Hours', 717), 300); // $75 crew + $25 deposit × 3
 assert.equal(dockQuote(barbie, '3 Hours', 717).payNow, 300);

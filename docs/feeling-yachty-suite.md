@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.28** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.29** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.28 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.29 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,13 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — book-experience popup + mobile menu polish (3.73.29)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.29.zip`, hard-refresh, purge Cloudflare.
+
+- **Booking no longer dumps guests into the cart.** After "Book Experience" on a yacht, the guest stays on the yacht page (`woocommerce_add_to_cart_redirect` override, yacht products only) and gets the confirmation dialog: animated ✓, "**Your experience is in the cart**", the yacht's name + photo, a **Continue** button that just closes it, and a gradient **Checkout →** button. Small "View cart" and "View All Yachts" links in the footer; the add-on cross-sell line stays. The `?fy_added=1` trigger flag is scrubbed from the address bar so refresh/share can't re-open it.
+- **Mobile menu polish** (scoped to menus inside Elementor popups): 48px app-style touch targets, soft dividers, blush hover, pink chevrons on expandable parents (Miami / Panama) that flip when open, indented fade-in submenus. Pairs with 3.73.28's click-to-expand fix.
 
 ### 2026-08-20 — Miami / Panama menu items open again (3.73.28)
 

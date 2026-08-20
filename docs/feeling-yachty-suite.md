@@ -1,7 +1,7 @@
 # Feeling Yachty Suite — how it works
 
 **Living document.** Update this file on every Suite upgrade, shortcode change, REST change, or UI change.  
-Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.27** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
+Last reviewed: **2026-08-20** against **feeling-yachty-suite 3.73.28** (this repo’s patched zip). Suite is the source of truth for yacht prices, fuel, and dock math.
 
 Staff training PDF (easy language, add-yacht first, settings last): [Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf](Feeling-Yachty-Add-a-Yacht-Staff-Guide.pdf).  
 Client-UX audit (bugs + fixes): [suite-audit-2026-08-14.md](suite-audit-2026-08-14.md).
@@ -240,7 +240,7 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 
 | Area | File |
 | --- | --- |
-| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.27 |
+| Bootstrap / version | `feeling-yachty-suite.php` — Version: 3.73.28 |
 | CPT + taxonomies | `includes/class-fy-cpt.php` |
 | Yacht meta | `includes/class-fy-metaboxes.php` |
 | Pricing / quote | `includes/class-fy-pricing.php` |
@@ -258,6 +258,14 @@ From the 3.73.4 zip (not copied into git — production stays the uploaded plugi
 ---
 
 ## Changelog (docs + product)
+
+### 2026-08-20 — Miami / Panama menu items open again (3.73.28)
+
+Upload **only** `dist/feeling-yachty-suite-3.73.28.zip`, hard-refresh, purge Cloudflare.
+
+The site menu is an Elementor Pro popup (hamburger → popup 18475). Parent items like **Miami** and **Panama** are placeholder links (`#`) whose submenu should expand on click — but no script handled that inside the popup, so they did nothing (the site even carries old `pointer-events: auto` custom-CSS attempts at this). The app shell now handles it site-wide: any menu parent with a placeholder link toggles its own submenu on click (real links still navigate normally), with CSS that beats every hiding trick. Also: the checkout pill hides while an Elementor popup is open so it can never cover a menu item, and the hover-prefetcher now ignores hash-only / Elementor-action links instead of wastefully prefetching their base page.
+
+If the owner prefers Miami/Panama to NAVIGATE instead of expand, give them real URLs in Appearance → Menus (e.g. `/miami-yacht-rental/`) — the toggle only claims placeholder links.
 
 ### 2026-08-20 — stop forcing the old plum header; kill the purple flash (3.73.27)
 
